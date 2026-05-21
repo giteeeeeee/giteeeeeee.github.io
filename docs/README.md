@@ -20,6 +20,7 @@ Welcome to the comprehensive documentation for Astro Theme Reay, a modern blog t
 - [Blog Frontmatter](./BLOG-FRONTMATTER.md) - Post metadata reference
 - [Projects Showcase](./PROJECTS.md) - GitHub integration
 - [Links Page](./LINKS.md) - Managing friend links
+- [Gallery and Music](./MEDIA.md) - Photo albums and playlist player
 - [Internationalization](./I18N.md) - Multi-language support
 
 ### Advanced
@@ -47,6 +48,13 @@ Automatically fetch and display your GitHub repositories with:
 - README rendering
 - Star and fork counts
 - Language detection
+
+### Gallery and Music
+Personal media pages for:
+- Album-based photo browsing
+- Lightbox photo viewing
+- A global floating music dock
+- Playlist filters and configurable music playback
 
 ### Bilingual Support
 Built-in English and Chinese language support with:

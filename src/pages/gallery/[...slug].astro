@@ -1,0 +1,803 @@
+---
+/**
+ * Plog Album Detail Page
+ * Shows every photo in one plog collection with metadata and download links.
+ */
+import DefaultLayout from '../../layouts/base/DefaultLayout.astro';
+import { getPlogAlbums } from '../../utils/plog';
+import { useI18n } from '../../utils/i18n';
+
+export async function getStaticPaths() {
+  const albums = await getPlogAlbums();
+
+  return albums.map(album => ({
+    params: { slug: album.slug },
+    props: { album },
+  }));
+}
+
+const { t } = useI18n();
+const { album } = Astro.props;
+const featuredPhoto = album.photos.find(photo => photo.featured) ?? album.photos[0];
+const heroCover = album.cover || featuredPhoto?.image;
+const heroPhotos = album.photos.slice(0, 6);
+const ratioPattern = ['4 / 5', '1 / 1', '3 / 2', '5 / 4', '2 / 3'];
+const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
+---
+
+<DefaultLayout title={`${album.title} | ${t('page.title.gallery')}`} description={album.description}>
+  <div class="album-page">
+    <a class="back-link" href="/gallery">
+      <i class="i-carbon:arrow-left"></i>
+      <span data-i18n="gallery.backToAlbums">{t('gallery.backToAlbums')}</span>
+    </a>
+
+    <section class="album-hero" style={`--album-accent: ${album.accent};`}>
+      <div class="hero-cover" aria-hidden="true">
+        {heroCover ? (
+          <img src={heroCover} alt="" loading="eager" decoding="async" />
+        ) : (
+          <span class="image-fallback" style={`--fallback-bg: ${album.gradient};`}></span>
+        )}
+      </div>
+
+      <div class="hero-copy">
+        <span class="page-eyebrow">
+          <i class={album.icon}></i>
+          <span data-i18n="gallery.collection">{t('gallery.collection')}</span>
+        </span>
+        <h1>{album.title}</h1>
+        <p>{album.description}</p>
+        <div class="album-meta">
+          <span><i class="i-carbon:image"></i>{album.photoCount} {t('gallery.stats.photos')}</span>
+          <span><i class="i-carbon:calendar"></i>{album.date}</span>
+          <span><i class="i-carbon:location"></i>{album.location}</span>
+        </div>
+        <div class="tag-row">
+          {album.tags.map(tag => <span>{tag}</span>)}
+        </div>
+      </div>
+
+      <div class="hero-preview" aria-hidden="true">
+        {heroPhotos.map((photo, index) => (
+          <span class:list={['preview-frame', index === 0 && 'is-large']}>
+            {photo.image ? (
+              <img src={photo.image} alt="" loading="lazy" decoding="async" />
+            ) : (
+              <span class="image-fallback" style={`--fallback-bg: ${photo.gradient};`}></span>
+            )}
+          </span>
+        ))}
+      </div>
+    </section>
+
+    <section class="photo-section">
+      <div class="section-heading">
+        <h2>
+          <i class="i-carbon:view"></i>
+          <span data-i18n="gallery.photos">{t('gallery.photos')}</span>
+        </h2>
+      </div>
+
+      <div class="photo-wall" aria-label={t('gallery.photos')}>
+        {album.photos.map((photo, index) => {
+          const ratio = ratioPattern[index % ratioPattern.length];
+
+          return (
+            <article class="photo-card" style={`--photo-accent: ${photo.accent}; --photo-ratio: ${ratio};`}>
+              <button
+                class="photo-open"
+                type="button"
+                data-photo-id={photo.id}
+              >
+                <span class="photo-card-visual" aria-hidden="true">
+                  {photo.image ? (
+                    <img src={photo.image} alt="" loading="lazy" decoding="async" />
+                  ) : (
+                    <span class="image-fallback" style={`--fallback-bg: ${photo.gradient};`}></span>
+                  )}
+                </span>
+                <span class="photo-overlay">
+                  <i class="i-carbon:view"></i>
+                </span>
+              </button>
+              <div class="photo-card-body">
+                <div class="photo-heading">
+                  <span class="photo-title">{photo.title}</span>
+                  {photo.downloadUrl && (
+                    <a
+                      class="photo-download"
+                      href={photo.downloadUrl}
+                      download={photo.downloadName}
+                      aria-label={`${t('gallery.download')}: ${photo.title}`}
+                    >
+                      <i class="i-carbon:download"></i>
+                    </a>
+                  )}
+                </div>
+                <span class="photo-file">{photo.fileName || photo.downloadName}</span>
+                <p>{photo.caption}</p>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  </div>
+
+  <div class="gallery-lightbox" id="gallery-lightbox" aria-hidden="true">
+    <div class="lightbox-panel" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+      <button class="lightbox-close" type="button" data-lightbox-close aria-label={t('gallery.close')}>
+        <i class="i-carbon:close"></i>
+      </button>
+      <button class="lightbox-nav prev" type="button" data-lightbox-prev aria-label={t('gallery.previous')}>
+        <i class="i-carbon:chevron-left"></i>
+      </button>
+      <figure class="lightbox-visual">
+        <img src={featuredPhoto?.image ?? ''} alt="" data-lightbox-image />
+      </figure>
+      <div class="lightbox-content">
+        <span class="lightbox-album">{album.title}</span>
+        <h2 id="lightbox-title" data-lightbox-title></h2>
+        <p data-lightbox-caption></p>
+        <p class="lightbox-signature" data-lightbox-signature></p>
+        <div class="lightbox-meta">
+          <span><i class="i-carbon:document"></i><span data-lightbox-file></span></span>
+          <span><i class="i-carbon:calendar"></i><span data-lightbox-date></span></span>
+          <span><i class="i-carbon:location"></i><span data-lightbox-location></span></span>
+          <span><i class="i-carbon:camera"></i><span data-lightbox-camera></span></span>
+        </div>
+        <div class="lightbox-tags" data-lightbox-tags></div>
+        <a class="lightbox-download" href="#" download data-lightbox-download>
+          <i class="i-carbon:download"></i>
+          <span data-i18n="gallery.download">{t('gallery.download')}</span>
+        </a>
+      </div>
+      <button class="lightbox-nav next" type="button" data-lightbox-next aria-label={t('gallery.next')}>
+        <i class="i-carbon:chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</DefaultLayout>
+
+<style>
+  .album-page {
+    padding: 2rem 0 4rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 1rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.9rem;
+    font-weight: 850;
+    text-decoration: none;
+  }
+
+  .album-hero {
+    position: relative;
+    min-height: 34rem;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.62fr);
+    align-items: end;
+    gap: 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.34);
+    border-radius: 1.35rem;
+    background: var(--md-sys-color-surface-container);
+    box-shadow: 0 30px 90px -54px rgba(0, 0, 0, 0.72);
+    isolation: isolate;
+  }
+
+  .album-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.74) 0%, rgba(0, 0, 0, 0.44) 44%, rgba(0, 0, 0, 0.18) 100%),
+      radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--album-accent) 42%, transparent), transparent 34%);
+    pointer-events: none;
+  }
+
+  .hero-cover {
+    position: absolute;
+    inset: 0;
+    transform: scale(1.02);
+  }
+
+  .hero-cover img,
+  .preview-frame img,
+  .photo-card-visual img,
+  .image-fallback {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-cover img,
+  .preview-frame img,
+  .photo-card-visual img {
+    object-fit: cover;
+  }
+
+  .image-fallback {
+    background: var(--fallback-bg);
+  }
+
+  .hero-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(1px);
+  }
+
+  .hero-copy {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    gap: 0.75rem;
+    align-self: end;
+    max-width: 44rem;
+    padding: clamp(1.35rem, 4vw, 2.6rem);
+    color: white;
+  }
+
+  .page-eyebrow,
+  .album-meta,
+  .lightbox-meta span,
+  .lightbox-download,
+  .photo-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .page-eyebrow {
+    width: fit-content;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 0.78rem;
+    font-weight: 850;
+    backdrop-filter: blur(16px);
+  }
+
+  .album-hero h1 {
+    margin: 0;
+    font-size: clamp(2.7rem, 8vw, 5.6rem);
+    line-height: 0.92;
+    font-weight: 950;
+    letter-spacing: 0;
+  }
+
+  .album-hero p {
+    max-width: 37rem;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.84);
+    line-height: 1.75;
+  }
+
+  .album-meta {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.86rem;
+    font-weight: 750;
+  }
+
+  .tag-row,
+  .lightbox-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .tag-row span,
+  .lightbox-tags span {
+    padding: 0.22rem 0.48rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.72rem;
+    font-weight: 750;
+  }
+
+  .hero-preview {
+    position: relative;
+    z-index: 2;
+    align-self: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(5rem, 1fr);
+    gap: 0.55rem;
+    padding: 1rem;
+  }
+
+  .preview-frame {
+    display: block;
+    min-height: 5rem;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.34);
+    border-radius: 0.9rem;
+    box-shadow: 0 18px 48px -28px rgba(0, 0, 0, 0.82);
+  }
+
+  .preview-frame.is-large {
+    grid-row: span 2;
+  }
+
+  .photo-section {
+    margin-top: 2rem;
+  }
+
+  .section-heading h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 1rem;
+    color: var(--md-sys-color-on-surface);
+    font-size: 1.35rem;
+    line-height: 1.2;
+  }
+
+  .photo-wall {
+    columns: 3 16rem;
+    column-gap: 1rem;
+  }
+
+  .photo-card {
+    display: inline-block;
+    width: 100%;
+    margin: 0 0 1rem;
+    overflow: hidden;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.34);
+    border-radius: 1rem;
+    background: rgba(var(--md-sys-color-surface-container-rgb), 0.7);
+    box-shadow: 0 18px 54px -44px rgba(0, 0, 0, 0.62);
+    break-inside: avoid;
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+  }
+
+  .photo-card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--photo-accent) 55%, transparent);
+    box-shadow: 0 28px 74px -42px rgba(0, 0, 0, 0.7);
+  }
+
+  .photo-open {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--photo-ratio);
+    border: 0;
+    padding: 0;
+    overflow: hidden;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: zoom-in;
+  }
+
+  .photo-card-visual {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.46s ease;
+  }
+
+  .photo-open::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.18) 100%),
+      radial-gradient(circle at 22% 18%, color-mix(in srgb, var(--photo-accent) 32%, transparent), transparent 34%);
+    opacity: 0;
+    transition: opacity 0.28s ease;
+  }
+
+  .photo-card:hover .photo-card-visual {
+    transform: scale(1.055);
+  }
+
+  .photo-card:hover .photo-open::after,
+  .photo-card:hover .photo-overlay {
+    opacity: 1;
+  }
+
+  .photo-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 1.4rem;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+  }
+
+  .photo-overlay i {
+    display: grid;
+    place-items: center;
+    width: 2.9rem;
+    height: 2.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.34);
+    backdrop-filter: blur(14px);
+  }
+
+  .photo-card-body {
+    display: grid;
+    gap: 0.42rem;
+    padding: 0.9rem;
+  }
+
+  .photo-heading {
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .photo-title {
+    color: var(--md-sys-color-on-surface);
+    font-size: 1rem;
+    line-height: 1.25;
+    font-weight: 850;
+  }
+
+  .photo-file {
+    color: var(--md-sys-color-primary);
+    font-size: 0.74rem;
+    font-weight: 800;
+  }
+
+  .photo-card-body p {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .photo-download {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+    border-radius: 999px;
+    background: rgba(var(--md-sys-color-surface-container-high-rgb, var(--md-sys-color-surface-container-rgb)), 0.76);
+    color: var(--md-sys-color-primary);
+    text-decoration: none;
+    transition: transform 0.22s ease, background 0.22s ease;
+  }
+
+  .photo-download:hover {
+    transform: translateY(-1px);
+    background: rgba(var(--md-sys-color-primary-rgb), 0.12);
+  }
+
+  .gallery-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(18px);
+  }
+
+  .gallery-lightbox.is-open {
+    display: flex;
+  }
+
+  .lightbox-panel {
+    position: relative;
+    width: min(100%, 1120px);
+    max-height: min(90vh, 800px);
+    display: grid;
+    grid-template-columns: minmax(0, 1.42fr) minmax(280px, 0.7fr);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 1.15rem;
+    background: var(--md-sys-color-surface);
+    box-shadow: 0 36px 110px -28px rgba(0, 0, 0, 0.75);
+  }
+
+  .lightbox-visual {
+    min-height: 36rem;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.92);
+  }
+
+  .lightbox-visual img {
+    width: 100%;
+    height: 100%;
+    max-height: min(90vh, 800px);
+    object-fit: contain;
+  }
+
+  .lightbox-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.78rem;
+    padding: 1.45rem;
+  }
+
+  .lightbox-album {
+    width: fit-content;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(var(--md-sys-color-primary-rgb), 0.12);
+    color: var(--md-sys-color-primary);
+    font-size: 0.78rem;
+    font-weight: 850;
+  }
+
+  .lightbox-content h2 {
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: clamp(1.55rem, 3vw, 2.3rem);
+    line-height: 1.08;
+  }
+
+  .lightbox-content p {
+    margin: 0;
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.7;
+  }
+
+  .lightbox-signature {
+    font-weight: 800;
+  }
+
+  .lightbox-meta {
+    display: grid;
+    gap: 0.55rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.86rem;
+  }
+
+  .lightbox-tags span {
+    background: rgba(var(--md-sys-color-primary-rgb), 0.12);
+    color: var(--md-sys-color-primary);
+  }
+
+  .lightbox-download {
+    width: fit-content;
+    margin-top: 0.35rem;
+    padding: 0.68rem 0.9rem;
+    border-radius: 0.85rem;
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    font-size: 0.86rem;
+    font-weight: 850;
+    text-decoration: none;
+  }
+
+  .lightbox-download[hidden] {
+    display: none;
+  }
+
+  .lightbox-close,
+  .lightbox-nav {
+    position: absolute;
+    z-index: 3;
+    display: inline-grid;
+    place-items: center;
+    width: 2.45rem;
+    height: 2.45rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.38);
+    color: white;
+    cursor: pointer;
+    backdrop-filter: blur(16px);
+    transition: background 0.22s ease;
+  }
+
+  .lightbox-close {
+    top: 0.85rem;
+    right: 0.85rem;
+  }
+
+  .lightbox-nav {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lightbox-nav.prev {
+    left: 0.85rem;
+  }
+
+  .lightbox-nav.next {
+    right: 0.85rem;
+  }
+
+  .lightbox-close:hover,
+  .lightbox-nav:hover {
+    background: rgba(0, 0, 0, 0.56);
+  }
+
+  @media (max-width: 920px) {
+    .album-hero,
+    .lightbox-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .album-hero {
+      min-height: auto;
+    }
+
+    .album-hero::after {
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.78) 100%),
+        radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--album-accent) 42%, transparent), transparent 34%);
+    }
+
+    .hero-copy {
+      min-height: 23rem;
+    }
+
+    .hero-preview {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      padding-top: 0;
+    }
+
+    .preview-frame.is-large {
+      grid-row: span 1;
+    }
+
+    .lightbox-visual {
+      min-height: 24rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .album-page {
+      padding: 1.25rem 0 3rem;
+    }
+
+    .hero-copy {
+      min-height: 21rem;
+    }
+
+    .album-hero h1 {
+      font-size: clamp(2.4rem, 16vw, 4rem);
+    }
+
+    .hero-preview {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.4rem;
+      padding: 0 0.75rem 0.75rem;
+    }
+
+    .preview-frame {
+      border-radius: 0.7rem;
+    }
+
+    .photo-wall {
+      columns: 1;
+    }
+
+    .gallery-lightbox {
+      padding: 0.75rem;
+    }
+
+    .lightbox-panel {
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    .lightbox-visual {
+      min-height: 18rem;
+    }
+
+    .lightbox-nav {
+      top: 9.5rem;
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ photoPayload }}>
+  (function() {
+    var photos = JSON.parse(photoPayload);
+    var currentIndex = 0;
+    var lightbox = document.getElementById('gallery-lightbox');
+    if (!lightbox || !photos.length) return;
+
+    var image = lightbox.querySelector('[data-lightbox-image]');
+    var title = lightbox.querySelector('[data-lightbox-title]');
+    var caption = lightbox.querySelector('[data-lightbox-caption]');
+    var signature = lightbox.querySelector('[data-lightbox-signature]');
+    var file = lightbox.querySelector('[data-lightbox-file]');
+    var date = lightbox.querySelector('[data-lightbox-date]');
+    var location = lightbox.querySelector('[data-lightbox-location]');
+    var camera = lightbox.querySelector('[data-lightbox-camera]');
+    var tags = lightbox.querySelector('[data-lightbox-tags]');
+    var download = lightbox.querySelector('[data-lightbox-download]');
+    var cards = Array.from(document.querySelectorAll('[data-photo-id]'));
+
+    function renderPhoto(photo) {
+      if (!photo || !image || !title || !caption || !signature || !file || !date || !location || !camera || !tags || !download) return;
+      image.src = photo.image;
+      image.alt = photo.imageAlt || photo.title;
+      title.textContent = photo.title;
+      caption.textContent = photo.caption || '';
+      signature.textContent = photo.signature || '';
+      signature.hidden = !photo.signature;
+      file.textContent = photo.fileName || photo.downloadName || '';
+      date.textContent = photo.date;
+      location.textContent = photo.location;
+      camera.textContent = photo.camera;
+      tags.innerHTML = '';
+      photo.tags.forEach(function(tag) {
+        var span = document.createElement('span');
+        span.textContent = tag;
+        tags.appendChild(span);
+      });
+      if (photo.downloadUrl) {
+        download.href = photo.downloadUrl;
+        download.setAttribute('download', photo.downloadName || photo.fileName || '');
+        download.hidden = false;
+      } else {
+        download.hidden = true;
+      }
+    }
+
+    function openPhoto(photoId) {
+      var nextIndex = photos.findIndex(function(photo) { return photo.id === photoId; });
+      currentIndex = Math.max(0, nextIndex);
+      renderPhoto(photos[currentIndex]);
+      lightbox.classList.add('is-open');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.documentElement.style.overflow = 'hidden';
+    }
+
+    function closePhoto() {
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.documentElement.style.overflow = '';
+    }
+
+    function stepPhoto(direction) {
+      currentIndex = (currentIndex + direction + photos.length) % photos.length;
+      renderPhoto(photos[currentIndex]);
+    }
+
+    cards.forEach(function(card) {
+      card.addEventListener('click', function() {
+        openPhoto(card.getAttribute('data-photo-id'));
+      });
+    });
+
+    lightbox.querySelector('[data-lightbox-close]')?.addEventListener('click', closePhoto);
+    lightbox.querySelector('[data-lightbox-prev]')?.addEventListener('click', function() { stepPhoto(-1); });
+    lightbox.querySelector('[data-lightbox-next]')?.addEventListener('click', function() { stepPhoto(1); });
+    lightbox.addEventListener('click', function(event) {
+      if (event.target === lightbox) closePhoto();
+    });
+
+    window.addEventListener('keydown', function(event) {
+      if (!lightbox.classList.contains('is-open')) return;
+      if (event.key === 'Escape') closePhoto();
+      if (event.key === 'ArrowLeft') stepPhoto(-1);
+      if (event.key === 'ArrowRight') stepPhoto(1);
+    });
+  })();
+</script>

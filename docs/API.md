@@ -147,6 +147,63 @@ const allPosts = await getCollection('blog')
 const sorted = getSortedPosts(allPosts)
 ```
 
+## Media Configuration API
+
+Plog utilities are located in `src/utils/plog.ts`. Music configuration is
+located in `src/data/media.config.ts`.
+
+### getPlogGallery()
+
+Returns plog album collections and their photos derived from `src/content/plog`.
+Each `index.md` is one album; files in its `images/` folder become album photos.
+
+```typescript
+import { getPlogGallery } from '@/utils/plog'
+
+const gallery = await getPlogGallery()
+console.log(gallery.albums, gallery.photos)
+```
+
+### getPlogAlbums()
+
+Returns only the album collection list.
+
+```typescript
+import { getPlogAlbums } from '@/utils/plog'
+
+const albums = await getPlogAlbums()
+console.log(albums[0].href, albums[0].photoCount)
+```
+
+### getMusicConfig()
+
+Returns configured playlists, tracks, and player defaults for the global music dock.
+
+```typescript
+import { getMusicConfig } from '@/data/site.config'
+
+const music = getMusicConfig()
+console.log(music.player.defaultTrackId, music.tracks)
+```
+
+### Media Asset Paths
+
+Store public assets under `public/` and reference them with absolute paths:
+Music files still use public paths:
+
+```text
+public/audio/song.mp3 -> /audio/song.mp3
+```
+
+Plog photos should usually live in an `images/` folder beside their `index.md`:
+
+```text
+src/content/plog/XiZang/images/DSC_1695.jpg
+```
+
+Optional per-photo metadata is configured through the `photos` array in the
+same `index.md`.
+
 ### getPostsByTag()
 
 Filter posts by tag.

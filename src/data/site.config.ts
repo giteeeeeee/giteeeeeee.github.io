@@ -8,6 +8,7 @@
 
 import { defaultLang, languages, translations, type Language } from './i18n.config';
 import { linksConfig } from './links.config';
+import { mediaConfig, musicConfig } from './media.config';
 import { projectsConfig } from './projects.config';
 import { backgroundConfig, themeConfig } from './theme.config';
 import { aboutConfig, getUserContent, user, userContent } from './user.config';
@@ -24,6 +25,7 @@ export const siteConfig = {
   theme: themeConfig,
   background: backgroundConfig,
   links: linksConfig,
+  media: mediaConfig,
   projects: projectsConfig,
 } as const;
 
@@ -54,6 +56,14 @@ export function getBackgroundConfig() {
 // Feature configuration
 export function getLinksConfig() {
   return siteConfig.links;
+}
+
+export function getMediaConfig() {
+  return siteConfig.media;
+}
+
+export function getMusicConfig() {
+  return musicConfig;
 }
 
 export function getProjectsConfig() {

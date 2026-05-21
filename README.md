@@ -11,6 +11,8 @@ A clean, configurable Astro blog theme with Material Design 3 colors, bilingual 
 - Archives by timeline, tags, and series
 - GitHub project showcase with repository metadata and README rendering
 - Links page for friends, resources, and social profiles
+- Personal gallery page with album filters and lightbox browsing
+- Global music dock with playlist filters, player controls, and configurable tracks
 - Config-driven user, theme, project, Markdown, and links settings
 - Built-in GitHub Pages workflow
 
@@ -37,6 +39,8 @@ Most template customization lives in `src/data/`. Edit the feature-specific `*.c
 | `src/data/i18n.config.ts` | UI translations and default language |
 | `src/data/projects.config.ts` | GitHub project settings and display options |
 | `src/data/links.config.ts` | Friend links, resource links, contact info |
+| `src/content/plog/` | Photo posts and album metadata for the gallery |
+| `src/data/media.config.ts` | Music dock playlists and tracks |
 | `src/data/markdown.config.ts` | Astro Markdown processing |
 | `src/data/markdown-style.config.ts` | Markdown visual style tokens |
 
@@ -87,6 +91,7 @@ Use the platform dashboard and these settings:
 - [Quick Start](./docs/QUICK-START.md)
 - [User Configuration](./docs/USER-CONFIG.md)
 - [Theme Configuration](./docs/THEME-CONFIG.md)
+- [Gallery and Music](./docs/MEDIA.md)
 - [Deployment](./docs/DEPLOYMENT.md)
 - [GitHub Actions](./docs/GITHUB-ACTIONS.md)
 - [FAQ](./docs/FAQ.md)

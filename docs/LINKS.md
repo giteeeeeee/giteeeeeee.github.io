@@ -88,7 +88,7 @@ export const linkApplicationInfo = {
 export const mySiteInfo = {
   name: 'Your Site Name',
   url: 'https://yourdomain.com',
-  avatar: '/avatar.png',
+  avatar: '/images/profile/avatar.png',
   description: 'Technical notes, project practice, and long-term learning logs',
 }
 ```

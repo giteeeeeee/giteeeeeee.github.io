@@ -22,7 +22,7 @@ Editable settings are split by feature under `src/data/`. Application code reads
 ```typescript
 export const user = {
   name: 'Your Name',
-  avatar: '/avatar.png',
+  avatar: '/images/profile/avatar.png',
   location: 'Your Location',
   socials: [
     { icon: 'i-carbon:logo-github', label: 'GitHub', url: 'https://github.com/yourusername' },
@@ -316,7 +316,7 @@ export const userContent = {
 ```typescript
 export const user = {
   name: 'John Smith',
-  avatar: '/avatar.png',
+  avatar: '/images/profile/avatar.png',
   location: 'Remote',
   socials: [
     { icon: 'i-carbon:logo-github', label: 'GitHub', url: 'https://github.com/johnsmith' },
@@ -333,7 +333,7 @@ export const user = {
 ```typescript
 export const user = {
   name: '张三',
-  avatar: '/avatar.png',
+  avatar: '/images/profile/avatar.png',
   location: '北京，中国',
   socials: [
     { icon: 'i-carbon:logo-github', label: 'GitHub', url: 'https://github.com/zhangsan' },

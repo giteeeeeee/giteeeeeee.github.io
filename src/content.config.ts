@@ -24,4 +24,46 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { blog };
+const plog = defineCollection({
+  schema: ({ image }) => z.object({
+    title: z.string(),
+    description: z.string().default(''),
+    publishDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    album: z.object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string().optional(),
+      icon: z.string().default('i-carbon:camera'),
+      accent: z.string().default('#5b8def'),
+    }),
+    location: z.string().default(''),
+    camera: z.string().default(''),
+    tags: z.array(z.string()).default([]),
+    image: image().optional(),
+    imageAlt: z.string().optional(),
+    photos: z.array(z.object({
+      file: z.string(),
+      title: z.string().optional(),
+      caption: z.string().optional(),
+      description: z.string().optional(),
+      signature: z.string().optional(),
+      alt: z.string().optional(),
+      date: z.coerce.date().optional(),
+      location: z.string().optional(),
+      camera: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      accent: z.string().optional(),
+      featured: z.boolean().optional(),
+      downloadName: z.string().optional(),
+    })).default([]),
+    gradient: z.string().default('linear-gradient(135deg, #5b8def 0%, #7c3aed 52%, #f97316 100%)'),
+    accent: z.string().optional(),
+    featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
+    published: z.boolean().default(true),
+    language: z.enum(['zh-CN', 'en-US']).default('zh-CN'),
+  }),
+});
+
+export const collections = { blog, plog };

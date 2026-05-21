@@ -98,7 +98,7 @@ Edit `src/data/user.config.ts`:
 ```typescript
 export const user = {
   name: 'Your Name',
-  avatar: '/avatar.png',
+  avatar: '/images/profile/avatar.png',
   location: 'Your Location',
   socials: [
     { icon: 'i-carbon:logo-github', label: 'GitHub', url: 'https://github.com/yourusername' },

@@ -18,6 +18,7 @@ export function initNavigationI18n() {
     { href: '/blog', key: 'nav.blog' as const },
     { href: '/archives', key: 'nav.archives' as const },
     { href: '/projects', key: 'nav.projects' as const },
+    { href: '/gallery', key: 'nav.gallery' as const },
     { href: '/links', key: 'nav.links' as const },
     { href: '/about', key: 'nav.about' as const },
   ];

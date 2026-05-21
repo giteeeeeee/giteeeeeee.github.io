@@ -15,7 +15,7 @@ import { defaultLang, type Language } from './i18n.config';
 
 export const user = {
   name: 'Your Name',
-  avatar: '/avatar.png',
+  avatar: '/images/profile/avatar.png',
   location: 'Your Location',
   socials: [
     { icon: 'i-carbon:logo-github', label: 'GitHub', url: 'https://github.com/yourusername' },
@@ -125,7 +125,7 @@ export const aboutConfig = {
       degree: 'Bachelor / Master / PhD',
       startDate: '2020-09',
       endDate: '2024-06',
-      logo: '/images/school-logo.png',
+      logo: '/images/education/school-logo.png',
       url: 'https://www.example.edu/',
       description: 'Brief description of your studies',
     },

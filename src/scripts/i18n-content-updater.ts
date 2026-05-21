@@ -114,6 +114,8 @@ function updatePageTitle(lang: Language) {
     titleKey = 'page.title.archives';
   } else if (path.startsWith('/projects')) {
     titleKey = 'page.title.projects';
+  } else if (path.startsWith('/gallery')) {
+    titleKey = 'page.title.gallery';
   } else if (path.startsWith('/links')) {
     titleKey = 'page.title.links';
   } else if (path.startsWith('/about')) {

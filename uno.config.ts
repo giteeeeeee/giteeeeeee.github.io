@@ -1,5 +1,6 @@
 import { defineConfig, presetWind4, presetIcons } from 'unocss'
 import { aboutConfig, user } from './src/data/user.config'
+import { mediaConfig } from './src/data/media.config'
 
 // 自动从配置文件中提取所有图标
 function extractIcons() {
@@ -26,6 +27,11 @@ function extractIcons() {
   // 从 aboutConfig.site.techStack 提取图标
   aboutConfig.site?.techStack?.forEach(tech => {
     if (tech.icon) icons.add(tech.icon)
+  })
+
+  // 从媒体配置提取图标
+  mediaConfig.music.playlists?.forEach(playlist => {
+    if (playlist.icon) icons.add(playlist.icon)
   })
   
   return Array.from(icons)
@@ -102,9 +108,12 @@ export default defineConfig({
     'i-carbon:logo-twitter',
     'i-carbon:email',
     'i-carbon:rss',
+    'i-carbon:arrow-left',
     'i-carbon:arrow-right',
     'i-carbon:portfolio',
     'i-carbon:chevron-down',
+    'i-carbon:chevron-left',
+    'i-carbon:chevron-right',
     'i-carbon:launch',
     'i-carbon:tools',
     'i-carbon:user-avatar',
@@ -114,6 +123,24 @@ export default defineConfig({
     'i-carbon:link',
     'i-carbon:cube',
     'i-carbon:analytics',
+    'i-carbon:download',
+    'i-carbon:document',
+    'i-carbon:earth',
+    'i-carbon:folder',
+    'i-carbon:image',
+    'i-carbon:camera',
+    'i-carbon:calendar',
+    'i-carbon:location',
+    'i-carbon:music',
+    'i-carbon:headphones',
+    'i-carbon:playlist',
+    'i-carbon:filter',
+    'i-carbon:view',
+    'i-carbon:play-filled',
+    'i-carbon:pause-filled',
+    'i-carbon:skip-back-filled',
+    'i-carbon:skip-forward-filled',
+    'i-carbon:volume-up',
     'text-[18px]',
     // 自动从配置文件提取的图标
     ...extractIcons(),

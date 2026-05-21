@@ -1,0 +1,734 @@
+---
+/**
+ * Global Music Dock
+ * Small floating player available across layouts.
+ */
+import { getMusicConfig } from '../../data/site.config';
+import { useI18n } from '../../utils/i18n';
+
+const { t } = useI18n();
+const musicConfig = getMusicConfig();
+const playlistById = new Map(musicConfig.playlists.map(playlist => [playlist.id, playlist]));
+const defaultTrack =
+  musicConfig.tracks.find(track => track.id === musicConfig.player.defaultTrackId) ??
+  musicConfig.tracks[0];
+
+const dockPayload = JSON.stringify(
+  musicConfig.tracks.map(track => ({
+    ...track,
+    playlistTitle: playlistById.get(track.playlistId)?.title ?? track.playlistId,
+  }))
+).replace(/</g, '\\u003c');
+const defaultTrackId = defaultTrack?.id ?? '';
+const autoAdvance = musicConfig.player.autoAdvance;
+const labels = {
+  play: t('music.play'),
+  pause: t('music.pause'),
+  previous: t('music.previous'),
+  next: t('music.next'),
+  volume: t('music.volume'),
+  all: t('music.filter.all'),
+  dock: t('music.dock.label'),
+  expand: t('music.dock.expand'),
+  collapse: t('music.dock.collapse'),
+  nowPlaying: t('music.dock.nowPlaying'),
+};
+---
+
+{defaultTrack && (
+  <aside
+    class="music-dock"
+    data-music-dock
+    aria-label={labels.dock}
+    style={`--dock-accent: ${defaultTrack.accent}; --dock-cover: ${defaultTrack.cover ? `url("${defaultTrack.cover}")` : `linear-gradient(135deg, ${defaultTrack.accent}, rgba(var(--md-sys-color-tertiary-rgb), 0.82))`};`}
+  >
+    <div class="dock-compact" data-dock-compact>
+      <button class="dock-play" type="button" data-dock-action="play" aria-label={labels.play}>
+        <span class="dock-cover-mini" aria-hidden="true"></span>
+        <i class="i-carbon:play-filled" data-dock-play-icon></i>
+      </button>
+      <button class="dock-summary" type="button" data-dock-action="toggle" aria-label={labels.expand}>
+        <span data-dock-compact-title>{defaultTrack.title}</span>
+        <small data-dock-compact-artist>{defaultTrack.artist}</small>
+      </button>
+      <button class="dock-icon-btn" type="button" data-dock-action="toggle" aria-label={labels.expand}>
+        <i class="i-carbon:playlist"></i>
+      </button>
+    </div>
+
+    <div class="dock-panel" data-dock-panel hidden>
+      <div class="dock-panel-head">
+        <span class="dock-now">
+          <i class="i-carbon:music"></i>
+          <span data-i18n="music.dock.nowPlaying">{labels.nowPlaying}</span>
+        </span>
+        <button class="dock-icon-btn" type="button" data-dock-action="toggle" aria-label={labels.collapse}>
+          <i class="i-carbon:chevron-down"></i>
+        </button>
+      </div>
+
+      <div class="dock-current">
+        <span class="dock-cover-large" aria-hidden="true"></span>
+        <span class="dock-current-copy">
+          <strong data-dock-title>{defaultTrack.title}</strong>
+          <span data-dock-artist>{defaultTrack.artist} · {defaultTrack.album}</span>
+          <small data-dock-playlist>{playlistById.get(defaultTrack.playlistId)?.title ?? defaultTrack.playlistId}</small>
+        </span>
+      </div>
+
+      <div class="dock-progress">
+        <span data-dock-current-time>00:00</span>
+        <input data-dock-seek type="range" min="0" max={defaultTrack.durationSeconds} value="0" step="1" aria-label={t('music.seek')} />
+        <span data-dock-duration>{defaultTrack.duration}</span>
+      </div>
+
+      <div class="dock-controls">
+        <button class="dock-icon-btn" type="button" data-dock-action="prev" aria-label={labels.previous}>
+          <i class="i-carbon:skip-back-filled"></i>
+        </button>
+        <button class="dock-primary-btn" type="button" data-dock-action="play" aria-label={labels.play}>
+          <i class="i-carbon:play-filled" data-dock-play-icon></i>
+        </button>
+        <button class="dock-icon-btn" type="button" data-dock-action="next" aria-label={labels.next}>
+          <i class="i-carbon:skip-forward-filled"></i>
+        </button>
+        <label class="dock-volume" aria-label={labels.volume}>
+          <i class="i-carbon:volume-up"></i>
+          <input data-dock-volume type="range" min="0" max="1" value="0.62" step="0.01" />
+        </label>
+      </div>
+
+      <div class="dock-playlists" role="tablist" aria-label={t('music.playlists')}>
+        <button class="dock-chip is-active" type="button" data-dock-playlist-filter="all">
+          <span data-i18n="music.filter.all">{labels.all}</span>
+        </button>
+        {musicConfig.playlists.map(playlist => (
+          <button class="dock-chip" type="button" data-dock-playlist-filter={playlist.id} style={`--playlist-accent: ${playlist.accent};`}>
+            <i class={playlist.icon}></i>
+            <span>{playlist.title}</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="dock-track-list" aria-label={t('music.tracks')}>
+        {musicConfig.tracks.map(track => (
+          <button
+            class:list={['dock-track', track.id === defaultTrackId && 'is-active']}
+            type="button"
+            data-dock-track-id={track.id}
+            data-dock-playlist-id={track.playlistId}
+            style={`--dock-accent: ${track.accent}; --dock-cover: ${track.cover ? `url("${track.cover}")` : `linear-gradient(135deg, ${track.accent}, rgba(var(--md-sys-color-tertiary-rgb), 0.82))`};`}
+          >
+            <span class="dock-track-cover" aria-hidden="true"></span>
+            <span class="dock-track-copy">
+              <strong>{track.title}</strong>
+              <small>{track.artist}</small>
+            </span>
+            <span>{track.duration}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <audio data-dock-audio preload="metadata"></audio>
+  </aside>
+)}
+
+<style>
+  .music-dock {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 70;
+    width: min(calc(100vw - 2rem), 23.5rem);
+    color: var(--md-sys-color-on-surface);
+    border-radius: 1.1rem;
+    pointer-events: none;
+  }
+
+  .music-dock * {
+    box-sizing: border-box;
+  }
+
+  .dock-compact,
+  .dock-panel {
+    pointer-events: auto;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.46);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--dock-accent) 16%, transparent), transparent 56%),
+      rgba(var(--md-sys-color-surface-container-rgb), 0.82);
+    box-shadow: 0 24px 70px -42px rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+  }
+
+  .dock-compact {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) 2.35rem;
+    align-items: center;
+    gap: 0.62rem;
+    min-height: 4rem;
+    padding: 0.5rem;
+    border-radius: 1.1rem;
+  }
+
+  .dock-panel {
+    display: grid;
+    gap: 0.85rem;
+    padding: 0.85rem;
+    border-radius: 1.1rem;
+  }
+
+  .dock-panel[hidden],
+  .dock-compact[hidden] {
+    display: none;
+  }
+
+  .dock-play,
+  .dock-icon-btn,
+  .dock-primary-btn,
+  .dock-summary,
+  .dock-chip,
+  .dock-track {
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .dock-play {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0.9rem;
+    background: var(--dock-cover);
+    background-position: center;
+    background-size: cover;
+    color: white;
+    box-shadow: 0 14px 34px -20px var(--dock-accent);
+  }
+
+  .dock-play::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.26);
+  }
+
+  .dock-play i {
+    position: relative;
+    z-index: 1;
+    font-size: 1.15rem;
+  }
+
+  .dock-cover-mini,
+  .dock-cover-large,
+  .dock-track-cover {
+    background: var(--dock-cover);
+    background-position: center;
+    background-size: cover;
+  }
+
+  .dock-summary {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+  }
+
+  .dock-summary span,
+  .dock-current-copy strong,
+  .dock-track-copy strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dock-summary span {
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.9rem;
+    font-weight: 850;
+  }
+
+  .dock-summary small {
+    overflow: hidden;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.74rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dock-icon-btn,
+  .dock-primary-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.45);
+    border-radius: 0.75rem;
+    background: rgba(var(--md-sys-color-surface-container-high-rgb), 0.72);
+    color: var(--md-sys-color-on-surface);
+    transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+
+  .dock-primary-btn {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-color: color-mix(in srgb, var(--dock-accent) 50%, transparent);
+    background: var(--dock-accent);
+    color: white;
+    box-shadow: 0 16px 32px -22px var(--dock-accent);
+  }
+
+  .dock-icon-btn:hover,
+  .dock-primary-btn:hover,
+  .dock-chip:hover,
+  .dock-track:hover {
+    transform: translateY(-1px);
+  }
+
+  .dock-panel-head,
+  .dock-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+  }
+
+  .dock-now {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.82rem;
+    font-weight: 850;
+  }
+
+  .dock-current {
+    display: grid;
+    grid-template-columns: 4.2rem minmax(0, 1fr);
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .dock-cover-large {
+    width: 4.2rem;
+    aspect-ratio: 1;
+    border-radius: 0.9rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .dock-current-copy,
+  .dock-track-copy {
+    display: grid;
+    gap: 0.18rem;
+    min-width: 0;
+  }
+
+  .dock-current-copy strong {
+    color: var(--md-sys-color-on-surface);
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .dock-current-copy span,
+  .dock-current-copy small {
+    overflow: hidden;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.78rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dock-progress {
+    display: grid;
+    grid-template-columns: 2.85rem minmax(0, 1fr) 2.85rem;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.74rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dock-progress input,
+  .dock-volume input {
+    width: 100%;
+    accent-color: var(--dock-accent);
+  }
+
+  .dock-volume {
+    display: grid;
+    grid-template-columns: auto minmax(58px, 1fr);
+    align-items: center;
+    gap: 0.38rem;
+    min-width: 7.1rem;
+    min-height: 2.35rem;
+    padding: 0 0.58rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
+    border-radius: 0.75rem;
+    background: rgba(var(--md-sys-color-surface-container-rgb), 0.45);
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .dock-playlists {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    padding-bottom: 0.1rem;
+    scrollbar-width: thin;
+  }
+
+  .dock-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 0 0 auto;
+    min-height: 2.15rem;
+    padding: 0.46rem 0.68rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.4);
+    border-radius: 999px;
+    background: rgba(var(--md-sys-color-surface-rgb), 0.38);
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .dock-chip.is-active {
+    border-color: color-mix(in srgb, var(--playlist-accent, var(--dock-accent)) 55%, transparent);
+    background: color-mix(in srgb, var(--playlist-accent, var(--dock-accent)) 14%, var(--md-sys-color-surface-container));
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .dock-track-list {
+    display: grid;
+    gap: 0.42rem;
+    max-height: 13rem;
+    overflow-y: auto;
+    padding-right: 0.1rem;
+    scrollbar-width: thin;
+  }
+
+  .dock-track {
+    display: grid;
+    grid-template-columns: 2.55rem minmax(0, 1fr) 2.8rem;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    min-height: 3.25rem;
+    padding: 0.38rem 0.48rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.28);
+    border-radius: 0.75rem;
+    background: rgba(var(--md-sys-color-surface-rgb), 0.35);
+    text-align: left;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  }
+
+  .dock-track[hidden] {
+    display: none;
+  }
+
+  .dock-track.is-active {
+    border-color: color-mix(in srgb, var(--dock-accent) 52%, transparent);
+    background: color-mix(in srgb, var(--dock-accent) 12%, var(--md-sys-color-surface-container));
+  }
+
+  .dock-track-cover {
+    width: 2.45rem;
+    aspect-ratio: 1;
+    border-radius: 0.6rem;
+  }
+
+  .dock-track-copy strong {
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.84rem;
+  }
+
+  .dock-track-copy small,
+  .dock-track > span:last-child {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.72rem;
+  }
+
+  .music-dock.is-playing .dock-cover-mini,
+  .music-dock.is-playing .dock-cover-large {
+    animation: dock-cover-pulse 4.5s ease-in-out infinite;
+  }
+
+  @keyframes dock-cover-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+
+  @media (max-width: 640px) {
+    .music-dock {
+      right: 0.75rem;
+      bottom: 0.75rem;
+      width: min(calc(100vw - 1.5rem), 22rem);
+    }
+
+    .dock-compact {
+      grid-template-columns: 3rem minmax(0, 1fr) 2.25rem;
+    }
+
+    .dock-volume {
+      flex: 1 1 7.5rem;
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ dockPayload, defaultTrackId, autoAdvance, labels }}>
+  (function() {
+    var dock = document.querySelector('[data-music-dock]');
+    if (!dock || dock.dataset.initialized === 'true') return;
+    dock.dataset.initialized = 'true';
+
+    var tracks = JSON.parse(dockPayload);
+    if (!tracks.length) return;
+
+    var compact = dock.querySelector('[data-dock-compact]');
+    var panel = dock.querySelector('[data-dock-panel]');
+    var audio = dock.querySelector('[data-dock-audio]');
+    var title = dock.querySelector('[data-dock-title]');
+    var artist = dock.querySelector('[data-dock-artist]');
+    var playlist = dock.querySelector('[data-dock-playlist]');
+    var compactTitle = dock.querySelector('[data-dock-compact-title]');
+    var compactArtist = dock.querySelector('[data-dock-compact-artist]');
+    var currentTimeLabel = dock.querySelector('[data-dock-current-time]');
+    var durationLabel = dock.querySelector('[data-dock-duration]');
+    var seek = dock.querySelector('[data-dock-seek]');
+    var volume = dock.querySelector('[data-dock-volume]');
+    var playButtons = Array.from(dock.querySelectorAll('[data-dock-action="play"]'));
+    var playIcons = Array.from(dock.querySelectorAll('[data-dock-play-icon]'));
+    var trackRows = Array.from(dock.querySelectorAll('[data-dock-track-id]'));
+    var playlistButtons = Array.from(dock.querySelectorAll('[data-dock-playlist-filter]'));
+
+    var storedTrackId = '';
+    try {
+      storedTrackId = localStorage.getItem('reay-music-track') || '';
+    } catch (_) {}
+
+    var currentIndex = Math.max(
+      0,
+      tracks.findIndex(function(track) { return track.id === (storedTrackId || defaultTrackId); })
+    );
+    var currentFilter = 'all';
+    var isPlaying = false;
+    var currentTime = 0;
+
+    function formatTime(seconds) {
+      var value = Math.max(0, Math.floor(seconds || 0));
+      var minutes = Math.floor(value / 60).toString().padStart(2, '0');
+      var secs = (value % 60).toString().padStart(2, '0');
+      return minutes + ':' + secs;
+    }
+
+    function getTrackBackground(track) {
+      return track.cover
+        ? 'url("' + track.cover + '")'
+        : 'linear-gradient(135deg, ' + track.accent + ', rgba(125, 90, 220, 0.82))';
+    }
+
+    function getVisibleTrackIndexes() {
+      return tracks
+        .map(function(track, index) { return { track: track, index: index }; })
+        .filter(function(item) { return currentFilter === 'all' || item.track.playlistId === currentFilter; })
+        .map(function(item) { return item.index; });
+    }
+
+    function updatePlayState(nextPlaying) {
+      isPlaying = nextPlaying;
+      dock.classList.toggle('is-playing', isPlaying);
+      playIcons.forEach(function(icon) {
+        icon.className = isPlaying ? 'i-carbon:pause-filled' : 'i-carbon:play-filled';
+      });
+      playButtons.forEach(function(button) {
+        button.setAttribute('aria-label', isPlaying ? labels.pause : labels.play);
+      });
+    }
+
+    function updateProgress(seconds) {
+      var track = tracks[currentIndex];
+      currentTime = Math.min(Math.max(0, seconds || 0), track.durationSeconds);
+      if (seek) seek.value = String(currentTime);
+      if (currentTimeLabel) currentTimeLabel.textContent = formatTime(currentTime);
+      if (durationLabel) durationLabel.textContent = track.duration || formatTime(track.durationSeconds);
+    }
+
+    function setVolume(nextVolume) {
+      if (audio) audio.volume = nextVolume;
+    }
+
+    function renderTrack(track) {
+      var background = getTrackBackground(track);
+      dock.style.setProperty('--dock-accent', track.accent);
+      dock.style.setProperty('--dock-cover', background);
+      if (title) title.textContent = track.title;
+      if (artist) artist.textContent = track.artist + ' · ' + track.album;
+      if (playlist) playlist.textContent = track.playlistTitle;
+      if (compactTitle) compactTitle.textContent = track.title;
+      if (compactArtist) compactArtist.textContent = track.artist;
+      if (seek) {
+        seek.max = String(track.durationSeconds);
+        seek.value = '0';
+      }
+      if (durationLabel) durationLabel.textContent = track.duration;
+      trackRows.forEach(function(row) {
+        row.classList.toggle('is-active', row.getAttribute('data-dock-track-id') === track.id);
+      });
+
+      try {
+        localStorage.setItem('reay-music-track', track.id);
+      } catch (_) {}
+    }
+
+    function loadTrack(index, shouldPlay) {
+      if (audio) {
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+      }
+      updatePlayState(false);
+      currentIndex = (index + tracks.length) % tracks.length;
+      currentTime = 0;
+      var track = tracks[currentIndex];
+      renderTrack(track);
+      updateProgress(0);
+
+      if (track.src && audio) {
+        audio.src = track.src;
+        audio.volume = Number(volume?.value || 0.62);
+        audio.load();
+      }
+
+      if (shouldPlay) {
+        playCurrent();
+      }
+    }
+
+    async function playCurrent() {
+      var track = tracks[currentIndex];
+      if (!track.src || !audio) {
+        updatePlayState(false);
+        return;
+      }
+
+      try {
+        if (!audio.getAttribute('src')) {
+          audio.src = track.src;
+          audio.volume = Number(volume?.value || 0.62);
+          audio.load();
+        }
+        audio.currentTime = currentTime;
+        await audio.play();
+        updatePlayState(true);
+      } catch (_) {
+        updatePlayState(false);
+      }
+    }
+
+    function pauseCurrent() {
+      if (audio) {
+        currentTime = audio.currentTime || currentTime;
+        audio.pause();
+      }
+      updatePlayState(false);
+      updateProgress(currentTime);
+    }
+
+    function stepTrack(direction, shouldPlay) {
+      var visible = getVisibleTrackIndexes();
+      if (!visible.length) visible = tracks.map(function(_, index) { return index; });
+      var position = visible.indexOf(currentIndex);
+      var nextPosition = position >= 0 ? position + direction : 0;
+      var nextIndex = visible[(nextPosition + visible.length) % visible.length];
+      loadTrack(nextIndex, shouldPlay);
+    }
+
+    function setExpanded(expanded) {
+      if (compact) compact.hidden = expanded;
+      if (panel) panel.hidden = !expanded;
+      dock.classList.toggle('is-expanded', expanded);
+    }
+
+    dock.querySelectorAll('[data-dock-action="toggle"]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        setExpanded(panel?.hidden === true);
+      });
+    });
+
+    playButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        if (isPlaying) pauseCurrent();
+        else playCurrent();
+      });
+    });
+
+    dock.querySelector('[data-dock-action="prev"]')?.addEventListener('click', function() {
+      stepTrack(-1, isPlaying);
+    });
+
+    dock.querySelector('[data-dock-action="next"]')?.addEventListener('click', function() {
+      stepTrack(1, isPlaying);
+    });
+
+    trackRows.forEach(function(row) {
+      row.addEventListener('click', function() {
+        var id = row.getAttribute('data-dock-track-id');
+        var index = tracks.findIndex(function(track) { return track.id === id; });
+        if (index >= 0) loadTrack(index, true);
+      });
+    });
+
+    playlistButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        currentFilter = button.getAttribute('data-dock-playlist-filter') || 'all';
+        playlistButtons.forEach(function(item) { item.classList.toggle('is-active', item === button); });
+        trackRows.forEach(function(row) {
+          var matches = currentFilter === 'all' || row.getAttribute('data-dock-playlist-id') === currentFilter;
+          row.hidden = !matches;
+        });
+      });
+    });
+
+    seek?.addEventListener('input', function() {
+      var nextTime = Number(seek.value || 0);
+      currentTime = nextTime;
+      var track = tracks[currentIndex];
+      if (track.src && audio) {
+        audio.currentTime = nextTime;
+      }
+      updateProgress(nextTime);
+    });
+
+    volume?.addEventListener('input', function() {
+      setVolume(Number(volume.value || 0));
+    });
+
+    audio?.addEventListener('timeupdate', function() {
+      if (!tracks[currentIndex].src) return;
+      updateProgress(audio.currentTime || 0);
+    });
+
+    audio?.addEventListener('loadedmetadata', function() {
+      var track = tracks[currentIndex];
+      if (Number.isFinite(audio.duration)) {
+        track.durationSeconds = Math.floor(audio.duration);
+        track.duration = formatTime(audio.duration);
+        if (seek) seek.max = String(track.durationSeconds);
+        if (durationLabel) durationLabel.textContent = track.duration;
+      }
+    });
+
+    audio?.addEventListener('ended', function() {
+      updatePlayState(false);
+      if (autoAdvance) stepTrack(1, true);
+    });
+
+    loadTrack(currentIndex, false);
+  })();
+</script>

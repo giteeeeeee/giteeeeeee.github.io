@@ -20,6 +20,7 @@ const links = [
   { href: '/blog', key: 'nav.blog' as const, label: t('nav.blog') },
   { href: '/archives', key: 'nav.archives' as const, label: t('nav.archives') },
   { href: '/projects', key: 'nav.projects' as const, label: t('nav.projects') },
+  { href: '/gallery', key: 'nav.gallery' as const, label: t('nav.gallery') },
   { href: '/links', key: 'nav.links' as const, label: t('nav.links') },
   { href: '/about', key: 'nav.about' as const, label: t('nav.about') },
 ];
@@ -37,7 +38,7 @@ const isActive = (href: string) => href === '/' ? currentPath === '/' : currentP
     >
       <span class="brand-avatar-wrap">
         <img 
-          src="/avatar.png" 
+          src="/images/profile/avatar.png" 
           alt={user.name}
           class="brand-avatar w-8 h-8 rounded-full object-cover"
         />
@@ -51,7 +52,7 @@ const isActive = (href: string) => href === '/' ? currentPath === '/' : currentP
         <a 
           href={l.href} 
           class:list={[
-            'nav-link px-3.5 py-2 text-sm font-600',
+            'nav-link px-3 py-2 text-sm font-600',
             isActive(l.href) && 'is-active'
           ]}
           aria-current={isActive(l.href) ? 'page' : undefined}

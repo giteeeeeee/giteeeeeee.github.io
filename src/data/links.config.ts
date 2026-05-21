@@ -98,7 +98,7 @@ export const linksConfig: LinksConfig = {
   mySiteInfo: {
     name: 'Your Site Name',
     url: 'https://your-site.example.com',
-    avatar: '/avatar.png',
+    avatar: '/images/profile/avatar.png',
     description: 'Technical notes, project practice, and long-term learning logs',
   },
 };
