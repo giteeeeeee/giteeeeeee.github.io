@@ -6,6 +6,7 @@
 import DefaultLayout from '../../layouts/base/DefaultLayout.astro';
 import { getPlogAlbums } from '../../utils/plog';
 import { useI18n } from '../../utils/i18n';
+import { getImage } from 'astro:assets';
 
 export async function getStaticPaths() {
   const albums = await getPlogAlbums();
@@ -17,12 +18,55 @@ export async function getStaticPaths() {
 }
 
 const { t } = useI18n();
-const { album } = Astro.props;
+const { album: sourceAlbum } = Astro.props;
+
+const optimizedImageCache = new Map<string, Promise<string>>();
+
+function getOptimizedPlogImage(imageAsset: unknown, width: number, quality = 72) {
+  if (!imageAsset || typeof imageAsset !== 'object' || !('src' in imageAsset)) {
+    return Promise.resolve('');
+  }
+
+  const asset = imageAsset as Parameters<typeof getImage>[0]['src'];
+  const cacheKey = `${(asset as { src?: string }).src ?? ''}:${width}:${quality}`;
+  const cached = optimizedImageCache.get(cacheKey);
+
+  if (cached) return cached;
+
+  const request = getImage({
+    src: asset,
+    width,
+    format: 'webp',
+    quality,
+  })
+    .then(image => image.src)
+    .catch(() => (asset as { src?: string }).src ?? '');
+
+  optimizedImageCache.set(cacheKey, request);
+  return request;
+}
+
+const optimizedPhotos = await Promise.all(sourceAlbum.photos.map(async (photo) => ({
+  ...photo,
+  thumbnailImage: await getOptimizedPlogImage(photo.imageAsset, 720, 70) || photo.image,
+  previewImage: await getOptimizedPlogImage(photo.imageAsset, 1800, 78) || photo.image,
+})));
+
+const sourceFeaturedPhoto = sourceAlbum.photos.find(photo => photo.featured) ?? sourceAlbum.photos[0];
+const optimizedHeroCover = await getOptimizedPlogImage(sourceAlbum.coverAsset ?? sourceFeaturedPhoto?.imageAsset, 1800, 78);
+const album = {
+  ...sourceAlbum,
+  cover: optimizedHeroCover || sourceAlbum.cover,
+  photos: optimizedPhotos,
+};
 const featuredPhoto = album.photos.find(photo => photo.featured) ?? album.photos[0];
 const heroCover = album.cover || featuredPhoto?.image;
 const heroPhotos = album.photos.slice(0, 6);
 const ratioPattern = ['4 / 5', '1 / 1', '3 / 2', '5 / 4', '2 / 3'];
-const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
+const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailImage, previewImage, ...photo }) => ({
+  ...photo,
+  image: previewImage || photo.image,
+}))).replace(/</g, '\\u003c');
 ---
 
 <DefaultLayout title={`${album.title} | ${t('page.title.gallery')}`} description={album.description}>
@@ -35,7 +79,14 @@ const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
     <section class="album-hero" style={`--album-accent: ${album.accent};`}>
       <div class="hero-cover" aria-hidden="true">
         {heroCover ? (
-          <img src={heroCover} alt="" loading="eager" decoding="async" />
+          <img
+            src={heroCover}
+            alt=""
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            sizes="100vw"
+          />
         ) : (
           <span class="image-fallback" style={`--fallback-bg: ${album.gradient};`}></span>
         )}
@@ -61,8 +112,14 @@ const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
       <div class="hero-preview" aria-hidden="true">
         {heroPhotos.map((photo, index) => (
           <span class:list={['preview-frame', index === 0 && 'is-large']}>
-            {photo.image ? (
-              <img src={photo.image} alt="" loading="lazy" decoding="async" />
+            {photo.thumbnailImage || photo.image ? (
+              <img
+                src={photo.thumbnailImage || photo.image}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                sizes="180px"
+              />
             ) : (
               <span class="image-fallback" style={`--fallback-bg: ${photo.gradient};`}></span>
             )}
@@ -91,8 +148,14 @@ const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
                 data-photo-id={photo.id}
               >
                 <span class="photo-card-visual" aria-hidden="true">
-                  {photo.image ? (
-                    <img src={photo.image} alt="" loading="lazy" decoding="async" />
+                  {photo.thumbnailImage || photo.image ? (
+                    <img
+                      src={photo.thumbnailImage || photo.image}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                    />
                   ) : (
                     <span class="image-fallback" style={`--fallback-bg: ${photo.gradient};`}></span>
                   )}
@@ -134,7 +197,7 @@ const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
         <i class="i-carbon:chevron-left"></i>
       </button>
       <figure class="lightbox-visual">
-        <img src={featuredPhoto?.image ?? ''} alt="" data-lightbox-image />
+        <img alt="" loading="lazy" decoding="async" data-lightbox-image />
       </figure>
       <div class="lightbox-content">
         <span class="lightbox-album">{album.title}</span>
@@ -189,6 +252,7 @@ const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
     background: var(--md-sys-color-surface-container);
     box-shadow: 0 30px 90px -54px rgba(0, 0, 0, 0.72);
     isolation: isolate;
+    contain: layout paint;
   }
 
   .album-hero::after {
@@ -333,6 +397,8 @@ const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
 
   .photo-section {
     margin-top: 2rem;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 80rem;
   }
 
   .section-heading h2 {
@@ -360,6 +426,9 @@ const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
     background: rgba(var(--md-sys-color-surface-container-rgb), 0.7);
     box-shadow: 0 18px 54px -44px rgba(0, 0, 0, 0.62);
     break-inside: avoid;
+    contain: layout paint style;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 360px;
     transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
   }
 
@@ -773,6 +842,7 @@ const photoPayload = JSON.stringify(album.photos).replace(/</g, '\\u003c');
       lightbox.classList.remove('is-open');
       lightbox.setAttribute('aria-hidden', 'true');
       document.documentElement.style.overflow = '';
+      if (image) image.removeAttribute('src');
     }
 
     function stepPhoto(direction) {

@@ -97,6 +97,13 @@ body::before {
   opacity: 0.52;
 }
 
+body.layout-default::before {
+  background:
+    linear-gradient(115deg, rgba(var(--md-sys-color-primary-rgb), 0.05), transparent 34% 62%, rgba(var(--md-sys-color-tertiary-rgb), 0.06));
+  mask-image: none;
+  opacity: 0.42;
+}
+
 .glass-effect,
 .card,
 .card-interactive,
@@ -486,7 +493,12 @@ a:focus-visible {
 .layout-default .info-card,
 .layout-default .quick-nav-card,
 .layout-default .link-card,
-.layout-default .link-card-simple {
+.layout-default .link-card-simple,
+.layout-default .reay-button,
+.layout-default .btn,
+.layout-default .btn-outline,
+.layout-default .btn-tonal,
+.layout-default .reay-chip {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   contain: paint;
@@ -516,6 +528,10 @@ a:focus-visible {
 .layout-default main *::before,
 .layout-default main *::after {
   animation-delay: 0s !important;
+}
+
+.layout-default main img {
+  content-visibility: auto;
 }
 
 .reay-button,

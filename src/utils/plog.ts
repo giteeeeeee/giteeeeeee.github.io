@@ -5,16 +5,16 @@
 
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import type { ImageMetadata } from 'astro';
 
 const PLOG_FILE_EXTENSION_PATTERN = /\.(md|mdx)$/i;
 const PLOG_IMAGE_EXTENSION_PATTERN = /\.(avif|gif|jpe?g|png|webp)$/i;
 const PLOG_IMAGES_FOLDER_SEGMENT = '/images/';
 
-const plogImageModules = import.meta.glob<string>(
+const plogImageModules = import.meta.glob<ImageMetadata>(
   '../content/plog/**/*.{jpg,jpeg,png,webp,avif,gif,JPG,JPEG,PNG,WEBP,AVIF,GIF}',
   {
     eager: true,
-    query: '?url',
     import: 'default',
   },
 );
@@ -31,6 +31,7 @@ export interface PlogPhoto {
   camera: string;
   tags: string[];
   image: string;
+  imageAsset?: ImageMetadata;
   downloadUrl: string;
   imageAlt?: string;
   gradient: string;
@@ -50,6 +51,7 @@ export interface PlogAlbum {
   camera: string;
   tags: string[];
   cover: string;
+  coverAsset?: ImageMetadata;
   coverAlt?: string;
   gradient: string;
   accent: string;
@@ -68,6 +70,7 @@ interface PlogFolderImage {
   fileName: string;
   stem: string;
   src: string;
+  asset: ImageMetadata;
 }
 
 type PlogEntry = CollectionEntry<'plog'>;
@@ -83,6 +86,11 @@ function getImageSrc(image?: { src?: string } | string) {
   if (!image) return '';
   if (typeof image === 'string') return image;
   return image.src ?? '';
+}
+
+function getImageAsset(image?: { src?: string; width?: number; height?: number; format?: string } | string) {
+  if (!image || typeof image === 'string' || !image.src) return undefined;
+  return image as ImageMetadata;
 }
 
 function getPlogAssetRelativePath(path: string) {
@@ -112,7 +120,7 @@ function formatPhotoTitle(title: string, index: number, imageCount: number) {
 function createPlogFolderImagesByEntry() {
   const imageMap = new Map<string, PlogFolderImage[]>();
 
-  Object.entries(plogImageModules).forEach(([path, src]) => {
+  Object.entries(plogImageModules).forEach(([path, asset]) => {
     const relativePath = getPlogAssetRelativePath(path);
     const folderIndex = relativePath.indexOf(PLOG_IMAGES_FOLDER_SEGMENT);
 
@@ -128,7 +136,8 @@ function createPlogFolderImagesByEntry() {
     images.push({
       fileName,
       stem: fileName.replace(PLOG_IMAGE_EXTENSION_PATTERN, ''),
-      src,
+      src: getImageSrc(asset),
+      asset,
     });
     imageMap.set(lookupSlug, images);
   });
@@ -170,6 +179,7 @@ function createPlogPhoto(
   const fallbackTitle = formatPhotoTitle(entry.data.title, imageIndex, imageCount);
   const title = meta?.title ?? fallbackTitle;
   const image = folderImage?.src ?? getImageSrc(entry.data.image);
+  const imageAsset = folderImage?.asset ?? getImageAsset(entry.data.image);
   const inferredDownloadName = fileName.split('/').pop() || `${entrySlug}.jpg`;
   const downloadName = meta?.downloadName ?? inferredDownloadName;
 
@@ -185,6 +195,7 @@ function createPlogPhoto(
     camera: meta?.camera ?? entry.data.camera,
     tags: meta?.tags ?? entry.data.tags,
     image,
+    imageAsset,
     downloadUrl: image,
     imageAlt: meta?.alt ?? entry.data.imageAlt ?? title,
     gradient: entry.data.gradient,
@@ -224,6 +235,7 @@ export function createPlogAlbum(entry: PlogEntry): PlogAlbum {
 
   const featuredPhoto = photos.find((photo) => photo.featured && photo.image) ?? photos.find((photo) => photo.image);
   const cover = getImageSrc(entry.data.image) || featuredPhoto?.image || '';
+  const coverAsset = getImageAsset(entry.data.image) ?? featuredPhoto?.imageAsset;
 
   return {
     id: slug,
@@ -237,6 +249,7 @@ export function createPlogAlbum(entry: PlogEntry): PlogAlbum {
     camera: entry.data.camera,
     tags: entry.data.tags,
     cover,
+    coverAsset,
     coverAlt: entry.data.imageAlt ?? featuredPhoto?.imageAlt,
     gradient: entry.data.gradient,
     accent: entry.data.accent ?? entry.data.album.accent,

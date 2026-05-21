@@ -193,6 +193,9 @@ function calculateReadingTime(content?: string): number {
   /* 文章项入场动画 */
   .post-item {
     opacity: 1;
+    content-visibility: auto;
+    contain: layout paint style;
+    contain-intrinsic-size: auto 180px;
   }
 
   @keyframes fadeInUp {
@@ -222,7 +225,12 @@ function calculateReadingTime(content?: string): number {
     );
     opacity: 0.1;
     z-index: -1;
-    animation: pulse 3s ease-in-out infinite;
+    animation: none;
+  }
+
+  .year-header a {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   @keyframes pulse {
