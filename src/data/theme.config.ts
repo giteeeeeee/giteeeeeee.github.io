@@ -51,7 +51,7 @@ export const themeConfig = {
     seasonal: {
       enabled: true,
       season: 'auto',
-      density: 'high',
+      density: 'medium',
       showOnMobile: true,
       respectReducedMotion: false,
       seasons: {

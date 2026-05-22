@@ -27,7 +27,7 @@ const settings = {
 )}
 
 <style>
-  .seasonal-effects {
+  :global(.seasonal-effects) {
     position: fixed;
     inset: 0;
     z-index: 70;
@@ -35,106 +35,106 @@ const settings = {
     overflow: hidden;
     contain: strict;
     opacity: 0;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.8s ease;
   }
 
-  .seasonal-effects.is-active {
-    opacity: 1;
+  :global(.seasonal-effects.is-active) {
+    opacity: 0.88;
   }
 
-  .seasonal-particle {
+  :global(.seasonal-particle) {
     position: absolute;
     left: var(--x);
-    top: -18vh;
+    top: -14vh;
     display: block;
     width: var(--size);
     height: var(--size);
     opacity: var(--opacity);
-    transform: translate3d(0, -18vh, 0) rotate(var(--rotate));
+    transform: translate3d(0, -14vh, 0) rotate(var(--rotate));
     animation: seasonal-fall var(--duration) linear var(--delay) infinite;
-    filter: drop-shadow(0 8px 12px rgba(var(--md-sys-color-shadow-rgb), 0.18));
+    filter: drop-shadow(0 6px 10px rgba(var(--md-sys-color-shadow-rgb), 0.12));
     will-change: transform, opacity;
   }
 
-  .seasonal-particle::before,
-  .seasonal-particle::after {
+  :global(.seasonal-particle::before),
+  :global(.seasonal-particle::after) {
     content: '';
     position: absolute;
     pointer-events: none;
   }
 
-  .seasonal-effects[data-season='spring'] .seasonal-particle {
+  :global(.seasonal-effects[data-season='spring'] .seasonal-particle) {
     border-radius: 82% 16% 72% 28%;
     background:
-      radial-gradient(circle at 30% 25%, rgba(var(--md-sys-color-surface-bright-rgb), 0.95), transparent 28%),
-      linear-gradient(135deg, rgba(255, 154, 196, 0.94), rgba(255, 219, 231, 0.74) 58%, rgba(var(--md-sys-color-tertiary-rgb), 0.46));
-    box-shadow: 0 0 18px rgba(255, 154, 196, 0.22);
+      radial-gradient(circle at 30% 25%, rgba(var(--md-sys-color-surface-bright-rgb), 0.82), transparent 28%),
+      linear-gradient(135deg, rgba(255, 162, 202, 0.82), rgba(255, 221, 232, 0.62) 58%, rgba(var(--md-sys-color-tertiary-rgb), 0.32));
+    box-shadow: 0 0 12px rgba(255, 154, 196, 0.14);
   }
 
-  .seasonal-effects[data-season='spring'] .seasonal-particle::after {
+  :global(.seasonal-effects[data-season='spring'] .seasonal-particle::after) {
     inset: 18% 46% 18% auto;
     width: 1px;
     border-radius: 999px;
-    background: rgba(180, 64, 118, 0.3);
+    background: rgba(180, 64, 118, 0.22);
     transform: rotate(32deg);
   }
 
-  .seasonal-effects[data-season='summer'] .seasonal-particle {
-    width: max(2px, calc(var(--size) * 0.15));
-    height: calc(var(--size) * 6.8);
+  :global(.seasonal-effects[data-season='summer'] .seasonal-particle) {
+    width: max(1px, calc(var(--size) * 0.12));
+    height: calc(var(--size) * 5.6);
     border-radius: 999px;
-    background: linear-gradient(to bottom, transparent, rgba(138, 214, 255, 0.96) 45%, rgba(var(--md-sys-color-primary-rgb), 0.72));
-    box-shadow: 0 0 14px rgba(138, 214, 255, 0.28);
+    background: linear-gradient(to bottom, transparent, rgba(138, 214, 255, 0.76) 45%, rgba(var(--md-sys-color-primary-rgb), 0.5));
+    box-shadow: 0 0 10px rgba(138, 214, 255, 0.18);
     animation-name: summer-rain-fall;
   }
 
-  .seasonal-effects[data-season='autumn'] .seasonal-particle {
+  :global(.seasonal-effects[data-season='autumn'] .seasonal-particle) {
     clip-path: polygon(50% 0%, 61% 24%, 88% 13%, 74% 37%, 100% 48%, 72% 57%, 84% 84%, 56% 69%, 50% 100%, 44% 69%, 16% 84%, 28% 57%, 0 48%, 26% 37%, 12% 13%, 39% 24%);
     background:
-      linear-gradient(135deg, rgba(255, 198, 88, 0.98), rgba(219, 88, 43, 0.88) 62%, rgba(132, 56, 28, 0.7)),
-      linear-gradient(45deg, transparent 48%, rgba(var(--md-sys-color-on-surface-rgb), 0.2) 49% 51%, transparent 52%);
-    box-shadow: 0 0 18px rgba(219, 88, 43, 0.22);
+      linear-gradient(135deg, rgba(255, 198, 88, 0.82), rgba(219, 88, 43, 0.72) 62%, rgba(132, 56, 28, 0.5)),
+      linear-gradient(45deg, transparent 48%, rgba(var(--md-sys-color-on-surface-rgb), 0.14) 49% 51%, transparent 52%);
+    box-shadow: 0 0 12px rgba(219, 88, 43, 0.14);
   }
 
-  .seasonal-effects[data-season='autumn'] .seasonal-particle::after {
+  :global(.seasonal-effects[data-season='autumn'] .seasonal-particle::after) {
     left: 50%;
     top: 26%;
     width: 1px;
     height: 56%;
     border-radius: 999px;
-    background: rgba(102, 45, 19, 0.34);
+    background: rgba(102, 45, 19, 0.24);
     transform: translateX(-50%);
   }
 
-  .seasonal-effects[data-season='winter'] .seasonal-particle {
+  :global(.seasonal-effects[data-season='winter'] .seasonal-particle) {
     border-radius: 999px;
     background:
-      radial-gradient(circle, rgba(var(--md-sys-color-surface-bright-rgb), 1) 0 28%, rgba(211, 241, 255, 0.9) 30% 68%, transparent 72%);
+      radial-gradient(circle, rgba(var(--md-sys-color-surface-bright-rgb), 0.92) 0 28%, rgba(211, 241, 255, 0.72) 30% 68%, transparent 72%);
     box-shadow:
-      0 0 16px rgba(211, 241, 255, 0.34),
-      inset 0 0 8px rgba(var(--md-sys-color-surface-rgb), 0.45);
+      0 0 10px rgba(211, 241, 255, 0.22),
+      inset 0 0 6px rgba(var(--md-sys-color-surface-rgb), 0.36);
     filter: blur(0.1px);
   }
 
-  .seasonal-effects[data-season='winter'] .seasonal-particle::before,
-  .seasonal-effects[data-season='winter'] .seasonal-particle::after {
+  :global(.seasonal-effects[data-season='winter'] .seasonal-particle::before),
+  :global(.seasonal-effects[data-season='winter'] .seasonal-particle::after) {
     left: 50%;
     top: 50%;
-    width: 140%;
+    width: 120%;
     height: 1px;
     border-radius: 999px;
-    background: rgba(var(--md-sys-color-surface-bright-rgb), 0.72);
+    background: rgba(var(--md-sys-color-surface-bright-rgb), 0.55);
     transform: translate(-50%, -50%);
   }
 
-  .seasonal-effects[data-season='winter'] .seasonal-particle::after {
+  :global(.seasonal-effects[data-season='winter'] .seasonal-particle::after) {
     transform: translate(-50%, -50%) rotate(90deg);
   }
 
   @keyframes seasonal-fall {
     0% {
       opacity: 0;
-      transform: translate3d(0, -18vh, 0) rotate(var(--rotate)) scale(0.86);
+      transform: translate3d(0, -14vh, 0) rotate(var(--rotate)) scale(0.9);
     }
     8% {
       opacity: var(--opacity);
@@ -144,7 +144,7 @@ const settings = {
     }
     100% {
       opacity: 0;
-      transform: translate3d(var(--drift), 118vh, 0) rotate(calc(var(--rotate) + var(--spin))) scale(1.08);
+      transform: translate3d(var(--drift), 116vh, 0) rotate(calc(var(--rotate) + var(--spin))) scale(1);
     }
   }
 
@@ -163,14 +163,14 @@ const settings = {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .seasonal-effects[data-respect-motion='true'] {
+    :global(.seasonal-effects[data-respect-motion='true']) {
       display: none;
     }
   }
 
   @media (max-width: 640px) {
-    .seasonal-effects {
-      opacity: 0.92;
+    :global(.seasonal-effects.is-active) {
+      opacity: 0.76;
     }
   }
 </style>
@@ -210,37 +210,38 @@ const settings = {
       (settings.showOnMobile !== false || !mobileViewport)
     ) {
       const densityCount: Record<Density, number> = {
-        low: 20,
-        medium: 34,
-        high: 52,
+        low: 8,
+        medium: 16,
+        high: 26,
       };
       const baseCount = densityCount[settings.density ?? 'medium'] ?? densityCount.medium;
-      const count = mobileViewport ? Math.max(8, Math.round(baseCount * 0.62)) : baseCount;
+      const count = mobileViewport ? Math.max(5, Math.round(baseCount * 0.55)) : baseCount;
       const fragment = document.createDocumentFragment();
 
       root.dataset.season = season;
+      root.dataset.particleCount = String(count);
       root.textContent = '';
 
       for (let index = 0; index < count; index += 1) {
         const particle = document.createElement('span');
         const size = season === 'summer'
-          ? 12 + Math.random() * 10
+          ? 8 + Math.random() * 6
           : season === 'winter'
-            ? 7 + Math.random() * 9
+            ? 4 + Math.random() * 5
             : season === 'autumn'
-              ? 14 + Math.random() * 16
-              : 13 + Math.random() * 15;
+              ? 8 + Math.random() * 9
+              : 8 + Math.random() * 8;
 
         particle.className = 'seasonal-particle';
         particle.style.setProperty('--x', `${Math.random() * 100}vw`);
         particle.style.setProperty('--size', `${size}px`);
-        particle.style.setProperty('--drift', `${(Math.random() * 2 - 1) * 28}vw`);
-        particle.style.setProperty('--rain-drift', `${(Math.random() * 2 - 1) * 5}vw`);
+        particle.style.setProperty('--drift', `${(Math.random() * 2 - 1) * 18}vw`);
+        particle.style.setProperty('--rain-drift', `${(Math.random() * 2 - 1) * 3}vw`);
         particle.style.setProperty('--rotate', `${Math.random() * 360}deg`);
-        particle.style.setProperty('--spin', `${(Math.random() > 0.5 ? 1 : -1) * (160 + Math.random() * 280)}deg`);
-        particle.style.setProperty('--duration', `${season === 'summer' ? 1.15 + Math.random() * 0.95 : 7 + Math.random() * 7}s`);
-        particle.style.setProperty('--delay', `${Math.random() * -14}s`);
-        particle.style.setProperty('--opacity', `${0.52 + Math.random() * 0.32}`);
+        particle.style.setProperty('--spin', `${(Math.random() > 0.5 ? 1 : -1) * (90 + Math.random() * 180)}deg`);
+        particle.style.setProperty('--duration', `${season === 'summer' ? 1.9 + Math.random() * 1.4 : 11 + Math.random() * 9}s`);
+        particle.style.setProperty('--delay', `${Math.random() * -22}s`);
+        particle.style.setProperty('--opacity', `${0.4 + Math.random() * 0.32}`);
         fragment.appendChild(particle);
       }
 
