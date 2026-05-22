@@ -131,7 +131,7 @@ const getCategoryKey = (id: string) => `projects.category.${id}` as keyof typeof
     color: var(--md-sys-color-on-primary-container);
     box-shadow: 
       0 4px 12px rgba(var(--md-sys-color-primary-rgb), 0.25),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.3);
   }
 
   .category-tab.active::after {

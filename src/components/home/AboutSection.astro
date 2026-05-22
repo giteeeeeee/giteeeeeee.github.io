@@ -62,8 +62,8 @@ const userContent = getLocalizedUserContent(currentLang);
               />
               
               <!-- 在线状态指示器 -->
-              <div class="absolute bottom-1 right-1 z-20 w-4 h-4 bg-green-500 rounded-full border-2 border-[var(--md-sys-color-surface)] shadow-lg">
-                <div class="absolute inset-0 bg-green-400 rounded-full animate-ping"></div>
+              <div class="absolute bottom-1 right-1 z-20 w-4 h-4 rounded-full border-2 border-[var(--md-sys-color-surface)]" style="background: var(--reay-color-success); box-shadow: 0 0 14px rgba(var(--reay-color-success-rgb), 0.45);">
+                <div class="absolute inset-0 rounded-full animate-ping" style="background: var(--reay-color-success);"></div>
               </div>
             </div>
           </div>
@@ -185,7 +185,7 @@ const userContent = getLocalizedUserContent(currentLang);
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px rgba(var(--md-sys-color-shadow-rgb), 0.15);
     border: 3px solid var(--md-sys-color-surface);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -279,7 +279,7 @@ const userContent = getLocalizedUserContent(currentLang);
   .social-link:hover {
     border-color: var(--md-sys-color-secondary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.1);
   }
 
   .social-link:hover::before {

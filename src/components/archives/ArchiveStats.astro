@@ -335,7 +335,7 @@ const tagsPercentage = maxValue > 0 ? (totalTags / maxValue) * 100 : 0;
     background: var(--md-sys-color-surface-container);
     border-color: var(--md-sys-color-primary);
     transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(var(--md-sys-color-shadow-rgb), 0.08);
   }
 
   .stat-card:hover::before {

@@ -141,7 +141,7 @@ function formatDate(date: Date) {
       var(--md-sys-color-primary),
       var(--md-sys-color-tertiary)
     );
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     opacity: 0;
@@ -186,7 +186,7 @@ function formatDate(date: Date) {
     color: var(--md-sys-color-on-primary-container);
     flex-shrink: 0;
     transition: transform 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.08);
   }
 
   .series-card:hover .series-icon {

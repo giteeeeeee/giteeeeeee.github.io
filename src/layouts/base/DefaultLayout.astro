@@ -10,8 +10,8 @@ import Header from '../../components/common/Header.astro'
 import Footer from '../../components/common/Footer.astro'
 import Container from '../../components/common/Container.astro'
 import Background from '../../components/common/Background.astro'
+import SeasonalEffects from '../../components/common/SeasonalEffects.astro'
 import I18nRuntime from '../../components/common/I18nRuntime.astro'
-import MusicDock from '../../components/common/MusicDock.astro'
 
 import { createTheme, themeToCSSVars } from '../../theme'
 import { getThemeConfig } from '../../data/site.config'
@@ -63,6 +63,12 @@ const THEME = createTheme(getThemeConfig())
     <style is:inline set:html={themeToCSSVars(THEME)}></style>
 
     <style is:inline>
+      html {
+        scroll-behavior: smooth;
+        overscroll-behavior-x: none;
+        overscroll-behavior-y: none;
+      }
+
       body{
         min-height:100vh; margin:0;
         display: flex;
@@ -74,10 +80,19 @@ const THEME = createTheme(getThemeConfig())
         font-size: var(--text-base);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+        overscroll-behavior-x: none;
+        overscroll-behavior-y: none;
+      }
+
+      @supports (min-height: 100dvh) {
+        body { min-height: 100dvh; }
       }
       
       main {
-        flex: 1;
+        flex: 1 0 auto;
+        min-width: 0;
+        overscroll-behavior-y: none;
       }
       
       a{ 
@@ -92,9 +107,6 @@ const THEME = createTheme(getThemeConfig())
       }
       a:hover{ color: var(--md-sys-color-primary); }
       
-      /* Smooth scrolling behavior */
-      html{ scroll-behavior: smooth; }
-
       html.i18n-syncing *,
       html.i18n-syncing *::before,
       html.i18n-syncing *::after {
@@ -146,11 +158,11 @@ const THEME = createTheme(getThemeConfig())
         background-opacity: 0.4;
         color: var(--md-sys-color-on-primary-container);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.1);
       }
       .icon-btn:active{
         transform: translateY(0);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(var(--md-sys-color-shadow-rgb), 0.05);
       }
       
       /* Icon size optimization for better balance */
@@ -163,6 +175,7 @@ const THEME = createTheme(getThemeConfig())
   <body class="antialiased layout-default">
     <!-- Unified background -->
     <Background />
+    <SeasonalEffects />
     
     <!-- Header -->
     <Header>
@@ -178,8 +191,5 @@ const THEME = createTheme(getThemeConfig())
 
     <!-- Footer -->
     <Footer />
-
-    <!-- Global music dock -->
-    <MusicDock />
   </body>
 </html>

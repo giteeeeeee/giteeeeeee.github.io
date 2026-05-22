@@ -9,9 +9,11 @@ import PostMeta from '../../components/blog/PostMeta.astro';
 import PostHeader from '../../components/blog/PostHeader.astro';
 import TableOfContents from '../../components/blog/TableOfContents.astro';
 import PostFooter from '../../components/blog/PostFooter.astro';
+import Comments from '../../components/common/Comments.astro';
 import type { CollectionEntry } from 'astro:content';
 import { currentMarkdownStyle } from '../../data/markdown-style.config';
 import { generateMarkdownStyles } from '../../utils/markdown-style-generator';
+import { useI18n } from '../../utils/i18n';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -20,49 +22,65 @@ interface Props {
   readingMinutes?: number;
 }
 
-const { post, headings = [], readingTime, readingMinutes } = Astro.props;
-const { title, description, publishDate, updatedDate, tags, cover, coverAlt, author, language } = post.data;
+const { t } = useI18n();
+const { post, headings = [], readingMinutes } = Astro.props;
+const { title, description, publishDate, updatedDate, tags, author, language, category, series, comment } = post.data;
 const siteOrigin = import.meta.env.PROD
   ? (Astro.site?.toString() || Astro.url.origin)
   : Astro.url.origin;
 const postUrl = new URL(Astro.url.pathname, siteOrigin).toString();
+const commentsEnabled = comment !== false;
 
 // Generate Markdown styles
 const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
 ---
 
 <DefaultLayout title={title} description={description}>
-  <!-- Back button -->
-  <div class="mb-6 mt-8">
+  <div class="article-back-row">
     <button 
       id="back-button"
-      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-[var(--md-sys-color-surface-variant)]/50 hover:bg-[var(--md-sys-color-surface-variant)] text-[var(--md-sys-color-on-surface-variant)] transition-all cursor-pointer border-none"
+      class="article-back-button"
     >
       <i class="i-carbon:arrow-left"></i>
-      Back
+      <span data-i18n="blog.back">{t('blog.back')}</span>
     </button>
   </div>
 
   <div class="blog-post-container flex gap-8 lg:gap-12 relative">
     <!-- Main content area -->
     <article class="blog-post flex-1 min-w-0">
-      <!-- Post metadata -->
-      <div class="mb-4">
+      <div class="article-intro">
         <PostMeta 
-          publishDate={publishDate}
-          updatedDate={updatedDate}
-          readingMinutes={readingMinutes}
-          language={language}
-          tags={tags}
-        />
-      </div>
-      
-      <!-- Post title and description -->
-      <PostHeader title={title} description={description} />
-      
-      <!-- Page views and comments (can be integrated with analytics later) -->
-      <div class="post-stats text-sm text-[var(--md-sys-color-on-surface-variant)] mb-8">
-        <span>1 views | 1 comments</span>
+            publishDate={publishDate}
+            updatedDate={updatedDate}
+            readingMinutes={readingMinutes}
+            language={language}
+            tags={tags}
+          />
+
+        <PostHeader title={title} description={description} />
+
+        {(category || series || tags.length > 0) && (
+          <div class="article-taxonomy">
+            {category && (
+              <span class="article-taxonomy-chip">
+                <i class="i-carbon:folder"></i>
+                <span>{t('blog.info.category')}</span>
+                <strong>{category}</strong>
+              </span>
+            )}
+            {series && (
+              <span class="article-taxonomy-chip">
+                <i class="i-carbon:list-boxes"></i>
+                <span>{t('blog.info.series')}</span>
+                <strong>{series}</strong>
+              </span>
+            )}
+            {tags.map(tag => (
+              <span class="article-tag-chip">#{tag}</span>
+            ))}
+          </div>
+        )}
       </div>
       
       <!-- Post content -->
@@ -72,6 +90,12 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
       
       <!-- Post footer -->
       <PostFooter author={author} postUrl={postUrl} />
+
+      <Comments
+        pageKey={Astro.url.pathname}
+        pageTitle={title}
+        enabled={commentsEnabled}
+      />
     </article>
     
     <!-- Right sidebar TOC (desktop only) -->
@@ -89,6 +113,77 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
 
   .post-content :is(h1, h2, h3, h4, h5, h6)[id] {
     scroll-margin-top: var(--blog-anchor-offset);
+  }
+
+  .article-back-row {
+    max-width: 1400px;
+    margin: 2rem auto 1rem;
+  }
+
+  .article-back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.35rem;
+    padding: 0.45rem 0.85rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.48);
+    border-radius: 999px;
+    color: var(--md-sys-color-on-surface-variant);
+    background: rgba(var(--md-sys-color-surface-container-rgb), 0.58);
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 680;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .article-back-button:hover {
+    color: var(--md-sys-color-primary);
+    border-color: rgba(var(--md-sys-color-primary-rgb), 0.28);
+    background: rgba(var(--md-sys-color-primary-container-rgb), 0.36);
+    transform: translateX(-2px);
+  }
+
+  .article-intro {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.62);
+  }
+
+  .article-intro .post-meta {
+    margin-bottom: 0.9rem;
+  }
+
+  .article-taxonomy {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .article-taxonomy-chip,
+  .article-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2rem;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.46);
+    border-radius: 999px;
+    color: var(--md-sys-color-on-surface-variant);
+    background: rgba(var(--md-sys-color-surface-container-rgb), 0.5);
+    font-size: 0.8rem;
+    font-weight: 650;
+  }
+
+  .article-taxonomy-chip strong {
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .article-tag-chip {
+    color: var(--md-sys-color-primary);
+    border-color: rgba(var(--md-sys-color-primary-rgb), 0.2);
+    background: rgba(var(--md-sys-color-primary-container-rgb), 0.28);
   }
 </style>
 
@@ -524,7 +619,7 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
     .prose a[href^="http"]::after {
       content: " (" attr(href) ")";
       font-size: 0.8em;
-      color: #666;
+      color: var(--md-sys-color-on-surface-variant);
     }
     
     .prose pre,

@@ -618,34 +618,26 @@ export function formatDate(dateString: string): string {
 }
 
 /**
- * Get color for programming language
- * 
- * @param language - Programming language name (case-sensitive)
- * @returns Hex color code
- * 
+ * Get a theme-aware accent color for a programming language.
+ *
+ * @param language - Programming language name
+ * @returns CSS color token from the active MD3 scheme
+ *
  * @remarks
- * Returns predefined colors for common languages, defaults to #8b949e for unknown languages
- * Color scheme follows GitHub's language colors
+ * Language markers intentionally use MD3 system roles instead of GitHub's
+ * hard-coded language hex colors so project cards remain theme-compliant.
  */
 export function getLanguageColor(language: string | null): string {
-  const colors: Record<string, string> = {
-    'JavaScript': '#f1e05a',
-    'TypeScript': '#3178c6',
-    'Python': '#3572A5',
-    'Java': '#b07219',
-    'C++': '#f34b7d',
-    'C': '#555555',
-    'Go': '#00ADD8',
-    'Rust': '#dea584',
-    'PHP': '#4F5D95',
-    'Ruby': '#701516',
-    'Swift': '#ffac45',
-    'Kotlin': '#A97BFF',
-    'Dart': '#00B4AB',
-    'Vue': '#41b883',
-    'HTML': '#e34c26',
-    'CSS': '#563d7c',
-    'Shell': '#89e051',
-  };
-  return language ? colors[language] || '#8b949e' : '#8b949e';
+  if (!language) return 'var(--md-sys-color-outline)';
+
+  const tokens = [
+    'var(--md-sys-color-primary)',
+    'var(--md-sys-color-secondary)',
+    'var(--md-sys-color-tertiary)',
+    'var(--md-sys-color-primary-fixed-dim)',
+    'var(--md-sys-color-secondary-fixed-dim)',
+    'var(--md-sys-color-tertiary-fixed-dim)',
+  ];
+  const index = Array.from(language).reduce((sum, char) => sum + char.charCodeAt(0), 0) % tokens.length;
+  return tokens[index];
 }

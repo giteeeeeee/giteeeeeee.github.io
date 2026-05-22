@@ -5,8 +5,26 @@
  * 支持 MD3 渐变背景、自定义图片背景、可配置模糊效果
  */
 import { getBackgroundConfig } from '../../data/site.config';
+import type { BackgroundConfig } from '../../data/theme.config';
 
-const { type, blur, blurIntensity, imageUrl, imageStyle, gradient } = getBackgroundConfig();
+type BackgroundOverride = Partial<BackgroundConfig>;
+
+const backgroundOverride = Astro.props as BackgroundOverride;
+const baseConfig = getBackgroundConfig();
+const backgroundConfig = {
+  ...baseConfig,
+  ...backgroundOverride,
+  imageStyle: {
+    ...baseConfig.imageStyle,
+    ...backgroundOverride.imageStyle,
+  },
+  gradient: {
+    ...baseConfig.gradient,
+    ...backgroundOverride.gradient,
+  },
+};
+
+const { type, blur, blurIntensity, imageUrl, imageStyle, gradient } = backgroundConfig;
 
 // 模糊程度映射
 const blurMap = {
@@ -116,7 +134,7 @@ if (type === 'gradient') {
     background:
       linear-gradient(105deg, transparent 12%, rgba(var(--md-sys-color-primary-rgb), 0.18) 24%, transparent 40%),
       linear-gradient(252deg, transparent 8%, rgba(var(--md-sys-color-tertiary-rgb), 0.16) 30%, transparent 48%),
-      linear-gradient(18deg, transparent 26%, rgba(var(--md-ref-palette-warning-rgb), 0.12) 48%, transparent 66%);
+      linear-gradient(18deg, transparent 26%, rgba(var(--reay-color-warning-rgb), 0.12) 48%, transparent 66%);
     filter: blur(26px);
     opacity: 0.58;
     mix-blend-mode: screen;
@@ -130,7 +148,7 @@ if (type === 'gradient') {
       linear-gradient(rgba(var(--md-sys-color-on-surface-rgb), 0.045) 1px, transparent 1px),
       linear-gradient(90deg, rgba(var(--md-sys-color-on-surface-rgb), 0.04) 1px, transparent 1px);
     background-size: 56px 56px;
-    mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 78%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, rgb(var(--md-sys-color-scrim-rgb)) 18%, rgb(var(--md-sys-color-scrim-rgb)) 78%, transparent);
     opacity: 0.28;
     transform: perspective(900px) rotateX(58deg) translateY(-18%);
     transform-origin: top;
@@ -139,7 +157,7 @@ if (type === 'gradient') {
 
   .light-sweep {
     z-index: 2;
-    background: linear-gradient(112deg, transparent 0 42%, rgba(255, 255, 255, 0.14) 49%, transparent 58% 100%);
+    background: linear-gradient(112deg, transparent 0 42%, rgba(var(--md-sys-color-surface-bright-rgb), 0.14) 49%, transparent 58% 100%);
     opacity: 0.34;
     transform: translateX(-18%);
     animation: sweep 12s var(--reay-ease-out, ease-out) infinite;

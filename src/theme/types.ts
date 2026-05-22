@@ -13,20 +13,43 @@
  * - Primary/Secondary/Tertiary: Brand colors with container variants
  * - Surface: Background colors with multiple container levels
  * - On-* colors: Text/icon colors that appear on corresponding backgrounds
- * - Semantic colors: Error, success, warning, info
+ * - Error: The only MD3 semantic color role
  * 
  * @see {@link https://m3.material.io/styles/color/the-color-system/key-colors-tones}
  */
+export type PaletteTone =
+  | 0 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 95 | 98 | 99 | 100;
+
+export type TonePalette = Record<PaletteTone, string>;
+
+export type ReferencePalettes = {
+  primary: TonePalette;
+  secondary: TonePalette;
+  tertiary: TonePalette;
+  neutral: TonePalette;
+  neutralVariant: TonePalette;
+  error: TonePalette;
+};
+
 export type Palette = {
+  ref: ReferencePalettes;
+
   primary: string; onPrimary: string;
   primaryContainer: string; onPrimaryContainer: string;
+  primaryFixed: string; primaryFixedDim: string;
+  onPrimaryFixed: string; onPrimaryFixedVariant: string;
   secondary: string; onSecondary: string;
   secondaryContainer: string; onSecondaryContainer: string;
+  secondaryFixed: string; secondaryFixedDim: string;
+  onSecondaryFixed: string; onSecondaryFixedVariant: string;
   tertiary: string; onTertiary: string;
   tertiaryContainer: string; onTertiaryContainer: string;
+  tertiaryFixed: string; tertiaryFixedDim: string;
+  onTertiaryFixed: string; onTertiaryFixedVariant: string;
 
   background: string; onBackground: string;
   surface: string; onSurface: string;
+  surfaceTint: string;
   surfaceVariant: string; onSurfaceVariant: string;
   surfaceDim?: string;
   surfaceBright?: string;
@@ -37,9 +60,25 @@ export type Palette = {
   surfaceContainerHighest?: string;
   outline: string;
   outlineVariant?: string;
+  shadow: string;
+  scrim: string;
+  inverseSurface: string;
+  inverseOnSurface: string;
+  inversePrimary: string;
 
   error: string; onError: string;
+  errorContainer: string; onErrorContainer: string;
+  // App aliases derived from MD3 palettes, exported as --reay-color-*.
   success: string; warning: string; info: string;
+};
+
+export type ThemeColorSource = {
+  primary: string;
+  secondary?: string;
+  tertiary?: string;
+  neutral?: string;
+  neutralVariant?: string;
+  error?: string;
 };
 
 /**
@@ -120,6 +159,7 @@ export type ThemeConfig = {
 export type UserThemeOverrides = Partial<{
   mode: 'light' | 'dark' | 'system';
   primary: string;   // Provide only primary color - MD3 color roles generated automatically
+  source: Partial<ThemeColorSource>; // Optional MD3 key colors for advanced palette control
   typography: Partial<Omit<Typography, 'scale'>> & Partial<{ scale: Partial<Typography['scale']> }>;
   shape: Partial<Shape>;
 }>;

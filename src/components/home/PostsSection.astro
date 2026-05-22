@@ -44,7 +44,7 @@ const latestPosts = allPosts.slice(0, 6);
             style={`animation-delay: ${index * 100}ms;`}
           >
             <a href={getPostUrl(post)} class="block h-full">
-              <div class="card-inner relative h-full p-4 bg-gradient-to-br from-[var(--md-sys-color-surface-container-low)]/80 to-[var(--md-sys-color-surface-container)]/80 backdrop-blur-md border border-[var(--md-sys-color-outline-variant)]/50 rounded-xl transition-all duration-300 hover:border-[var(--md-sys-color-primary)] hover:shadow-xl hover:-translate-y-2 overflow-hidden flex flex-col gap-3">
+              <div class="card-inner relative h-full p-4 bg-gradient-to-br from-[var(--md-sys-color-surface-container-low)]/80 to-[var(--md-sys-color-surface-container)]/80 backdrop-blur-md border border-[var(--md-sys-color-outline-variant)]/50 rounded-xl transition-all duration-300 hover:border-[var(--md-sys-color-primary)] hover:shadow-[var(--reay-shadow-panel)] hover:-translate-y-2 overflow-hidden flex flex-col gap-3">
                 
                 <div class="absolute inset-0 bg-gradient-to-br from-[var(--md-sys-color-primary)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 
@@ -119,10 +119,10 @@ const latestPosts = allPosts.slice(0, 6);
       <div class="view-more text-center mt-6">
         <a 
           href="/blog" 
-          class="inline-flex items-center gap-2 px-6 py-2 text-sm font-700 bg-gradient-to-r from-[var(--md-sys-color-primary)] to-[var(--md-sys-color-tertiary)] text-[var(--md-sys-color-on-primary)] rounded-full shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:gap-3 group relative overflow-hidden"
+          class="inline-flex items-center gap-2 px-6 py-2 text-sm font-700 bg-gradient-to-r from-[var(--md-sys-color-primary)] to-[var(--md-sys-color-tertiary)] text-[var(--md-sys-color-on-primary)] rounded-full shadow-[var(--reay-shadow-soft)] transition-all duration-300 hover:shadow-[var(--reay-shadow-panel)] hover:scale-105 hover:gap-3 group relative overflow-hidden"
         >
           <!-- 光晕效果 -->
-          <span class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+          <span class="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" style="background: linear-gradient(90deg, transparent, rgba(var(--md-sys-color-on-primary-rgb), 0.2), transparent);"></span>
           
           <span class="relative z-10" data-i18n="posts.viewAll">查看全部文章</span>
           <i class="i-carbon:arrow-right text-lg relative z-10 group-hover:translate-x-1 transition-transform"></i>

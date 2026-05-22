@@ -274,7 +274,7 @@ const latestYear = postsByYear[0]?.[0];
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.2);
     z-index: 100;
   }
 
@@ -286,7 +286,7 @@ const latestYear = postsByYear[0]?.[0];
   .back-to-top:hover {
     background: var(--md-sys-color-primary);
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 24px rgba(var(--md-sys-color-shadow-rgb), 0.3);
   }
 
   @media (max-width: 768px) {

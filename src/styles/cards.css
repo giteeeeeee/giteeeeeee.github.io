@@ -35,8 +35,8 @@
   border: 2px solid var(--md-sys-color-outline-variant);
   border-radius: 16px;
   box-shadow: 
-    0 2px 8px -2px rgba(0, 0, 0, 0.08),
-    0 1px 4px -1px rgba(0, 0, 0, 0.04);
+    0 2px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.08),
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.04);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -67,13 +67,13 @@
 :root:not([data-theme]) .card {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95),
+    rgba(var(--md-sys-color-surface-bright-rgb), 0.95),
     rgba(var(--md-sys-color-surface-container-low-rgb), 0.85)
   );
   box-shadow: 
-    0 2px 8px -2px rgba(0, 0, 0, 0.12),
-    0 1px 4px -1px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    0 2px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.12),
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.06),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.8);
   border-color: rgba(var(--md-sys-color-outline-variant-rgb), 0.6);
 }
 
@@ -87,8 +87,8 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 12px 32px -4px rgba(var(--md-sys-color-primary-rgb), 0.15),
-    0 6px 16px -2px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 6px 16px -2px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.9);
   transform: translateY(-4px);
 }
 
@@ -100,9 +100,9 @@
     rgba(var(--md-sys-color-surface-container-low-rgb), 0.85)
   );
   box-shadow: 
-    0 2px 8px -2px rgba(0, 0, 0, 0.4),
-    0 1px 4px -1px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 2px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.3),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.12);
   border-color: rgba(var(--md-sys-color-outline-variant-rgb), 0.4);
 }
 
@@ -115,8 +115,8 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 12px 32px -4px rgba(var(--md-sys-color-primary-rgb), 0.25),
-    0 6px 16px -2px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 6px 16px -2px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.2);
   transform: translateY(-4px);
 }
 
@@ -163,13 +163,13 @@
 :root:not([data-theme]) .card-interactive {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.9),
+    rgba(var(--md-sys-color-surface-bright-rgb), 0.9),
     rgba(var(--md-sys-color-surface-container-rgb), 0.8)
   );
   box-shadow: 
-    0 2px 8px -2px rgba(0, 0, 0, 0.12),
-    0 1px 4px -1px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    0 2px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.12),
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.06),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.8);
   border: 2px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.7);
 }
 
@@ -184,8 +184,8 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 16px 40px -6px rgba(var(--md-sys-color-primary-rgb), 0.2),
-    0 8px 20px -3px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 1);
+    0 8px 20px -3px rgba(var(--md-sys-color-shadow-rgb), 0.12),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 1);
   transform: translateY(-6px) scale(1.02);
 }
 
@@ -202,9 +202,9 @@
     rgba(var(--md-sys-color-surface-container-rgb), 0.8)
   );
   box-shadow: 
-    0 2px 8px -2px rgba(0, 0, 0, 0.4),
-    0 1px 4px -1px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 2px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.3),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.12);
   border: 2px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.6);
 }
 
@@ -218,8 +218,8 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 16px 40px -6px rgba(var(--md-sys-color-primary-rgb), 0.3),
-    0 8px 20px -3px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    0 8px 20px -3px rgba(var(--md-sys-color-shadow-rgb), 0.6),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.25);
   transform: translateY(-6px) scale(1.02);
 }
 
@@ -267,8 +267,8 @@
     rgba(var(--md-sys-color-surface-container-low-rgb), 0.95)
   );
   box-shadow: 
-    0 1px 4px -1px rgba(0, 0, 0, 0.1),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.4);
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.4);
 }
 
 :root[data-theme="light"] .card-stat:hover,
@@ -281,8 +281,8 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 6px 16px -2px rgba(var(--md-sys-color-primary-rgb), 0.2),
-    0 3px 8px -1px rgba(0, 0, 0, 0.15),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.6);
+    0 3px 8px -1px rgba(var(--md-sys-color-shadow-rgb), 0.15),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.6);
   transform: translateY(-2px) scale(1.03);
 }
 
@@ -294,8 +294,8 @@
     rgba(var(--md-sys-color-surface-container-low-rgb), 0.8)
   );
   box-shadow: 
-    0 1px 4px -1px rgba(0, 0, 0, 0.4),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.06);
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.06);
 }
 
 :root[data-theme="dark"] .card-stat:hover {
@@ -307,8 +307,8 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 6px 16px -2px rgba(var(--md-sys-color-primary-rgb), 0.25),
-    0 3px 8px -1px rgba(0, 0, 0, 0.5),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
+    0 3px 8px -1px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.12);
   transform: translateY(-2px) scale(1.03);
 }
 
@@ -330,16 +330,16 @@
 :root:not([data-theme]) .card-highlight {
   box-shadow: 
     0 6px 16px -4px rgba(var(--md-sys-color-primary-rgb), 0.3),
-    0 3px 8px -2px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    0 3px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.15),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.7);
 }
 
 :root[data-theme="light"] .card-highlight:hover,
 :root:not([data-theme]) .card-highlight:hover {
   box-shadow: 
     0 12px 24px -6px rgba(var(--md-sys-color-primary-rgb), 0.4),
-    0 6px 12px -3px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 6px 12px -3px rgba(var(--md-sys-color-shadow-rgb), 0.2),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.9);
   transform: translateY(-3px);
 }
 
@@ -347,15 +347,15 @@
 :root[data-theme="dark"] .card-highlight {
   box-shadow: 
     0 6px 16px -4px rgba(var(--md-sys-color-primary-rgb), 0.25),
-    0 3px 8px -2px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 3px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.15);
 }
 
 :root[data-theme="dark"] .card-highlight:hover {
   box-shadow: 
     0 12px 24px -6px rgba(var(--md-sys-color-primary-rgb), 0.35),
-    0 6px 12px -3px rgba(0, 0, 0, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 6px 12px -3px rgba(var(--md-sys-color-shadow-rgb), 0.7),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.2);
   transform: translateY(-3px);
 }
 
@@ -401,13 +401,13 @@
 :root:not([data-theme]) .card-minimal {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.95),
+    rgba(var(--md-sys-color-surface-bright-rgb), 0.95),
     rgba(var(--md-sys-color-surface-container-lowest-rgb), 0.9)
   );
   box-shadow: 
-    0 2px 6px -1px rgba(0, 0, 0, 0.1),
-    0 1px 3px 0 rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    0 2px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    0 1px 3px 0 rgba(var(--md-sys-color-shadow-rgb), 0.06),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.7);
   border-color: rgba(var(--md-sys-color-outline-variant-rgb), 0.5);
 }
 
@@ -421,8 +421,8 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 8px 20px -4px rgba(var(--md-sys-color-primary-rgb), 0.15),
-    0 4px 10px -2px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 4px 10px -2px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.9);
   transform: translateY(-3px) scale(1.02);
 }
 
@@ -434,9 +434,9 @@
     rgba(var(--md-sys-color-surface-container-lowest-rgb), 0.9)
   );
   box-shadow: 
-    0 2px 6px -1px rgba(0, 0, 0, 0.4),
-    0 1px 3px 0 rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 2px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    0 1px 3px 0 rgba(var(--md-sys-color-shadow-rgb), 0.3),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.1);
   border-color: rgba(var(--md-sys-color-outline-variant-rgb), 0.35);
 }
 
@@ -449,8 +449,8 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 8px 20px -4px rgba(var(--md-sys-color-primary-rgb), 0.25),
-    0 4px 10px -2px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 4px 10px -2px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.18);
   transform: translateY(-3px) scale(1.02);
 }
 
@@ -499,16 +499,16 @@
   :root:not([data-theme]) .card-stat,
   :root:not([data-theme]) .card-minimal {
     box-shadow: 
-      0 2px 8px -2px rgba(0, 0, 0, 0.4),
-      0 1px 4px -1px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 2px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+      0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.3),
+      inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.08);
   }
   
   :root:not([data-theme]) .card-highlight {
     box-shadow: 
       0 6px 16px -4px rgba(var(--md-sys-color-primary-rgb), 0.25),
-      0 3px 8px -2px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      0 3px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+      inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.15);
   }
 }
 
@@ -519,24 +519,24 @@
   border: 2px solid var(--md-sys-color-outline-variant);
   border-radius: 16px;
   box-shadow: 
-    0 2px 8px -2px rgba(0, 0, 0, 0.08),
-    0 1px 4px -1px rgba(0, 0, 0, 0.04);
+    0 2px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.08),
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.04);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :root[data-theme="light"] .glass-card,
 :root:not([data-theme]) .glass-card {
   box-shadow: 
-    0 2px 8px -2px rgba(0, 0, 0, 0.12),
-    0 1px 4px -1px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 2px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.12),
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.06),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.5);
 }
 
 :root[data-theme="dark"] .glass-card {
   box-shadow: 
-    0 2px 8px -2px rgba(0, 0, 0, 0.4),
-    0 1px 4px -1px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 2px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.3),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.08);
 }
 
 .glass-card-interactive {
@@ -553,8 +553,8 @@
 :root[data-theme="light"] .glass-card-interactive,
 :root:not([data-theme]) .glass-card-interactive {
   box-shadow: 
-    0 2px 6px -1px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 2px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.4);
 }
 
 :root[data-theme="light"] .glass-card-interactive:hover,
@@ -562,25 +562,25 @@
   background: var(--md-sys-color-surface-container-high);
   border-color: var(--md-sys-color-primary);
   box-shadow: 
-    0 8px 20px -4px rgba(0, 0, 0, 0.18),
-    0 4px 8px -2px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 8px 20px -4px rgba(var(--md-sys-color-shadow-rgb), 0.18),
+    0 4px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.12),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.6);
   transform: translateY(-2px);
 }
 
 :root[data-theme="dark"] .glass-card-interactive {
   box-shadow: 
-    0 2px 6px -1px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 2px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.06);
 }
 
 :root[data-theme="dark"] .glass-card-interactive:hover {
   background: var(--md-sys-color-surface-container-high);
   border-color: var(--md-sys-color-primary);
   box-shadow: 
-    0 8px 20px -4px rgba(0, 0, 0, 0.7),
-    0 4px 8px -2px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 8px 20px -4px rgba(var(--md-sys-color-shadow-rgb), 0.7),
+    0 4px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.12);
   transform: translateY(-2px);
 }
 
@@ -595,8 +595,8 @@
 :root[data-theme="light"] .glass-card-stat,
 :root:not([data-theme]) .glass-card-stat {
   box-shadow: 
-    0 1px 4px -1px rgba(0, 0, 0, 0.1),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.3);
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.3);
 }
 
 :root[data-theme="light"] .glass-card-stat:hover,
@@ -604,23 +604,23 @@
   background: var(--md-sys-color-primary-container);
   border-color: var(--md-sys-color-primary);
   box-shadow: 
-    0 4px 12px -2px rgba(0, 0, 0, 0.15),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.5);
+    0 4px 12px -2px rgba(var(--md-sys-color-shadow-rgb), 0.15),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.5);
   transform: translateY(-1px) scale(1.02);
 }
 
 :root[data-theme="dark"] .glass-card-stat {
   box-shadow: 
-    0 1px 4px -1px rgba(0, 0, 0, 0.4),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.05);
+    0 1px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.05);
 }
 
 :root[data-theme="dark"] .glass-card-stat:hover {
   background: var(--md-sys-color-primary-container);
   border-color: var(--md-sys-color-primary);
   box-shadow: 
-    0 4px 12px -2px rgba(0, 0, 0, 0.6),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.1);
+    0 4px 12px -2px rgba(var(--md-sys-color-shadow-rgb), 0.6),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.1);
   transform: translateY(-1px) scale(1.02);
 }
 
@@ -640,31 +640,31 @@
 :root:not([data-theme]) .glass-card-highlight {
   box-shadow: 
     0 6px 16px -4px rgba(var(--md-sys-color-primary-rgb), 0.3),
-    0 3px 8px -2px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    0 3px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.15),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.7);
 }
 
 :root[data-theme="light"] .glass-card-highlight:hover,
 :root:not([data-theme]) .glass-card-highlight:hover {
   box-shadow: 
     0 12px 24px -6px rgba(var(--md-sys-color-primary-rgb), 0.4),
-    0 6px 12px -3px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 6px 12px -3px rgba(var(--md-sys-color-shadow-rgb), 0.2),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.9);
   transform: translateY(-3px);
 }
 
 :root[data-theme="dark"] .glass-card-highlight {
   box-shadow: 
     0 6px 16px -4px rgba(var(--md-sys-color-primary-rgb), 0.25),
-    0 3px 8px -2px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 3px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.15);
 }
 
 :root[data-theme="dark"] .glass-card-highlight:hover {
   box-shadow: 
     0 12px 24px -6px rgba(var(--md-sys-color-primary-rgb), 0.35),
-    0 6px 12px -3px rgba(0, 0, 0, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 6px 12px -3px rgba(var(--md-sys-color-shadow-rgb), 0.7),
+    inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.2);
   transform: translateY(-3px);
 }
 
@@ -679,8 +679,8 @@
 :root[data-theme="light"] .glass-card-minimal,
 :root:not([data-theme]) .glass-card-minimal {
   box-shadow: 
-    0 1px 3px 0 rgba(0, 0, 0, 0.08),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.25);
+    0 1px 3px 0 rgba(var(--md-sys-color-shadow-rgb), 0.08),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.25);
 }
 
 :root[data-theme="light"] .glass-card-minimal:hover,
@@ -688,22 +688,22 @@
   background: var(--md-sys-color-surface-container);
   border-color: var(--md-sys-color-outline);
   box-shadow: 
-    0 2px 6px -1px rgba(0, 0, 0, 0.12),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.35);
+    0 2px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.12),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.35);
 }
 
 :root[data-theme="dark"] .glass-card-minimal {
   box-shadow: 
-    0 1px 3px 0 rgba(0, 0, 0, 0.35),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.04);
+    0 1px 3px 0 rgba(var(--md-sys-color-shadow-rgb), 0.35),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.04);
 }
 
 :root[data-theme="dark"] .glass-card-minimal:hover {
   background: var(--md-sys-color-surface-container);
   border-color: var(--md-sys-color-outline);
   box-shadow: 
-    0 2px 6px -1px rgba(0, 0, 0, 0.5),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.08);
+    0 2px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+    inset 0 0.5px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.08);
 }
 
 /* ========== 2. 可交互卡片 ========== */
@@ -723,8 +723,8 @@
 :root[data-theme="light"] .glass-card-interactive,
 :root:not([data-theme="dark"]):not([data-theme="light"]) .glass-card-interactive {
   box-shadow: 
-    0 2px 4px -1px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    0 2px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.3);
 }
 
 :root[data-theme="light"] .glass-card-interactive:hover,
@@ -732,26 +732,26 @@
   background: var(--md-sys-color-surface-container-high);
   border-color: var(--md-sys-color-primary);
   box-shadow: 
-    0 8px 16px -4px rgba(0, 0, 0, 0.15),
-    0 4px 6px -2px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+    0 8px 16px -4px rgba(var(--md-sys-color-shadow-rgb), 0.15),
+    0 4px 6px -2px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.5);
   transform: translateY(-2px);
 }
 
 /* Dark 主题 */
 :root[data-theme="dark"] .glass-card-interactive {
   box-shadow: 
-    0 2px 4px -1px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    0 2px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.08);
 }
 
 :root[data-theme="dark"] .glass-card-interactive:hover {
   background: var(--md-sys-color-surface-container-high);
   border-color: var(--md-sys-color-primary);
   box-shadow: 
-    0 8px 16px -4px rgba(0, 0, 0, 0.6),
-    0 4px 6px -2px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    0 8px 16px -4px rgba(var(--md-sys-color-shadow-rgb), 0.6),
+    0 4px 6px -2px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.15);
   transform: translateY(-2px);
 }
 
@@ -765,15 +765,15 @@
   padding: 1px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.5),
-    rgba(255, 255, 255, 0.1)
+    rgba(var(--md-sys-color-surface-bright-rgb), 0.5),
+    rgba(var(--md-sys-color-surface-bright-rgb), 0.1)
   );
   -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, 
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
   mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, 
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -798,15 +798,15 @@
   padding: 1px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.12),
-    rgba(255, 255, 255, 0.03)
+    rgba(var(--md-sys-color-surface-bright-rgb), 0.12),
+    rgba(var(--md-sys-color-surface-bright-rgb), 0.03)
   );
   -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, 
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
   mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, 
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -837,8 +837,8 @@
 :root[data-theme="light"] .glass-card-stat,
 :root:not([data-theme="dark"]):not([data-theme="light"]) .glass-card-stat {
   box-shadow: 
-    0 2px 4px -1px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    0 2px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.08),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.3);
 }
 
 :root[data-theme="light"] .glass-card-stat:hover,
@@ -846,24 +846,24 @@
   background: var(--md-sys-color-primary-container);
   border-color: var(--md-sys-color-primary);
   box-shadow: 
-    0 4px 8px -2px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.4);
+    0 4px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.12),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.4);
   transform: translateY(-1px) scale(1.02);
 }
 
 /* Dark 主题 */
 :root[data-theme="dark"] .glass-card-stat {
   box-shadow: 
-    0 2px 4px -1px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    0 2px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.35),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.08);
 }
 
 :root[data-theme="dark"] .glass-card-stat:hover {
   background: var(--md-sys-color-primary-container);
   border-color: var(--md-sys-color-primary);
   box-shadow: 
-    0 4px 8px -2px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    0 4px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.5),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.12);
   transform: translateY(-1px) scale(1.02);
 }
 
@@ -889,16 +889,16 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 6px 12px -2px rgba(var(--md-sys-color-primary-rgb), 0.25),
-    0 3px 6px -1px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+    0 3px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.6);
 }
 
 :root[data-theme="light"] .glass-card-highlight:hover,
 :root:not([data-theme="dark"]):not([data-theme="light"]) .glass-card-highlight:hover {
   box-shadow: 
     0 10px 20px -4px rgba(var(--md-sys-color-primary-rgb), 0.35),
-    0 4px 8px -2px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+    0 4px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.15),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.8);
   transform: translateY(-3px);
 }
 
@@ -912,15 +912,15 @@
   border-color: var(--md-sys-color-primary);
   box-shadow: 
     0 6px 12px -2px rgba(var(--md-sys-color-primary-rgb), 0.2),
-    0 3px 6px -1px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    0 3px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.15);
 }
 
 :root[data-theme="dark"] .glass-card-highlight:hover {
   box-shadow: 
     0 10px 20px -4px rgba(var(--md-sys-color-primary-rgb), 0.3),
-    0 4px 8px -2px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    0 4px 8px -2px rgba(var(--md-sys-color-shadow-rgb), 0.6),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.2);
   transform: translateY(-3px);
 }
 
@@ -938,11 +938,11 @@
     rgba(var(--md-sys-color-tertiary-rgb), 0.4)
   );
   -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, 
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
   mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, 
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -961,11 +961,11 @@
     rgba(var(--md-sys-color-tertiary-rgb), 0.2)
   );
   -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, 
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
   mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, 
+    linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -987,8 +987,8 @@
 :root[data-theme="light"] .glass-card-minimal,
 :root:not([data-theme="dark"]):not([data-theme="light"]) .glass-card-minimal {
   box-shadow: 
-    0 1px 2px 0 rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    0 1px 2px 0 rgba(var(--md-sys-color-shadow-rgb), 0.06),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.2);
 }
 
 :root[data-theme="light"] .glass-card-minimal:hover,
@@ -996,23 +996,23 @@
   background: var(--md-sys-color-surface-container);
   border-color: var(--md-sys-color-outline);
   box-shadow: 
-    0 2px 4px -1px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    0 2px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.1),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.3);
 }
 
 /* Dark 主题 */
 :root[data-theme="dark"] .glass-card-minimal {
   box-shadow: 
-    0 1px 2px 0 rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    0 1px 2px 0 rgba(var(--md-sys-color-shadow-rgb), 0.3),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.05);
 }
 
 :root[data-theme="dark"] .glass-card-minimal:hover {
   background: var(--md-sys-color-surface-container);
   border-color: var(--md-sys-color-outline);
   box-shadow: 
-    0 2px 4px -1px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    0 2px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+    inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.08);
 }
 
 /* ========== 响应式调整 ========== */
@@ -1040,25 +1040,25 @@
   :root:not([data-theme]) .glass-card-stat,
   :root:not([data-theme]) .glass-card-minimal {
     box-shadow: 
-      0 4px 6px -1px rgba(0, 0, 0, 0.3),
-      0 2px 4px -1px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+      0 4px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.3),
+      0 2px 4px -1px rgba(var(--md-sys-color-shadow-rgb), 0.2),
+      inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.1);
   }
   
   :root:not([data-theme]) .glass-card::before,
   :root:not([data-theme]) .glass-card-interactive::before {
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.15),
-      rgba(255, 255, 255, 0.03)
+      rgba(var(--md-sys-color-surface-bright-rgb), 0.15),
+      rgba(var(--md-sys-color-surface-bright-rgb), 0.03)
     );
   }
   
   :root:not([data-theme]) .glass-card-highlight {
     box-shadow: 
       0 6px 12px -2px rgba(var(--md-sys-color-primary-rgb), 0.2),
-      0 3px 6px -1px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+      0 3px 6px -1px rgba(var(--md-sys-color-shadow-rgb), 0.4),
+      inset 0 1px 0 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.15);
   }
   
   :root:not([data-theme]) .glass-card-highlight::before {

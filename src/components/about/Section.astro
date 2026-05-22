@@ -248,8 +248,8 @@ const displayDescription = isDescTranslationKey ? t(description as any) : descri
     border-color: var(--section-accent);
     transform: translateY(-2px);
     box-shadow: 
-      0 8px 16px rgba(0,0,0,0.08),
-      0 2px 4px rgba(0,0,0,0.04);
+      0 8px 16px rgba(var(--md-sys-color-shadow-rgb), 0.08),
+      0 2px 4px rgba(var(--md-sys-color-shadow-rgb), 0.04);
   }
 
   .item-card:hover::before {

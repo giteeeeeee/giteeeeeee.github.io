@@ -1,0 +1,616 @@
+---
+/**
+ * Lazy comment system wrapper.
+ * Supports static-site friendly providers used by common personal blog themes.
+ */
+import { getCommentsConfig } from '../../data/site.config';
+import { useI18n } from '../../utils/i18n';
+import type { CommentProvider } from '../../data/comments.config';
+
+interface Props {
+  pageKey: string;
+  pageTitle: string;
+  description?: string;
+  mode?: 'article' | 'guestbook';
+  enabled?: boolean;
+}
+
+const { t } = useI18n();
+const config = getCommentsConfig();
+const {
+  pageKey,
+  pageTitle,
+  description,
+  mode = 'article',
+  enabled = true,
+} = Astro.props;
+
+const provider = config.provider as CommentProvider;
+const providerLabels: Record<CommentProvider, string> = {
+  giscus: 'Giscus',
+  utterances: 'Utterances',
+  waline: 'Waline',
+  twikoo: 'Twikoo',
+  artalk: 'Artalk',
+  disqus: 'Disqus',
+};
+
+function hasProviderConfig() {
+  if (provider === 'giscus') {
+    return Boolean(config.giscus.repo && config.giscus.repoId && config.giscus.categoryId);
+  }
+  if (provider === 'utterances') return Boolean(config.utterances.repo);
+  if (provider === 'waline') return Boolean(config.waline.serverURL);
+  if (provider === 'twikoo') return Boolean(config.twikoo.envId);
+  if (provider === 'artalk') return Boolean(config.artalk.server && config.artalk.site);
+  if (provider === 'disqus') return Boolean(config.disqus.shortname);
+  return false;
+}
+
+const modeEnabled = mode === 'guestbook' ? config.guestbook.enabled : config.article.enabled;
+const isEnabled = Boolean(config.enabled && modeEnabled && enabled);
+const isConfigured = isEnabled && hasProviderConfig();
+const sectionTitle = mode === 'guestbook' ? t('guestbook.commentsTitle') : t('comments.title');
+const sectionDescription = description ?? (mode === 'guestbook' ? t('guestbook.commentsDesc') : t('comments.description'));
+const loadLabel = mode === 'guestbook' ? t('guestbook.load') : t('comments.load');
+const threadKey = pageKey.replace(/^\/+|\/+$/g, '') || 'home';
+
+const clientConfig = {
+  provider,
+  providerLabel: providerLabels[provider],
+  pageKey,
+  pageTitle,
+  autoLoad: config.autoLoad,
+  lazy: config.lazy,
+  giscus: config.giscus,
+  utterances: config.utterances,
+  waline: config.waline,
+  twikoo: config.twikoo,
+  artalk: config.artalk,
+  disqus: config.disqus,
+};
+const clientConfigJson = JSON.stringify(clientConfig).replace(/</g, '\\u003c');
+---
+
+<section
+  class:list={['comment-section', mode === 'guestbook' && 'comment-section--guestbook']}
+  data-comment-section
+  data-ready={String(isConfigured)}
+>
+  <span class="comment-grid" aria-hidden="true"></span>
+  <span class="comment-corner comment-corner--tl" aria-hidden="true"></span>
+  <span class="comment-corner comment-corner--br" aria-hidden="true"></span>
+  <div class="comment-section__header">
+    <div class="comment-section__copy">
+      <p class="comment-section__eyebrow">
+        <span class="comment-signal">
+          <i class="i-carbon:chat"></i>
+        </span>
+        <span>{providerLabels[provider]}</span>
+      </p>
+      <h2>{sectionTitle}</h2>
+      <p>{sectionDescription}</p>
+    </div>
+    <div class="comment-panel">
+      <span class:list={['comment-status', isConfigured ? 'is-ready' : 'is-muted']}>
+        <i class={isConfigured ? 'i-carbon:checkmark-outline' : 'i-carbon:warning'}></i>
+        {isConfigured ? t('comments.ready') : t('comments.unconfigured')}
+      </span>
+      <dl class="comment-meta">
+        <div>
+          <dt>{t('comments.provider')}</dt>
+          <dd>{providerLabels[provider]}</dd>
+        </div>
+        <div>
+          <dt>{t('comments.thread')}</dt>
+          <dd title={pageKey}>{threadKey}</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  {isConfigured ? (
+    <>
+      <div class="comment-action-row">
+        <button class="comment-load-button" type="button" data-comment-load>
+          <i class="i-carbon:chat-launch"></i>
+          <span>{loadLabel}</span>
+        </button>
+        <span class="comment-lazy-hint">
+          <i class="i-carbon:timer"></i>
+          {t('comments.lazyHint')}
+        </span>
+      </div>
+      <div class="comment-host-shell">
+        <div class="comment-host" data-comment-host aria-live="polite"></div>
+      </div>
+      <script is:inline type="application/json" data-comment-config set:html={clientConfigJson}></script>
+    </>
+  ) : (
+    <div class="comment-placeholder">
+      <i class="i-carbon:settings-adjust"></i>
+      <div>
+        <strong>{t('comments.setupTitle')}</strong>
+        <p>{t('comments.setupDesc')}</p>
+      </div>
+    </div>
+  )}
+</section>
+
+{isConfigured && (
+  <script is:inline>
+    function getThemeName() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      return theme === 'dark' ? 'dark' : 'light';
+    }
+
+    function addStylesheet(id, href) {
+      if (document.getElementById(id)) return;
+      const link = document.createElement('link');
+      link.id = id;
+      link.rel = 'stylesheet';
+      link.href = href;
+      document.head.appendChild(link);
+    }
+
+    function clearHost(host) {
+      while (host.firstChild) host.removeChild(host.firstChild);
+    }
+
+    function loadGiscus(host, config) {
+      const script = document.createElement('script');
+      script.src = 'https://giscus.app/client.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      script.setAttribute('data-repo', config.giscus.repo);
+      script.setAttribute('data-repo-id', config.giscus.repoId);
+      script.setAttribute('data-category', config.giscus.category);
+      script.setAttribute('data-category-id', config.giscus.categoryId);
+      script.setAttribute('data-mapping', config.giscus.mapping || 'pathname');
+      script.setAttribute('data-term', config.pageKey);
+      script.setAttribute('data-strict', config.giscus.strict || '0');
+      script.setAttribute('data-reactions-enabled', config.giscus.reactionsEnabled || '1');
+      script.setAttribute('data-emit-metadata', config.giscus.emitMetadata || '0');
+      script.setAttribute('data-input-position', config.giscus.inputPosition || 'top');
+      script.setAttribute('data-theme', getThemeName());
+      script.setAttribute('data-lang', config.giscus.lang || 'zh-CN');
+      host.appendChild(script);
+    }
+
+    function loadUtterances(host, config) {
+      const script = document.createElement('script');
+      script.src = 'https://utteranc.es/client.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      script.setAttribute('repo', config.utterances.repo);
+      script.setAttribute('issue-term', config.utterances.issueTerm || 'pathname');
+      script.setAttribute('label', config.utterances.label || 'comment');
+      script.setAttribute('theme', getThemeName() === 'dark' ? 'github-dark' : 'github-light');
+      host.appendChild(script);
+    }
+
+    async function loadWaline(host, config) {
+      addStylesheet('waline-css', 'https://unpkg.com/@waline/client@v3/dist/waline.css');
+      const { init } = await import('https://unpkg.com/@waline/client@v3/dist/waline.js');
+      init({
+        el: host,
+        serverURL: config.waline.serverURL,
+        path: config.pageKey,
+        lang: config.waline.lang || 'zh-CN',
+        reaction: config.waline.reaction,
+        dark: config.waline.dark || 'html[data-theme="dark"]',
+      });
+    }
+
+    function loadTwikoo(host, config) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.all.min.js';
+        script.async = true;
+        script.onload = () => {
+          window.twikoo?.init({
+            el: host,
+            envId: config.twikoo.envId,
+            path: config.pageKey,
+            lang: config.twikoo.lang || 'zh-CN',
+          });
+          resolve();
+        };
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    async function loadArtalk(host, config) {
+      addStylesheet('artalk-css', 'https://cdn.jsdelivr.net/npm/artalk@2/dist/Artalk.css');
+      const { default: Artalk } = await import('https://cdn.jsdelivr.net/npm/artalk@2/dist/Artalk.js');
+      Artalk.init({
+        el: host,
+        pageKey: config.pageKey,
+        pageTitle: config.pageTitle,
+        server: config.artalk.server,
+        site: config.artalk.site,
+        locale: config.artalk.locale || 'zh-CN',
+      });
+    }
+
+    function loadDisqus(host, config) {
+      const thread = document.createElement('div');
+      thread.id = 'disqus_thread';
+      host.appendChild(thread);
+      window.disqus_config = function () {
+        this.page.url = window.location.href;
+        this.page.identifier = config.pageKey;
+        this.page.title = config.pageTitle;
+      };
+      const script = document.createElement('script');
+      script.src = `https://${config.disqus.shortname}.disqus.com/embed.js`;
+      script.async = true;
+      script.setAttribute('data-timestamp', String(Date.now()));
+      document.body.appendChild(script);
+    }
+
+    function initComments(root) {
+      if (root.getAttribute('data-comment-initialized') === 'true') return;
+      root.setAttribute('data-comment-initialized', 'true');
+
+      const host = root.querySelector('[data-comment-host]');
+      const button = root.querySelector('[data-comment-load]');
+      const configNode = root.querySelector('[data-comment-config]');
+      if (!host || !button || !configNode) return;
+
+      let loaded = false;
+      const config = JSON.parse(configNode.textContent || '{}');
+
+      async function loadComments() {
+        if (loaded) return;
+        loaded = true;
+        root.classList.add('is-loading');
+        button.hidden = true;
+        clearHost(host);
+
+        try {
+          if (config.provider === 'giscus') loadGiscus(host, config);
+          if (config.provider === 'utterances') loadUtterances(host, config);
+          if (config.provider === 'waline') await loadWaline(host, config);
+          if (config.provider === 'twikoo') await loadTwikoo(host, config);
+          if (config.provider === 'artalk') await loadArtalk(host, config);
+          if (config.provider === 'disqus') loadDisqus(host, config);
+          root.classList.remove('is-loading');
+          root.classList.add('is-loaded');
+        } catch (error) {
+          loaded = false;
+          button.hidden = false;
+          root.classList.remove('is-loading');
+          root.classList.add('is-error');
+          host.textContent = '评论加载失败，请稍后重试。';
+          console.error('Failed to load comments:', error);
+        }
+      }
+
+      button.addEventListener('click', loadComments);
+
+      if (config.autoLoad) {
+        if (!config.lazy || !('IntersectionObserver' in window)) {
+          loadComments();
+          return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+          if (entries.some(entry => entry.isIntersecting)) {
+            observer.disconnect();
+            loadComments();
+          }
+        }, { rootMargin: '280px 0px' });
+        observer.observe(root);
+      }
+    }
+
+    function initAllCommentSections() {
+      document.querySelectorAll('[data-comment-section][data-ready="true"]').forEach(initComments);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAllCommentSections);
+    } else {
+      initAllCommentSections();
+    }
+
+    document.addEventListener('astro:page-load', initAllCommentSections);
+  </script>
+)}
+
+<style>
+  .comment-section {
+    position: relative;
+    overflow: hidden;
+    margin-top: 3rem;
+    padding: clamp(1rem, 2.4vw, 1.45rem);
+    border: 1px solid rgba(var(--md-sys-color-primary-rgb), 0.24);
+    border-radius: 8px;
+    background:
+      linear-gradient(135deg, rgba(var(--md-sys-color-surface-container-rgb), 0.86), rgba(var(--md-sys-color-surface-rgb), 0.62)),
+      linear-gradient(90deg, rgba(var(--md-sys-color-primary-rgb), 0.1), transparent 40%, rgba(var(--md-sys-color-tertiary-rgb), 0.08));
+    box-shadow:
+      0 26px 70px -58px rgba(var(--md-sys-color-shadow-rgb), 0.78),
+      inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.12);
+    contain: layout paint style;
+    isolation: isolate;
+  }
+
+  .comment-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, rgba(var(--md-sys-color-primary-rgb), 0.22), transparent);
+    height: 1px;
+    opacity: 0.95;
+    pointer-events: none;
+  }
+
+  .comment-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(var(--md-sys-color-primary-rgb), 0.075) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(var(--md-sys-color-primary-rgb), 0.065) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(180deg, rgba(var(--md-sys-color-shadow-rgb), 0.6), transparent 78%);
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .comment-corner {
+    position: absolute;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-color: rgba(var(--md-sys-color-primary-rgb), 0.64);
+    pointer-events: none;
+  }
+
+  .comment-corner--tl {
+    top: 0.55rem;
+    left: 0.55rem;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+
+  .comment-corner--br {
+    right: 0.55rem;
+    bottom: 0.55rem;
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+  }
+
+  .comment-section--guestbook {
+    margin-top: 1.5rem;
+  }
+
+  .comment-section__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .comment-section__copy {
+    min-width: 0;
+  }
+
+  .comment-section__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 0.45rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.75rem;
+    font-weight: 760;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+  }
+
+  .comment-signal {
+    display: inline-grid;
+    place-items: center;
+    width: 1.55rem;
+    height: 1.55rem;
+    border: 1px solid rgba(var(--md-sys-color-primary-rgb), 0.35);
+    border-radius: 8px;
+    background: rgba(var(--md-sys-color-primary-container-rgb), 0.34);
+    box-shadow: 0 0 20px -12px rgba(var(--md-sys-color-primary-rgb), 0.95);
+  }
+
+  .comment-section__header h2 {
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: clamp(1.25rem, 2vw, 1.65rem);
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .comment-section__header p:not(.comment-section__eyebrow) {
+    margin: 0.45rem 0 0;
+    max-width: 44rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.925rem;
+    line-height: 1.7;
+  }
+
+  .comment-panel {
+    flex: 0 0 auto;
+    width: min(100%, 18rem);
+    padding: 0.75rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.4);
+    border-radius: 8px;
+    background: rgba(var(--md-sys-color-surface-container-low-rgb), 0.58);
+  }
+
+  .comment-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    min-height: 1.8rem;
+    padding: 0.28rem 0.55rem;
+    border-radius: 8px;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.48);
+    color: var(--md-sys-color-on-surface-variant);
+    background: rgba(var(--md-sys-color-surface-container-high-rgb), 0.62);
+    font-size: 0.75rem;
+    font-weight: 650;
+  }
+
+  .comment-status.is-ready {
+    color: var(--md-sys-color-primary);
+    border-color: rgba(var(--md-sys-color-primary-rgb), 0.28);
+    background: rgba(var(--md-sys-color-primary-container-rgb), 0.34);
+  }
+
+  .comment-meta {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0.75rem 0 0;
+  }
+
+  .comment-meta div {
+    display: grid;
+    grid-template-columns: 4.6rem minmax(0, 1fr);
+    gap: 0.55rem;
+    align-items: baseline;
+  }
+
+  .comment-meta dt,
+  .comment-meta dd {
+    margin: 0;
+  }
+
+  .comment-meta dt {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.68rem;
+    font-weight: 760;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .comment-meta dd {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .comment-action-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .comment-load-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.6rem;
+    padding: 0.58rem 0.95rem;
+    border: 1px solid rgba(var(--md-sys-color-primary-rgb), 0.46);
+    border-radius: 8px;
+    color: var(--md-sys-color-primary);
+    background:
+      linear-gradient(135deg, rgba(var(--md-sys-color-primary-container-rgb), 0.5), rgba(var(--md-sys-color-surface-container-rgb), 0.68));
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 760;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .comment-load-button:hover {
+    color: var(--md-sys-color-on-primary-container);
+    border-color: rgba(var(--md-sys-color-primary-rgb), 0.7);
+    background: rgba(var(--md-sys-color-primary-container-rgb), 0.88);
+    transform: translateY(-1px);
+  }
+
+  .comment-lazy-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .comment-lazy-hint i {
+    color: var(--md-sys-color-tertiary);
+  }
+
+  .comment-host-shell {
+    padding: 0.75rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.38);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(var(--md-sys-color-surface-rgb), 0.7), rgba(var(--md-sys-color-surface-container-rgb), 0.5));
+  }
+
+  .comment-host {
+    min-height: 4rem;
+  }
+
+  .is-loading .comment-host::before {
+    content: 'Loading comments...';
+    display: block;
+    padding: 1rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.875rem;
+  }
+
+  .comment-placeholder {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 1rem;
+    border: 1px dashed rgba(var(--md-sys-color-outline-rgb), 0.45);
+    border-radius: 8px;
+    background: rgba(var(--md-sys-color-surface-container-rgb), 0.5);
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  .comment-placeholder i {
+    color: var(--md-sys-color-primary);
+    font-size: 1.25rem;
+  }
+
+  .comment-placeholder strong {
+    display: block;
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.925rem;
+  }
+
+  .comment-placeholder p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 720px) {
+    .comment-section__header {
+      display: block;
+    }
+
+    .comment-panel {
+      width: auto;
+      margin-top: 0.85rem;
+    }
+
+    .comment-meta div {
+      grid-template-columns: 1fr;
+      gap: 0.18rem;
+    }
+  }
+</style>

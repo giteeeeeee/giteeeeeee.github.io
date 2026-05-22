@@ -155,7 +155,7 @@ const { t } = useI18n();
 
   .summary-item:hover .summary-icon {
     transform: rotate(10deg) scale(1.1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 16px rgba(var(--md-sys-color-shadow-rgb), 0.15);
   }
 
   .summary-content {
@@ -274,7 +274,7 @@ const { t } = useI18n();
     border-left-color: transparent;
     transform: translateX(12px);
     box-shadow: 
-      0 6px 20px rgba(0, 0, 0, 0.12),
+      0 6px 20px rgba(var(--md-sys-color-shadow-rgb), 0.12),
       0 0 0 1px var(--md-sys-color-primary) inset;
   }
 
@@ -300,7 +300,7 @@ const { t } = useI18n();
     background: linear-gradient(135deg, var(--md-sys-color-primary-container), var(--md-sys-color-tertiary-container));
     color: var(--md-sys-color-primary);
     transform: scale(1.1) rotate(-5deg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.1);
   }
 
   .tag-name {
@@ -353,7 +353,7 @@ const { t } = useI18n();
 
   .tag-row:hover .tag-arrow {
     transform: translateX(6px) scale(1.2);
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 2px 4px rgba(var(--md-sys-color-shadow-rgb), 0.2));
   }
 
   @media (max-width: 768px) {

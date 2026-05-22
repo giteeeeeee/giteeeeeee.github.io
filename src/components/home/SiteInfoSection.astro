@@ -16,29 +16,29 @@ const statCards = [
     icon: 'i-carbon:document',
     value: stats.totalPosts,
     label: 'site.stats.articles',
-    gradient: 'from-blue-500/20 to-cyan-500/20',
-    color: 'text-blue-500',
+    gradient: 'linear-gradient(135deg, rgba(var(--md-sys-color-primary-rgb), 0.18), rgba(var(--md-sys-color-tertiary-rgb), 0.14))',
+    color: 'var(--md-sys-color-primary)',
   },
   {
     icon: 'i-carbon:tag',
     value: stats.totalTags,
     label: 'site.stats.tags',
-    gradient: 'from-purple-500/20 to-pink-500/20',
-    color: 'text-purple-500',
+    gradient: 'linear-gradient(135deg, rgba(var(--md-sys-color-tertiary-rgb), 0.18), rgba(var(--md-sys-color-secondary-rgb), 0.14))',
+    color: 'var(--md-sys-color-tertiary)',
   },
   {
     icon: 'i-carbon:text-font',
     value: `${Math.round(stats.totalWords / 1000)}K`,
     label: 'site.stats.words',
-    gradient: 'from-green-500/20 to-emerald-500/20',
-    color: 'text-green-500',
+    gradient: 'linear-gradient(135deg, rgba(var(--reay-color-success-rgb), 0.18), rgba(var(--md-sys-color-secondary-rgb), 0.14))',
+    color: 'var(--reay-color-success)',
   },
   {
     icon: 'i-carbon:calendar',
     value: stats.postsThisYear,
     label: 'site.stats.thisYear',
-    gradient: 'from-orange-500/20 to-red-500/20',
-    color: 'text-orange-500',
+    gradient: 'linear-gradient(135deg, rgba(var(--reay-color-warning-rgb), 0.18), rgba(var(--md-sys-color-tertiary-rgb), 0.14))',
+    color: 'var(--reay-color-warning)',
   },
 ];
 ---
@@ -81,14 +81,14 @@ const statCards = [
             style={`animation-delay: ${index * 100}ms;`}
           >
             <!-- 装饰性渐变背景 -->
-            <div class={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl`}></div>
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" style={`background: ${stat.gradient};`}></div>
             
             <!-- 右上角光晕 -->
             <div class="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-[var(--md-sys-color-primary)]/10 to-[var(--md-sys-color-tertiary)]/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
             
-            <div class="relative z-10 flex items-center gap-3 p-3 md:p-4 bg-gradient-to-br from-[var(--md-sys-color-surface-container-low)]/80 to-[var(--md-sys-color-surface-container)]/80 backdrop-blur-md border border-[var(--md-sys-color-outline-variant)]/50 rounded-xl transition-all duration-300 group-hover:border-[var(--md-sys-color-primary)] group-hover:-translate-y-1 group-hover:shadow-xl">
+            <div class="relative z-10 flex items-center gap-3 p-3 md:p-4 bg-gradient-to-br from-[var(--md-sys-color-surface-container-low)]/80 to-[var(--md-sys-color-surface-container)]/80 backdrop-blur-md border border-[var(--md-sys-color-outline-variant)]/50 rounded-xl transition-all duration-300 group-hover:border-[var(--md-sys-color-primary)] group-hover:-translate-y-1 group-hover:shadow-[var(--reay-shadow-panel)]">
               <div class={`stat-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-gradient-to-br from-[var(--md-sys-color-primary-container)] to-[var(--md-sys-color-tertiary-container)] rounded-lg flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                <i class={`${stat.icon} text-lg md:text-xl ${stat.color} group-hover:animate-pulse`}></i>
+                <i class={`${stat.icon} text-lg md:text-xl group-hover:animate-pulse`} style={`color: ${stat.color};`}></i>
               </div>
               <div class="stat-info flex-1">
                 <div class="stat-value text-xl md:text-2xl font-700 text-[var(--md-sys-color-on-surface)] leading-none mb-1 group-hover:scale-105 transition-transform duration-300">{stat.value}</div>
@@ -131,7 +131,7 @@ const statCards = [
                 <!-- 装饰性渐变背景 -->
                 <div class="absolute inset-0 bg-gradient-to-br from-[var(--md-sys-color-primary)]/5 to-transparent opacity-0 group-hover/tech:opacity-100 transition-opacity duration-300 rounded-lg"></div>
                 
-                <div class="relative z-10 flex items-center gap-3 p-3 bg-[var(--md-sys-color-surface-container)]/70 backdrop-blur-sm border border-[var(--md-sys-color-outline-variant)]/50 rounded-lg transition-all duration-300 group-hover/tech:bg-[var(--md-sys-color-surface-container-high)]/70 group-hover/tech:border-[var(--md-sys-color-primary)] group-hover/tech:-translate-y-1 group-hover/tech:shadow-lg no-underline">
+                <div class="relative z-10 flex items-center gap-3 p-3 bg-[var(--md-sys-color-surface-container)]/70 backdrop-blur-sm border border-[var(--md-sys-color-outline-variant)]/50 rounded-lg transition-all duration-300 group-hover/tech:bg-[var(--md-sys-color-surface-container-high)]/70 group-hover/tech:border-[var(--md-sys-color-primary)] group-hover/tech:-translate-y-1 group-hover/tech:shadow-[var(--reay-shadow-panel)] no-underline">
                   <i class={`${tech.icon} text-2xl text-[var(--md-sys-color-primary)] flex-shrink-0 group-hover/tech:scale-110 transition-transform duration-300`}></i>
                   <div class="tech-info flex-1 min-w-0">
                     <h4 class="text-sm font-600 text-[var(--md-sys-color-on-surface)] group-hover/tech:text-[var(--md-sys-color-primary)] transition-colors leading-snug mb-0.5">{tech.name}</h4>

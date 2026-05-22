@@ -12,6 +12,7 @@ import { mediaConfig, musicConfig } from './media.config';
 import { projectsConfig } from './projects.config';
 import { backgroundConfig, themeConfig } from './theme.config';
 import { aboutConfig, getUserContent, user, userContent } from './user.config';
+import { commentsConfig } from './comments.config';
 
 export const siteConfig = {
   i18n: {
@@ -26,6 +27,7 @@ export const siteConfig = {
   background: backgroundConfig,
   links: linksConfig,
   media: mediaConfig,
+  comments: commentsConfig,
   projects: projectsConfig,
 } as const;
 
@@ -53,6 +55,10 @@ export function getBackgroundConfig() {
   return siteConfig.background;
 }
 
+export function getEffectsConfig() {
+  return siteConfig.theme.effects;
+}
+
 // Feature configuration
 export function getLinksConfig() {
   return siteConfig.links;
@@ -64,6 +70,10 @@ export function getMediaConfig() {
 
 export function getMusicConfig() {
   return musicConfig;
+}
+
+export function getCommentsConfig() {
+  return siteConfig.comments;
 }
 
 export function getProjectsConfig() {

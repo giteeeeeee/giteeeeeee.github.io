@@ -484,14 +484,14 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
     align-items: flex-start;
     gap: 0.625rem;
     padding: 0.625rem 0.875rem;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(var(--md-sys-color-surface-bright-rgb), 0.5);
     border-radius: 10px;
     border: 1px solid var(--md-sys-color-outline-variant);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .requirement-item:hover {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(var(--md-sys-color-surface-bright-rgb), 0.8);
     border-color: var(--md-sys-color-primary);
     transform: translateX(4px);
   }
@@ -561,14 +561,14 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 4px rgba(var(--md-sys-color-shadow-rgb), 0.06);
   }
 
   .contact-button:hover {
     background: var(--md-sys-color-secondary);
     color: var(--md-sys-color-on-secondary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.12);
   }
 
   .contact-button:active {
@@ -623,7 +623,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
     height: 72px;
     border-radius: 18px;
     object-fit: cover;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 18px rgba(var(--md-sys-color-shadow-rgb), 0.15);
     border: 2px solid var(--md-sys-color-surface);
   }
 
@@ -640,7 +640,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
     justify-content: space-between;
     gap: 0.625rem;
     padding: 0.75rem 0.875rem;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(var(--md-sys-color-surface-bright-rgb), 0.5);
     border-radius: 10px;
     backdrop-filter: blur(8px);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -648,8 +648,8 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
   }
 
   .info-row:hover {
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: rgba(var(--md-sys-color-surface-bright-rgb), 0.8);
+    box-shadow: 0 2px 8px rgba(var(--md-sys-color-shadow-rgb), 0.08);
   }
 
   .info-content {
@@ -704,7 +704,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
   }
 
   .copy-btn.copied {
-    background: var(--md-ref-palette-success);
+    background: var(--reay-color-success);
     color: white;
   }
 

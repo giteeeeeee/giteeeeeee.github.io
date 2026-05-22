@@ -4,18 +4,20 @@
  * Fullscreen hero section with typewriter effects
  * Layout: text content (left) + avatar (right)
  */
-import { getLocalizedUserContent, getUserProfile } from '../../data/site.config';
+import { getLocalizedUserContent, getThemeConfig, getUserProfile } from '../../data/site.config';
 import { useI18n } from '../../utils/i18n';
 
 const { t, currentLang } = useI18n();
 const user = getUserProfile();
 const userContent = getLocalizedUserContent(currentLang);
+const effectsConfig = getThemeConfig().effects;
+const showHomeWave = effectsConfig.homeWave.enabled;
+const homeWaveIntensity = effectsConfig.homeWave.intensity;
 ---
 
 <section class="hero-section h-full w-full flex items-center justify-center relative overflow-hidden">
   <div class="hero-light hero-light-a" aria-hidden="true"></div>
   <div class="hero-light hero-light-b" aria-hidden="true"></div>
-  <div class="hero-scanline" aria-hidden="true"></div>
   
   <div class="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10 pt-12 md:pt-0">
     <div class="grid grid-cols-1 lg:grid-cols-[1.08fr_0.92fr] gap-8 lg:gap-12 items-center">
@@ -33,7 +35,7 @@ const userContent = getLocalizedUserContent(currentLang);
             <span class="text-[var(--md-sys-color-on-surface)]"> </span>
             <span 
               id="name-typewriter"
-              class="name-gradient bg-gradient-to-r from-[var(--md-sys-color-primary)] via-[var(--md-ref-palette-warning)] to-[var(--md-sys-color-tertiary)] bg-clip-text text-transparent"
+              class="name-gradient bg-gradient-to-r from-[var(--md-sys-color-primary)] via-[var(--reay-color-warning)] to-[var(--md-sys-color-tertiary)] bg-clip-text text-transparent"
               data-text={user.name}
             ></span>
             <span class="title-icon inline-grid place-items-center align-middle ml-2">
@@ -117,6 +119,21 @@ const userContent = getLocalizedUserContent(currentLang);
     </div>
   </div>
 
+  {showHomeWave && (
+    <div class="hero-wave-field" data-wave-intensity={homeWaveIntensity} aria-hidden="true">
+      <div class="wave-glow"></div>
+      <svg class="hero-wave-svg wave-layer-back" viewBox="0 0 1440 180" preserveAspectRatio="none">
+        <path d="M0 92L60 82C120 72 240 52 360 58C480 64 600 96 720 103C840 110 960 92 1080 76C1200 60 1320 46 1380 39L1440 32V180H0V92Z"></path>
+      </svg>
+      <svg class="hero-wave-svg wave-layer-mid" viewBox="0 0 1440 180" preserveAspectRatio="none">
+        <path d="M0 112L80 98C160 84 320 56 480 72C640 88 800 148 960 145C1120 142 1280 76 1360 43L1440 10V180H0V112Z"></path>
+      </svg>
+      <svg class="hero-wave-svg wave-layer-front" viewBox="0 0 1440 180" preserveAspectRatio="none">
+        <path d="M0 132L80 121C160 110 320 88 480 98C640 108 800 150 960 154C1120 158 1280 124 1360 107L1440 90V180H0V132Z"></path>
+      </svg>
+    </div>
+  )}
+
   <!-- 滚动提示 -->
   <div class="scroll-cue absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
     <span class="text-xs text-[var(--md-sys-color-on-surface-variant)]" data-i18n="home.hero.scroll">{t('home.hero.scroll')}</span>
@@ -132,19 +149,31 @@ const userContent = getLocalizedUserContent(currentLang);
   .hero-section::before {
     content: '';
     position: absolute;
-    inset: 10% 4% 8%;
+    inset: 0;
     background:
-      linear-gradient(90deg, transparent, rgba(var(--md-sys-color-primary-rgb), 0.1), transparent),
-      linear-gradient(180deg, rgba(var(--md-sys-color-on-surface-rgb), 0.06) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 44px;
-    mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
-    opacity: 0.64;
-    transform: rotate(-2deg);
+      radial-gradient(circle at 24% 36%, rgba(var(--md-sys-color-primary-rgb), 0.2), transparent 30%),
+      radial-gradient(circle at 76% 44%, rgba(var(--md-sys-color-tertiary-rgb), 0.18), transparent 32%),
+      linear-gradient(to bottom, transparent 0 68%, rgba(var(--md-sys-color-surface-rgb), 0.16) 100%);
+    opacity: 0.82;
+    z-index: 0;
+  }
+
+  .hero-section::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(var(--md-sys-color-surface-rgb), 0.08), transparent 28% 72%, rgba(var(--md-sys-color-surface-rgb), 0.34)),
+      linear-gradient(90deg, rgba(var(--md-sys-color-surface-rgb), 0.12), transparent 24% 76%, rgba(var(--md-sys-color-surface-rgb), 0.12));
+    opacity: 0.72;
+    z-index: 0;
   }
 
   .hero-light {
     position: absolute;
     inset: auto;
+    z-index: 0;
     pointer-events: none;
     opacity: 0.78;
     filter: blur(18px);
@@ -156,8 +185,8 @@ const userContent = getLocalizedUserContent(currentLang);
     height: 34vh;
     left: -10vw;
     top: 18vh;
-    background: linear-gradient(100deg, rgba(var(--md-sys-color-primary-rgb), 0.24), transparent 70%);
-    animation: hero-light-shift 10s ease-in-out infinite alternate;
+    background: radial-gradient(ellipse, rgba(var(--md-sys-color-primary-rgb), 0.22), transparent 70%);
+    animation: hero-light-shift 14s ease-in-out infinite alternate;
   }
 
   .hero-light-b {
@@ -165,22 +194,36 @@ const userContent = getLocalizedUserContent(currentLang);
     height: 42vh;
     right: -8vw;
     bottom: 12vh;
-    background: linear-gradient(250deg, rgba(var(--md-sys-color-tertiary-rgb), 0.2), rgba(var(--md-ref-palette-warning-rgb), 0.1), transparent 72%);
-    animation: hero-light-shift 13s ease-in-out infinite alternate-reverse;
-  }
-
-  .hero-scanline {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.09), transparent);
-    transform: translateY(-100%);
-    animation: scanline 7s ease-in-out infinite;
-    opacity: 0.4;
+    background: radial-gradient(ellipse, rgba(var(--md-sys-color-tertiary-rgb), 0.2), rgba(var(--reay-color-warning-rgb), 0.08), transparent 72%);
+    animation: hero-light-shift 16s ease-in-out infinite alternate-reverse;
   }
 
   .hero-copy {
-    animation: hero-copy-in 0.9s var(--reay-ease-out, ease) both;
+    transform-style: preserve-3d;
+  }
+
+  .status-pill,
+  .hero-title,
+  .hero-tagline,
+  .hero-actions,
+  #social-icons-container {
+    animation: hero-item-in 0.78s var(--reay-ease-out, ease) both;
+  }
+
+  .hero-title {
+    animation-delay: 0.08s;
+  }
+
+  .hero-tagline {
+    animation-delay: 0.16s;
+  }
+
+  .hero-actions {
+    animation-delay: 0.36s;
+  }
+
+  #social-icons-container {
+    animation-delay: 0.46s;
   }
 
   .status-pill,
@@ -190,8 +233,8 @@ const userContent = getLocalizedUserContent(currentLang);
     border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.38);
     background: rgba(var(--md-sys-color-surface-container-rgb), 0.48);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.18),
-      0 16px 36px -28px rgba(0, 0, 0, 0.65);
+      inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.18),
+      0 16px 36px -28px rgba(var(--md-sys-color-shadow-rgb), 0.65);
     backdrop-filter: blur(18px) saturate(150%);
     -webkit-backdrop-filter: blur(18px) saturate(150%);
   }
@@ -205,8 +248,8 @@ const userContent = getLocalizedUserContent(currentLang);
     width: 0.48rem;
     height: 0.48rem;
     border-radius: 999px;
-    background: var(--md-ref-palette-success);
-    box-shadow: 0 0 14px rgba(var(--md-ref-palette-success-rgb), 0.8);
+    background: var(--reay-color-success);
+    box-shadow: 0 0 14px rgba(var(--reay-color-success-rgb), 0.8);
     animation: status-pulse 1.8s ease-in-out infinite;
   }
 
@@ -226,10 +269,11 @@ const userContent = getLocalizedUserContent(currentLang);
     width: 2rem;
     height: 2rem;
     border-radius: 0.7rem;
-    color: var(--md-ref-palette-warning);
-    background: rgba(var(--md-ref-palette-warning-rgb), 0.14);
-    border: 1px solid rgba(var(--md-ref-palette-warning-rgb), 0.28);
-    box-shadow: 0 0 22px rgba(var(--md-ref-palette-warning-rgb), 0.22);
+    color: var(--reay-color-warning);
+    background: rgba(var(--reay-color-warning-rgb), 0.14);
+    border: 1px solid rgba(var(--reay-color-warning-rgb), 0.28);
+    box-shadow: 0 0 22px rgba(var(--reay-color-warning-rgb), 0.22);
+    animation: title-icon-glow 2.8s ease-in-out infinite;
   }
 
   .hero-tagline {
@@ -256,6 +300,29 @@ const userContent = getLocalizedUserContent(currentLang);
       transform 0.3s var(--reay-ease-spring, ease),
       box-shadow 0.3s ease,
       background 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-primary-btn::before,
+  .hero-secondary-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent, rgba(var(--md-sys-color-surface-bright-rgb), 0.22), transparent);
+    transform: translateX(-120%);
+    transition: transform 0.56s var(--reay-ease-out, ease-out);
+  }
+
+  .hero-primary-btn:hover::before,
+  .hero-secondary-btn:hover::before {
+    transform: translateX(120%);
+  }
+
+  .hero-primary-btn > *,
+  .hero-secondary-btn > * {
+    position: relative;
+    z-index: 1;
   }
 
   .hero-primary-btn {
@@ -264,7 +331,7 @@ const userContent = getLocalizedUserContent(currentLang);
       linear-gradient(135deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary));
     box-shadow:
       0 18px 40px -18px rgba(var(--md-sys-color-primary-rgb), 0.8),
-      inset 0 1px 0 rgba(255, 255, 255, 0.32);
+      inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.32);
   }
 
   .hero-primary-btn:hover,
@@ -307,14 +374,24 @@ const userContent = getLocalizedUserContent(currentLang);
     border-radius: 2rem;
     background:
       linear-gradient(rgba(var(--md-sys-color-surface-container-rgb), 0.38), rgba(var(--md-sys-color-surface-container-rgb), 0.18)) padding-box,
-      conic-gradient(from var(--avatar-angle, 0deg), var(--md-sys-color-primary), transparent 22%, var(--md-ref-palette-warning), transparent 52%, var(--md-sys-color-tertiary), var(--md-sys-color-primary)) border-box;
+      conic-gradient(from var(--avatar-angle, 0deg), var(--md-sys-color-primary), transparent 22%, var(--reay-color-warning), transparent 52%, var(--md-sys-color-tertiary), var(--md-sys-color-primary)) border-box;
     border: 1px solid transparent;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.18),
       0 28px 70px -44px rgba(var(--md-sys-color-primary-rgb), 0.9);
     backdrop-filter: blur(22px) saturate(160%);
     -webkit-backdrop-filter: blur(22px) saturate(160%);
     animation: avatar-angle 8s linear infinite;
+  }
+
+  .avatar-holo-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(115deg, transparent 0 38%, rgba(var(--md-sys-color-surface-bright-rgb), 0.2) 48%, transparent 58% 100%);
+    transform: translateX(-130%);
+    animation: avatar-sweep 5.6s var(--reay-ease-out, ease-out) infinite;
   }
 
   .avatar-panel-lines {
@@ -325,8 +402,9 @@ const userContent = getLocalizedUserContent(currentLang);
       linear-gradient(90deg, rgba(var(--md-sys-color-on-surface-rgb), 0.08) 1px, transparent 1px),
       linear-gradient(rgba(var(--md-sys-color-on-surface-rgb), 0.07) 1px, transparent 1px);
     background-size: 24px 24px;
-    mask-image: linear-gradient(135deg, transparent, #000 22% 78%, transparent);
+    mask-image: linear-gradient(135deg, transparent, rgb(var(--md-sys-color-scrim-rgb)) 22% 78%, transparent);
     opacity: 0.5;
+    animation: panel-drift 12s linear infinite;
   }
 
   .avatar-image-wrap {
@@ -336,17 +414,17 @@ const userContent = getLocalizedUserContent(currentLang);
     border-radius: 999px;
     background:
       linear-gradient(rgba(var(--md-sys-color-surface-rgb), 0.72), rgba(var(--md-sys-color-surface-container-rgb), 0.58)) padding-box,
-      conic-gradient(from 90deg, var(--md-sys-color-primary), var(--md-ref-palette-warning), var(--md-sys-color-tertiary), var(--md-sys-color-primary)) border-box;
+      conic-gradient(from 90deg, var(--md-sys-color-primary), var(--reay-color-warning), var(--md-sys-color-tertiary), var(--md-sys-color-primary)) border-box;
     border: 2px solid transparent;
     box-shadow:
-      0 26px 52px -28px rgba(0, 0, 0, 0.72),
+      0 26px 52px -28px rgba(var(--md-sys-color-shadow-rgb), 0.72),
       0 0 42px rgba(var(--md-sys-color-primary-rgb), 0.24);
     transform: translateZ(48px);
     animation: avatar-float 4.8s ease-in-out infinite;
   }
 
   .avatar-image-wrap img {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+    box-shadow: inset 0 0 0 1px rgba(var(--md-sys-color-surface-bright-rgb), 0.24);
   }
 
   .avatar-caption {
@@ -361,7 +439,89 @@ const userContent = getLocalizedUserContent(currentLang);
     font-weight: 800;
   }
 
+  .hero-wave-field {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    z-index: 5;
+    height: clamp(6.5rem, 20vh, 12.5rem);
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0.96;
+    transform: translateZ(0);
+    mask-image: linear-gradient(to top, rgb(var(--md-sys-color-scrim-rgb)) 0 82%, transparent 100%);
+  }
+
+  .hero-wave-field[data-wave-intensity='low'] {
+    opacity: 0.74;
+    height: clamp(5rem, 15vh, 9rem);
+  }
+
+  .hero-wave-field[data-wave-intensity='high'] {
+    opacity: 1;
+    height: clamp(8rem, 25vh, 15.5rem);
+  }
+
+  .wave-glow {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: 0;
+    height: 62%;
+    border-radius: 999px 999px 0 0;
+    background:
+      radial-gradient(ellipse at 50% 100%, rgba(var(--md-sys-color-primary-rgb), 0.42), transparent 70%),
+      radial-gradient(ellipse at 30% 100%, rgba(var(--md-sys-color-tertiary-rgb), 0.34), transparent 68%);
+    filter: blur(22px);
+    animation: wave-glow-pulse 4.8s ease-in-out infinite;
+  }
+
+  .hero-wave-svg {
+    position: absolute;
+    left: -8%;
+    right: -8%;
+    bottom: -1px;
+    width: 116%;
+    height: 100%;
+    transform-origin: center bottom;
+    filter: drop-shadow(0 -10px 22px rgba(var(--md-sys-color-primary-rgb), 0.1));
+    will-change: transform;
+  }
+
+  .hero-wave-svg path {
+    transform-box: fill-box;
+    transform-origin: center;
+    stroke: rgba(var(--md-sys-color-surface-bright-rgb), 0.28);
+    stroke-width: 1.2;
+  }
+
+  .wave-layer-back {
+    animation: wave-flow-back 11s ease-in-out infinite alternate;
+  }
+
+  .wave-layer-back path {
+    fill: rgba(var(--md-sys-color-tertiary-container-rgb), 0.58);
+  }
+
+  .wave-layer-mid {
+    animation: wave-flow-mid 8.5s ease-in-out infinite alternate-reverse;
+  }
+
+  .wave-layer-mid path {
+    fill: rgba(var(--md-sys-color-primary-container-rgb), 0.74);
+  }
+
+  .wave-layer-front {
+    animation: wave-flow-front 6.8s ease-in-out infinite alternate;
+  }
+
+  .wave-layer-front path {
+    fill: rgba(var(--md-sys-color-surface-container-high-rgb), 0.9);
+  }
+
   .scroll-cue {
+    z-index: 10;
     animation: scroll-cue 1.8s ease-in-out infinite;
   }
 
@@ -434,15 +594,22 @@ const userContent = getLocalizedUserContent(currentLang);
     to { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes hero-item-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 12px, 0);
+      filter: blur(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      filter: blur(0);
+    }
+  }
+
   @keyframes hero-light-shift {
     from { transform: translate3d(-2%, -3%, 0) skewX(-8deg); }
     to { transform: translate3d(4%, 4%, 0) skewX(8deg); }
-  }
-
-  @keyframes scanline {
-    0%, 48% { transform: translateY(-100%); opacity: 0; }
-    58% { opacity: 0.36; }
-    78%, 100% { transform: translateY(100%); opacity: 0; }
   }
 
   @keyframes status-pulse {
@@ -453,6 +620,11 @@ const userContent = getLocalizedUserContent(currentLang);
   @keyframes name-gradient-flow {
     from { background-position: 0% 50%; }
     to { background-position: 100% 50%; }
+  }
+
+  @keyframes title-icon-glow {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-2px) rotate(5deg); }
   }
 
   @property --avatar-angle {
@@ -468,6 +640,37 @@ const userContent = getLocalizedUserContent(currentLang);
   @keyframes avatar-float {
     0%, 100% { transform: translateZ(48px) translateY(0) rotate(-1deg); }
     50% { transform: translateZ(48px) translateY(-10px) rotate(1deg); }
+  }
+
+  @keyframes avatar-sweep {
+    0%, 42% { transform: translateX(-130%); opacity: 0; }
+    52% { opacity: 0.9; }
+    72%, 100% { transform: translateX(130%); opacity: 0; }
+  }
+
+  @keyframes panel-drift {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 24px 0, 0 24px; }
+  }
+
+  @keyframes wave-flow-back {
+    from { transform: translate3d(-2.5%, 8px, 0) scaleY(0.92); }
+    to { transform: translate3d(2.5%, -2px, 0) scaleY(1.04); }
+  }
+
+  @keyframes wave-flow-mid {
+    from { transform: translate3d(3%, 4px, 0) scaleY(0.98); }
+    to { transform: translate3d(-3%, -6px, 0) scaleY(1.08); }
+  }
+
+  @keyframes wave-flow-front {
+    from { transform: translate3d(-1.8%, 2px, 0) scaleY(1); }
+    to { transform: translate3d(2.2%, -8px, 0) scaleY(1.1); }
+  }
+
+  @keyframes wave-glow-pulse {
+    0%, 100% { opacity: 0.68; transform: scaleX(0.96); }
+    50% { opacity: 0.96; transform: scaleX(1.04); }
   }
 
   @keyframes scroll-cue {
@@ -526,6 +729,17 @@ const userContent = getLocalizedUserContent(currentLang);
 
     .scroll-cue {
       bottom: 1rem;
+    }
+
+    .hero-wave-field {
+      height: clamp(4rem, 14vh, 6.75rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-wave-svg,
+    .wave-glow {
+      animation: none;
     }
   }
 </style>

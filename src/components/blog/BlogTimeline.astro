@@ -66,7 +66,7 @@ function calculateReadingTime(content?: string): number {
       <div id={`year-${year}`} class="year-header sticky top-20 z-10 mb-6">
         <a 
           href={`#${firstPostId}`}
-          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--md-sys-color-primary-container)]/80 backdrop-blur-xl border border-[var(--md-sys-color-outline)]/10 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+          class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--md-sys-color-primary-container)]/80 backdrop-blur-xl border border-[var(--md-sys-color-outline)]/10 shadow-[var(--reay-shadow-soft)] hover:shadow-[var(--reay-shadow-panel)] hover:scale-105 transition-all duration-300"
         >
           <div class="w-1 h-1 rounded-full bg-[var(--md-sys-color-primary)] animate-pulse"></div>
           <h2 class="text-base font-600 text-[var(--md-sys-color-on-primary-container)]">
@@ -95,7 +95,7 @@ function calculateReadingTime(content?: string): number {
             data-month={postDate.getMonth() + 1}
           >
             <!-- 时间点 -->
-            <div class="timeline-dot absolute left-[1.625rem] top-4 w-2.5 h-2.5 rounded-full bg-[var(--md-sys-color-primary)] border-2 border-[var(--md-sys-color-surface)] shadow-lg group-hover:scale-150 group-hover:shadow-[0_0_20px_var(--md-sys-color-primary)] transition-all duration-300"></div>
+            <div class="timeline-dot absolute left-[1.625rem] top-4 w-2.5 h-2.5 rounded-full bg-[var(--md-sys-color-primary)] border-2 border-[var(--md-sys-color-surface)] shadow-[var(--reay-shadow-soft)] group-hover:scale-150 group-hover:shadow-[0_0_20px_var(--md-sys-color-primary)] transition-all duration-300"></div>
 
             <!-- 日期标签 - 可点击跳转 -->
             <a 

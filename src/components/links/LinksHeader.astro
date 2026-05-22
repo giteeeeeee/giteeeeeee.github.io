@@ -175,11 +175,11 @@ const { totalLinks, featuredLinks, friendsCount, sitesCount, socialCount } = Ast
 
   :root[data-theme="light"] .stat-card:hover .stat-icon,
   :root:not([data-theme]) .stat-card:hover .stat-icon {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.15);
   }
 
   :root[data-theme="dark"] .stat-card:hover .stat-icon {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.4);
   }
 
   .stat-card.featured .stat-icon {

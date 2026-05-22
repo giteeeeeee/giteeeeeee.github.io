@@ -15,6 +15,9 @@ import EmptyBlogList from '../../components/blog/EmptyBlogList.astro';
 import { getSortedPosts } from '../../utils/blog';
 
 const sortedPosts = await getSortedPosts();
+const totalTags = new Set(sortedPosts.flatMap(post => post.data.tags)).size;
+const totalSeries = new Set(sortedPosts.map(post => post.data.series).filter(Boolean)).size;
+const latestDate = sortedPosts[0]?.data.updatedDate ?? sortedPosts[0]?.data.publishDate;
 ---
 
 <DefaultLayout 
@@ -24,7 +27,12 @@ const sortedPosts = await getSortedPosts();
   <div class="min-h-screen py-12 px-4">
     <div class="max-w-4xl mx-auto">
       <!-- Component: Page header -->
-      <BlogListHeader totalPosts={sortedPosts.length} />
+      <BlogListHeader
+        totalPosts={sortedPosts.length}
+        totalTags={totalTags}
+        totalSeries={totalSeries}
+        latestDate={latestDate}
+      />
 
       <!-- Component: Timeline list or empty state -->
       {sortedPosts.length > 0 ? (

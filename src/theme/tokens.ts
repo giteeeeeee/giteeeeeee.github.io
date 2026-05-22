@@ -1,47 +1,15 @@
 /**
  * Theme Tokens
- * Default color palette, typography, and shape definitions for the theme system
+ * Default source color, typography, and shape definitions for the theme system
  * 
  * @module theme/tokens
  */
-import type { Palette, Typography, Shape } from './types';
+import type { Typography, Shape } from './types';
 
 /**
  * Default primary color - Bright blue representing a sunny and tech-forward aesthetic
  */
 export const DEFAULT_PRIMARY = '#5B8CFF';
-
-/**
- * Default Material Design 3 color palette
- * This is a manually crafted palette that can be overridden by generateMaterialPalette
- * 
- * @remarks
- * Colors follow Material Design 3 color roles:
- * - Primary: Main brand color
- * - Secondary: Supporting color for less prominent components
- * - Tertiary: Accent color for additional visual interest
- * - Container colors: Filled backgrounds with corresponding "on" colors
- * - Surface colors: Background surfaces with variants
- * - Semantic colors: Error, success, warning, info
- */
-export const defaultPalette: Palette = {
-  primary: DEFAULT_PRIMARY, onPrimary: '#ffffff',
-  primaryContainer: '#dbe6ff', onPrimaryContainer: '#123060',
-
-  secondary: '#5ED0FA', onSecondary: '#06222D',
-  secondaryContainer: '#CBF1FF', onSecondaryContainer: '#073A4A',
-
-  tertiary: '#A78BFA', onTertiary: '#24124A',
-  tertiaryContainer: '#E9D8FD', onTertiaryContainer: '#2B1B52',
-
-  background: '#F6F7FB', onBackground: '#111827',
-  surface: '#FFFFFF', onSurface: '#111827',
-  surfaceVariant: '#F1F3F5', onSurfaceVariant: '#374151',
-  outline: 'rgba(0,0,0,0.12)',
-
-  error: '#EF4444', onError: '#ffffff',
-  success: '#10B981', warning: '#F59E0B', info: '#3B82F6',
-};
 
 /**
  * Default typography system
@@ -78,7 +46,7 @@ export const defaultShape: Shape = {
   radiusMd: '16px',
   radiusLg: '24px',
   borderWidth: '1px',
-  shadowSm: '0 1px 2px rgba(0,0,0,.06)',
-  shadowMd: '0 8px 30px rgba(0,0,0,.08)',
-  shadowLg: '0 18px 40px rgba(0,0,0,.12)',
+  shadowSm: '0 1px 2px rgba(var(--md-sys-color-shadow-rgb), .06)',
+  shadowMd: '0 8px 30px rgba(var(--md-sys-color-shadow-rgb), .08)',
+  shadowLg: '0 18px 40px rgba(var(--md-sys-color-shadow-rgb), .12)',
 };
