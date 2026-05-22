@@ -15,7 +15,7 @@
 
 <style>
   .theme-toggle {
-    border-radius: 0.8rem;
+    border-radius: var(--reay-icon-button-radius, 0.95rem);
     border: 1px solid var(--reay-button-border, rgba(var(--md-sys-color-outline-variant-rgb), 0.36));
     background: var(--reay-button-bg, rgba(var(--md-sys-color-surface-container-rgb), 0.52));
     color: var(--md-sys-color-on-surface);
@@ -27,6 +27,8 @@
 
   .theme-toggle:hover {
     color: var(--md-sys-color-primary);
+    border-color: rgba(var(--md-sys-color-primary-rgb), 0.48);
+    background: var(--reay-button-bg-hover, rgba(var(--md-sys-color-primary-container-rgb), 0.42));
     transform: translateY(-1px);
     box-shadow: var(--reay-button-shadow-hover, 0 16px 32px -22px rgba(var(--md-sys-color-primary-rgb), 0.8));
   }

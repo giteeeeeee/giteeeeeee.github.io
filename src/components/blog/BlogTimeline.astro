@@ -191,11 +191,51 @@ function calculateReadingTime(content?: string): number {
   }
 
   /* 文章项入场动画 */
+  .timeline-container,
+  .year-section,
+  .posts-list {
+    overflow: visible;
+  }
+
+  .posts-list {
+    padding-top: 0.25rem;
+    padding-right: 0.875rem;
+    margin-right: -0.875rem;
+  }
+
   .post-item {
     opacity: 1;
-    content-visibility: auto;
-    contain: layout paint style;
-    contain-intrinsic-size: auto 180px;
+    contain: layout style;
+    overflow: visible;
+    padding-top: 0.45rem;
+    padding-right: 0.875rem;
+    padding-bottom: 0.45rem;
+    z-index: 0;
+  }
+
+  .post-item:hover,
+  .post-item:focus-within {
+    z-index: 20;
+  }
+
+  .timeline-post-card {
+    position: relative;
+    contain: layout style;
+    z-index: 1;
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  :global(.layout-default) .timeline-post-card.reay-card {
+    contain: layout style;
+  }
+
+  .timeline-post-card:hover {
+    transform: translateY(-2px) scale(1.006);
+  }
+
+  :global(.layout-default) .timeline-post-card.reay-card:hover {
+    transform: translateY(-2px) scale(1.006);
   }
 
   @keyframes fadeInUp {
