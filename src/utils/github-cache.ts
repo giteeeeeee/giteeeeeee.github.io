@@ -16,7 +16,10 @@ interface CacheOptions {
   cacheDir?: string;
 }
 
-const DEFAULT_TTL = 1000 * 60 * 10;
+const envTtl = Number(process.env.GITHUB_CACHE_TTL_MS);
+const DEFAULT_TTL = Number.isFinite(envTtl) && envTtl > 0
+  ? envTtl
+  : 1000 * 60 * 60 * 6;
 const DEFAULT_CACHE_DIR = '.cache/github';
 
 class GitHubCache {
@@ -217,7 +220,7 @@ class GitHubCache {
 
 // Export singleton instance with default configuration
 export const githubCache = new GitHubCache({
-  ttl: 1000 * 60 * 10,
+  ttl: DEFAULT_TTL,
   cacheDir: '.cache/github',
 });
 

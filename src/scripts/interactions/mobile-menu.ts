@@ -23,6 +23,13 @@ export class MobileMenu {
   private icon: HTMLElement | null;
   private config: MobileMenuConfig;
   private isOpen: boolean = false;
+  private linkHandlers = new Map<Element, EventListener>();
+  private handleButtonClick = () => this.toggle();
+  private handleKeydown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && this.isOpen) {
+      this.close();
+    }
+  };
 
   constructor(config: Partial<MobileMenuConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -43,21 +50,20 @@ export class MobileMenu {
    * Initialize event listeners
    */
   private init() {
-    this.btn?.addEventListener('click', () => this.toggle());
+    this.btn?.addEventListener('click', this.handleButtonClick);
     
     this.menu?.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
+      const handler = () => {
         if (this.isOpen) {
           this.close();
         }
-      });
+      };
+
+      this.linkHandlers.set(link, handler);
+      link.addEventListener('click', handler);
     });
     
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.isOpen) {
-        this.close();
-      }
-    });
+    document.addEventListener('keydown', this.handleKeydown);
   }
 
   /**
@@ -109,6 +115,25 @@ export class MobileMenu {
    */
   public getState(): boolean {
     return this.isOpen;
+  }
+
+  /**
+   * Remove event listeners before Astro swaps the page.
+   */
+  public destroy() {
+    this.close();
+    this.btn?.removeEventListener('click', this.handleButtonClick);
+
+    this.linkHandlers.forEach((handler, link) => {
+      link.removeEventListener('click', handler);
+    });
+    this.linkHandlers.clear();
+
+    document.removeEventListener('keydown', this.handleKeydown);
+
+    if (this.btn) {
+      delete this.btn.dataset.bound;
+    }
   }
 }
 

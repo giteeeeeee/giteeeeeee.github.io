@@ -40,12 +40,12 @@ function getOptimizedPlogImage(imageAsset: unknown, width: number, quality = 72)
 const albums = await Promise.all(sourceGalleryConfig.albums.map(async (album) => {
   const photos = await Promise.all(album.photos.map(async (photo, index) => ({
     ...photo,
-    thumbnailImage: await getOptimizedPlogImage(photo.imageAsset, index === 0 ? 720 : 320, 70) || photo.image,
+    thumbnailImage: await getOptimizedPlogImage(photo.imageAsset, index === 0 ? 640 : 280, 66) || photo.image,
   })));
 
   return {
     ...album,
-    coverImage: await getOptimizedPlogImage(album.coverAsset, 960, 72) || album.cover,
+    coverImage: await getOptimizedPlogImage(album.coverAsset, 840, 68) || album.cover,
     photos,
   };
 }));
@@ -412,7 +412,6 @@ const featuredPhotos = featuredAlbum?.photos.slice(0, 5) ?? [];
     background:
       linear-gradient(135deg, color-mix(in srgb, var(--album-accent) 14%, transparent), transparent 56%),
       rgba(var(--md-sys-color-surface-rgb), 0.88);
-    backdrop-filter: blur(20px);
   }
 
   .featured-label,

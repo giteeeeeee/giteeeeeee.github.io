@@ -13,7 +13,7 @@
   --reay-radius-lg: 1.48rem;
   --reay-radius-xl: 1.86rem;
   --reay-radius-pill: 999px;
-  --reay-glass-blur: 22px;
+  --reay-glass-blur: 14px;
   --reay-glass-border: rgba(var(--md-sys-color-outline-variant-rgb), 0.24);
   --reay-glow-primary: rgba(var(--md-sys-color-primary-rgb), 0.28);
   --reay-glow-secondary: rgba(var(--md-sys-color-secondary-rgb), 0.18);
@@ -473,7 +473,6 @@ a:focus-visible {
 .glass-card-highlight:hover,
 .glass-card-minimal:hover {
   outline-color: rgba(var(--md-sys-color-primary-rgb), 0.1);
-  filter: saturate(1.05);
 }
 
 .reay-card {
@@ -644,7 +643,6 @@ a:focus-visible {
   background: var(--reay-surface-bg-hover);
   box-shadow: var(--reay-surface-shadow-hover);
   transform: translateY(var(--reay-hover-lift)) scale(var(--reay-hover-scale));
-  filter: saturate(1.04);
 }
 
 .layout-default .reay-card,
@@ -884,7 +882,6 @@ body.layout-home :is(
   border-color: var(--reay-surface-border-hover);
   box-shadow: var(--reay-surface-shadow-hover);
   transform: translateY(var(--reay-hover-lift)) scale(var(--reay-hover-scale));
-  filter: saturate(1.04);
 }
 
 body :is(

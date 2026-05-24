@@ -45,7 +45,7 @@ const labels = {
     style={getCoverStyle(defaultTrack.cover)}
   >
     <button
-      class="dock-trigger"
+      class="header-tool-button dock-trigger"
       type="button"
       data-dock-action="toggle"
       aria-label={labels.expand}
@@ -130,7 +130,7 @@ const labels = {
       </div>
     </div>
 
-    <audio data-dock-audio preload="metadata"></audio>
+    <audio data-dock-audio preload="none"></audio>
   </aside>
 )}
 
@@ -144,9 +144,15 @@ const labels = {
 
     position: relative;
     z-index: 90;
-    display: inline-flex;
-    align-items: center;
+    display: inline-grid;
+    place-items: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    flex: 0 0 auto;
     color: var(--md-sys-color-on-surface);
+    transition:
+      width 0.28s var(--reay-ease-smooth, ease),
+      height 0.28s var(--reay-ease-smooth, ease);
   }
 
   .music-dock * {
@@ -155,10 +161,11 @@ const labels = {
 
   .dock-trigger {
     position: relative;
+    z-index: 90;
     display: inline-grid;
     place-items: center;
-    width: 2.35rem;
-    height: 2.35rem;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     border: 1px solid var(--reay-button-border);
     border-radius: var(--reay-icon-button-radius, 0.95rem);
@@ -174,8 +181,8 @@ const labels = {
       background 0.22s ease,
       transform 0.22s ease,
       box-shadow 0.22s ease;
-    backdrop-filter: blur(16px) saturate(150%);
-    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(10px) saturate(135%);
+    -webkit-backdrop-filter: blur(10px) saturate(135%);
   }
 
   .dock-trigger:hover,
@@ -206,9 +213,9 @@ const labels = {
   }
 
   .dock-panel {
-    position: fixed;
-    top: calc(4rem + 0.75rem);
-    right: max(1rem, calc((100vw - 1100px) / 2 + 1.5rem));
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    right: 0;
     z-index: 95;
     display: grid;
     width: min(calc(100vw - 2rem), 23.5rem);
@@ -225,8 +232,8 @@ const labels = {
       0 34px 86px -48px rgba(var(--md-sys-color-shadow-rgb), 0.66),
       0 14px 38px -32px color-mix(in srgb, var(--dock-accent) 58%, transparent),
       inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.2);
-    backdrop-filter: blur(24px) saturate(170%);
-    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    backdrop-filter: blur(14px) saturate(145%);
+    -webkit-backdrop-filter: blur(14px) saturate(145%);
     transform-origin: top right;
     animation: dock-panel-in 0.24s var(--reay-ease-out, ease) both;
   }
@@ -298,7 +305,6 @@ const labels = {
   }
 
   .dock-primary-btn:hover {
-    filter: saturate(1.08) brightness(1.03);
     transform: translateY(-2px) scale(1.02);
   }
 
@@ -495,8 +501,8 @@ const labels = {
 
   @media (max-width: 640px) {
     .dock-panel {
-      top: calc(4rem + 0.6rem);
-      right: max(0.75rem, env(safe-area-inset-right));
+      top: calc(100% + 0.6rem);
+      right: 0;
       width: min(calc(100vw - 1.5rem), 22rem);
       max-height: min(calc(100dvh - 5.25rem), 32rem);
     }
@@ -507,7 +513,7 @@ const labels = {
   }
 </style>
 
-<script is:inline define:vars={{ dockPayload, defaultTrackId, autoAdvance, labels }}>
+<script is:inline data-astro-rerun define:vars={{ dockPayload, defaultTrackId, autoAdvance, labels }}>
   (function() {
     var docks = Array.from(document.querySelectorAll('[data-music-dock]'));
     docks.forEach(function(dock) {
@@ -621,7 +627,7 @@ const labels = {
       renderTrack(track);
       updateProgress(0);
 
-      if (track.src && audio) {
+      if (track.src && audio && shouldPlay) {
         audio.src = track.src;
         audio.volume = Number(volume?.value || 0.62);
         audio.load();

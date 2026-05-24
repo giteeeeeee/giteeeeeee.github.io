@@ -6,10 +6,9 @@
 
 export class LinksAnimation {
   private cards: NodeListOf<HTMLElement>;
-  private observer: IntersectionObserver | null = null;
 
   constructor() {
-    this.cards = document.querySelectorAll('.link-card');
+    this.cards = document.querySelectorAll('[data-link-card]');
     this.init();
   }
 
@@ -24,50 +23,9 @@ export class LinksAnimation {
   }
 
   /**
-   * Setup intersection observer for viewport detection
-   */
-  private setupIntersectionObserver() {
-    const options = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.1, // Trigger when 10% of element is visible
-    };
-
-    this.observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate-in');
-          // Stop observing once animation is triggered
-          this.observer?.unobserve(entry.target);
-        }
-      });
-    }, options);
-
-    // Observe all cards
-    this.cards.forEach((card) => {
-      this.observer?.observe(card);
-    });
-  }
-
-  /**
-   * Setup staggered animation delays for cards
-   */
-  private setupStaggerAnimation() {
-    this.cards.forEach((card, index) => {
-      // Set different delay for each card to create stagger effect
-      (card as HTMLElement).style.setProperty('--animation-delay', `${index * 50}ms`);
-    });
-  }
-
-  /**
    * Cleanup observer and resources
    */
-  public destroy() {
-    if (this.observer) {
-      this.observer.disconnect();
-      this.observer = null;
-    }
-  }
+  public destroy() {}
 }
 
 /**

@@ -23,16 +23,9 @@ interface Props {
 }
 
 const { 
-  totalPosts, 
-  totalTags, 
-  totalSeries,
   totalWords,
   averageWords,
-  maxWords,
-  longestPostTitle,
-  totalYears,
   postsThisYear,
-  publishFrequency,
   firstPostDate,
   latestPostDate
 } = Astro.props;
@@ -48,10 +41,6 @@ const formatNumber = (num: number) => {
   return num.toLocaleString();
 };
 
-// 计算百分比（用于环形图）
-const maxValue = Math.max(totalPosts, totalTags, totalSeries);
-const postsPercentage = maxValue > 0 ? (totalPosts / maxValue) * 100 : 0;
-const tagsPercentage = maxValue > 0 ? (totalTags / maxValue) * 100 : 0;
 ---
 
 <div class="archive-stats-container">

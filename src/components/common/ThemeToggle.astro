@@ -6,15 +6,20 @@
  */
 ---
 <button
-  class="theme-toggle inline-flex items-center justify-center w-9 h-9 cursor-pointer"
+  class="header-tool-button theme-toggle"
   aria-label="切换主题"
   title="切换主题"
   data-theme-toggle>
-  <i class="theme-icon i-carbon:sun text-[1.25rem] transition-transform duration-300" data-theme-icon></i>
+  <i class="theme-icon i-carbon:sun" data-theme-icon></i>
 </button>
 
 <style>
   .theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    padding: 0;
     border-radius: var(--reay-icon-button-radius, 0.95rem);
     border: 1px solid var(--reay-button-border, rgba(var(--md-sys-color-outline-variant-rgb), 0.36));
     background: var(--reay-button-bg, rgba(var(--md-sys-color-surface-container-rgb), 0.52));
@@ -25,6 +30,11 @@
     transition: transform 0.25s var(--reay-ease-out, ease), background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
   }
 
+  .theme-toggle i {
+    font-size: 1.1rem;
+    transition: transform 0.3s var(--reay-ease-out, ease);
+  }
+
   .theme-toggle:hover {
     color: var(--md-sys-color-primary);
     border-color: rgba(var(--md-sys-color-primary-rgb), 0.48);
@@ -33,10 +43,3 @@
     box-shadow: var(--reay-button-shadow-hover, 0 16px 32px -22px rgba(var(--md-sys-color-primary-rgb), 0.8));
   }
 </style>
-
-<script>
-  import { initThemeToggle } from '../../scripts/ui/theme-toggle';
-  
-  // 初始化主题切换
-  initThemeToggle();
-</script>

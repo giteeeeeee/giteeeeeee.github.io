@@ -14,7 +14,14 @@ const { title, description } = Astro.props;
 const titleConfig = currentMarkdownStyle.postHeader;
 ---
 
-<header class="post-header">
+<header
+  class="post-header"
+  style={`
+    --post-title-size-base: ${titleConfig.fontSize};
+    --post-title-size-md: ${titleConfig.fontSizeMd};
+    --post-title-size-lg: ${titleConfig.fontSizeLg};
+  `}
+>
   <h1 
     class="post-title"
     style={`
@@ -62,9 +69,3 @@ const titleConfig = currentMarkdownStyle.postHeader;
     }
   }
 </style>
-
-<script define:vars={{ titleConfig }}>
-  document.documentElement.style.setProperty('--post-title-size-base', titleConfig.fontSize);
-  document.documentElement.style.setProperty('--post-title-size-md', titleConfig.fontSizeMd);
-  document.documentElement.style.setProperty('--post-title-size-lg', titleConfig.fontSizeLg);
-</script>

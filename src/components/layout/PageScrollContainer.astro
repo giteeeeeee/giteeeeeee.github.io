@@ -34,10 +34,13 @@ const { sections } = Astro.props;
 
 <style>
   .fullpage-wrapper {
+    --reay-fullpage-duration: 560ms;
     height: 100%;
-    /* height: calc(100dvh-4rem); */
     overflow: hidden;
     position: relative;
+    contain: layout paint size;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
 
   .section-dots {
@@ -101,10 +104,3 @@ const { sections } = Astro.props;
     }
   }
 </style>
-
-<script>
-  import { initFullPageScroll } from '../../scripts/navigation/fullpage-scroll';
-  
-  // 初始化全屏滚动
-  initFullPageScroll();
-</script>

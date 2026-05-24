@@ -22,6 +22,13 @@ export class ThemeToggle {
   private buttons: HTMLButtonElement[];
   private config: ThemeToggleConfig;
   private order: ThemeMode[] = ['light', 'dark', 'system'];
+  private buttonHandlers = new Map<HTMLButtonElement, EventListener>();
+  private mediaQueryList?: MediaQueryList;
+  private handleSystemThemeChange = () => {
+    if (this.read() === 'system') {
+      this.apply('system');
+    }
+  };
 
   constructor(config: Partial<ThemeToggleConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -51,25 +58,23 @@ export class ThemeToggle {
       if (button.dataset.bound === 'true') return;
       button.dataset.bound = 'true';
 
-      button.addEventListener('click', () => {
+      const handler = () => {
         const cur = this.read();
         const idx = this.order.indexOf(cur);
         const next = this.order[(idx + 1) % this.order.length];
         this.apply(next);
-      });
+      };
+
+      this.buttonHandlers.set(button, handler);
+      button.addEventListener('click', handler);
     });
 
-    const mql = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => {
-      if (this.read() === 'system') {
-        this.apply('system');
-      }
-    };
+    this.mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
 
-    if (mql.addEventListener) {
-      mql.addEventListener('change', onChange);
-    } else if ((mql as any).addListener) {
-      (mql as any).addListener(onChange);
+    if (this.mediaQueryList.addEventListener) {
+      this.mediaQueryList.addEventListener('change', this.handleSystemThemeChange);
+    } else if ((this.mediaQueryList as any).addListener) {
+      (this.mediaQueryList as any).addListener(this.handleSystemThemeChange);
     }
   }
 
@@ -163,6 +168,23 @@ export class ThemeToggle {
    */
   public setTheme(mode: ThemeMode) {
     this.apply(mode);
+  }
+
+  /**
+   * Remove event listeners before Astro swaps the page.
+   */
+  public destroy() {
+    this.buttonHandlers.forEach((handler, button) => {
+      button.removeEventListener('click', handler);
+      delete button.dataset.bound;
+    });
+    this.buttonHandlers.clear();
+
+    if (this.mediaQueryList?.removeEventListener) {
+      this.mediaQueryList.removeEventListener('change', this.handleSystemThemeChange);
+    } else if (this.mediaQueryList && (this.mediaQueryList as any).removeListener) {
+      (this.mediaQueryList as any).removeListener(this.handleSystemThemeChange);
+    }
   }
 }
 

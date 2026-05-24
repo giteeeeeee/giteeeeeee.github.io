@@ -114,57 +114,6 @@ console.log(`📊 Loaded ${allRepos.length} projects (⭐ ${totalStars} stars, �
   )}
 </ProjectsLayout>
 
-<script>
-  // Category filtering functionality - performance optimized version
-  document.addEventListener('DOMContentLoaded', () => {
-    const categoryTabs = document.querySelectorAll('.category-tab');
-    const projectCards = document.querySelectorAll('.project-card');
-
-    categoryTabs.forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        e.preventDefault();
-        const category = tab.getAttribute('data-category');
-
-        // Use requestAnimationFrame to optimize DOM operations
-        requestAnimationFrame(() => {
-          // Update active state
-          categoryTabs.forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-
-          // Use CSS class instead of directly manipulating style
-          projectCards.forEach(card => {
-            const cardCategory = card.getAttribute('data-category');
-            const isFeatured = card.getAttribute('data-featured') === 'true';
-
-            if (category === 'all') {
-              card.classList.remove('hidden');
-            } else if (category === 'featured') {
-              card.classList.toggle('hidden', !isFeatured);
-            } else {
-              card.classList.toggle('hidden', cardCategory !== category);
-            }
-          });
-        });
-
-        // Update URL (without page refresh)
-        const url = new URL(window.location.href);
-        url.searchParams.set('category', category);
-        window.history.pushState({}, '', url);
-      });
-    });
-
-    // Read category from URL and apply
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryFromUrl = urlParams.get('category');
-    if (categoryFromUrl) {
-      const tab = document.querySelector(`[data-category="${categoryFromUrl}"]`);
-      if (tab) {
-        (tab as HTMLElement).click();
-      }
-    }
-  });
-</script>
-
 <style>
   .projects-list {
     display: grid;

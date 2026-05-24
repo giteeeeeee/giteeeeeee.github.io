@@ -6,6 +6,12 @@
 import { defaultLang, type Language } from '../data/i18n.config';
 import { userContent } from '../data/user.config';
 
+let initialized = false;
+
+function getStoredLanguage(): Language {
+  return (localStorage.getItem('language') || defaultLang) as Language;
+}
+
 /**
  * Update user content based on language
  */
@@ -47,24 +53,15 @@ export function updateUserContent(lang: Language) {
  * Initialize user content i18n system
  */
 export function initUserContentI18n() {
-  let isInitialLoad = true;
-  
-  // Listen for language change events
-  window.addEventListener('languagechange', (event: Event) => {
-    const customEvent = event as CustomEvent<{ lang: Language }>;
-    if (customEvent.detail?.lang) {
-      // Update user content
-      updateUserContent(customEvent.detail.lang);
-    }
-  });
-  
-  // Initial update based on stored language
-  // This fixes server-side vs client-side language mismatch
-  const currentLang = (localStorage.getItem('language') || defaultLang) as Language;
-  
-  // Update immediately if language is different from default
-  if (isInitialLoad) {
-    updateUserContent(currentLang);
-    isInitialLoad = false;
+  if (!initialized) {
+    initialized = true;
+
+    window.addEventListener('languagechange', (event: Event) => {
+      const customEvent = event as CustomEvent<{ lang: Language }>;
+      updateUserContent(customEvent.detail?.lang || getStoredLanguage());
+    });
   }
+
+  // Apply on every page load because ClientRouter swaps in fresh DOM.
+  updateUserContent(getStoredLanguage());
 }

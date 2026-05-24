@@ -122,6 +122,7 @@ export interface FriendLink extends BaseLink {
   category?: string;
   type: LinkType;
   featured?: boolean;
+  screenshot?: string;
 }
 
 export interface LinkCategoryItem {

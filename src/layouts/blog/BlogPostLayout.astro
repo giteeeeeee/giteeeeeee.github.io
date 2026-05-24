@@ -37,13 +37,13 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
 
 <DefaultLayout title={title} description={description}>
   <div class="article-back-row">
-    <button 
-      id="back-button"
+    <a
+      href="/blog"
       class="article-back-button"
     >
       <i class="i-carbon:arrow-left"></i>
       <span data-i18n="blog.back">{t('blog.back')}</span>
-    </button>
+    </a>
   </div>
 
   <div class="blog-post-container flex gap-8 lg:gap-12 relative">
@@ -133,6 +133,7 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
     font: inherit;
     font-size: 0.86rem;
     font-weight: 680;
+    text-decoration: none;
     cursor: pointer;
     transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   }
@@ -184,6 +185,16 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
     color: var(--md-sys-color-primary);
     border-color: rgba(var(--md-sys-color-primary-rgb), 0.2);
     background: rgba(var(--md-sys-color-primary-container-rgb), 0.28);
+  }
+
+  .post-content > :is(p, ul, ol, blockquote, pre, table, img, figure, details) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 3rem;
+  }
+
+  .post-content > :is(pre, table, blockquote, figure, details),
+  .post-content > .code-block-wrapper {
+    contain-intrinsic-size: auto 14rem;
   }
 </style>
 
@@ -262,6 +273,16 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
 </script>
 
 <script>
+  function runWhenIdle(callback: () => void) {
+    const requestIdle = window.requestIdleCallback;
+    if (typeof requestIdle === 'function') {
+      requestIdle.call(window, callback, { timeout: 1200 });
+      return;
+    }
+
+    setTimeout(callback, 120);
+  }
+
   /**
    * Code block enhancement features
    * - Add copy button
@@ -352,9 +373,6 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
       // Set language attribute (for CSS to display language label)
       pre.setAttribute('data-language', language);
       
-      // Debug: output detected language
-      console.log('Detected language:', language, 'for code block with classes:', codeElement.className, 'pre classes:', (pre as HTMLElement).className);
-      
       // Create copy button
       const copyButton = document.createElement('button');
       copyButton.className = 'code-copy-button';
@@ -408,16 +426,26 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
   
   // Execute on page load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', enhanceCodeBlocks);
+    document.addEventListener('DOMContentLoaded', () => runWhenIdle(enhanceCodeBlocks));
   } else {
-    enhanceCodeBlocks();
+    runWhenIdle(enhanceCodeBlocks);
   }
   
   // Support Astro View Transitions
-  document.addEventListener('astro:page-load', enhanceCodeBlocks);
+  document.addEventListener('astro:page-load', () => runWhenIdle(enhanceCodeBlocks));
 </script>
 
 <script>
+  function runTaskEnhancementWhenIdle(callback: () => void) {
+    const requestIdle = window.requestIdleCallback;
+    if (typeof requestIdle === 'function') {
+      requestIdle.call(window, callback, { timeout: 1200 });
+      return;
+    }
+
+    setTimeout(callback, 120);
+  }
+
   /**
    * Task list interaction functionality
    * - Enable checkbox clicking
@@ -482,44 +510,13 @@ const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
   
   // Execute on page load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', enhanceTaskLists);
+    document.addEventListener('DOMContentLoaded', () => runTaskEnhancementWhenIdle(enhanceTaskLists));
   } else {
-    enhanceTaskLists();
+    runTaskEnhancementWhenIdle(enhanceTaskLists);
   }
   
   // Support Astro View Transitions
-  document.addEventListener('astro:page-load', enhanceTaskLists);
-</script>
-
-<script>
-  /**
-   * Back button functionality
-   * Uses browser's history.back() to return to previous page
-   */
-  function initBackButton() {
-    const backButton = document.getElementById('back-button');
-    if (backButton) {
-      backButton.addEventListener('click', () => {
-        // If there's browser history, go back
-        if (window.history.length > 1) {
-          window.history.back();
-        } else {
-          // Otherwise return to blog list
-          window.location.href = '/blog';
-        }
-      });
-    }
-  }
-
-  // Execute on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initBackButton);
-  } else {
-    initBackButton();
-  }
-
-  // Support Astro View Transitions
-  document.addEventListener('astro:page-load', initBackButton);
+  document.addEventListener('astro:page-load', () => runTaskEnhancementWhenIdle(enhanceTaskLists));
 </script>
 
 <script>

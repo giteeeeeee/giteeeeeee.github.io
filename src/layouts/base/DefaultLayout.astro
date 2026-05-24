@@ -6,12 +6,15 @@
  * Suitable for regular content pages (blog list, about, etc.)
  */
 import HeadMeta from '../../components/common/HeadMeta.astro'
+import { ClientRouter } from 'astro:transitions'
 import Header from '../../components/common/Header.astro'
 import Footer from '../../components/common/Footer.astro'
 import Container from '../../components/common/Container.astro'
 import Background from '../../components/common/Background.astro'
 import SeasonalEffects from '../../components/common/SeasonalEffects.astro'
 import I18nRuntime from '../../components/common/I18nRuntime.astro'
+import PageTransition from '../../components/common/PageTransition.astro'
+import ClientRuntime from '../../components/common/ClientRuntime.astro'
 
 import { createTheme, themeToCSSVars } from '../../theme'
 import { getThemeConfig } from '../../data/site.config'
@@ -58,9 +61,12 @@ const THEME = createTheme(getThemeConfig())
     <I18nRuntime />
     
     <HeadMeta {title} {description} {ogImage} />
+    <ClientRouter fallback="swap" />
 
     <!-- Theme CSS variables (includes light/dark + override rules) -->
     <style is:inline set:html={themeToCSSVars(THEME)}></style>
+    <PageTransition />
+    <ClientRuntime />
 
     <style is:inline>
       html {
@@ -170,6 +176,7 @@ const THEME = createTheme(getThemeConfig())
       .icon-btn i {
         font-size: 1.25rem;
       }
+
     </style>
   </head>
 
@@ -186,7 +193,9 @@ const THEME = createTheme(getThemeConfig())
     <!-- Main content area - wrapped with Container -->
     <main>
       <Container>
-        <slot />
+        <div data-page-transition data-page-transition-scope="default">
+          <slot />
+        </div>
       </Container>
     </main>
 

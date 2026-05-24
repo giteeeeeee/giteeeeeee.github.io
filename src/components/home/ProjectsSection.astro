@@ -70,6 +70,8 @@ try {
           <a
             href={`/projects/${project.owner}/${project.name}`}
             class="card-interactive project-card group animate-fade-in relative p-4 flex flex-col gap-3 overflow-hidden"
+            data-reay-prefetch="hover"
+            data-astro-prefetch="hover"
             style={`animation-delay: ${index * 100}ms;`}
           >
               <!-- Decorative gradient background -->
@@ -157,6 +159,8 @@ try {
         <a 
           href="/projects" 
           class="inline-flex items-center gap-2 px-6 py-2 text-sm font-700 bg-gradient-to-r from-[var(--md-sys-color-tertiary)] to-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] rounded-full shadow-[var(--reay-shadow-soft)] transition-all duration-300 hover:shadow-[var(--reay-shadow-panel)] hover:scale-105 hover:gap-3 group relative overflow-hidden"
+          data-reay-prefetch="idle"
+          data-astro-prefetch="load"
         >
           <!-- Sweeping highlight -->
           <span class="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" style="background: linear-gradient(90deg, transparent, rgba(var(--md-sys-color-on-primary-rgb), 0.2), transparent);"></span>

@@ -77,7 +77,7 @@ if (type === 'gradient') {
     background-size: ${imageStyle?.size || 'cover'};
     background-position: ${imageStyle?.position || 'center'};
     background-repeat: ${imageStyle?.repeat || 'no-repeat'};
-    background-attachment: fixed;
+    background-attachment: scroll;
   `;
 }
 ---
@@ -213,11 +213,10 @@ if (type === 'gradient') {
   }
 
   /* 性能优化 */
-	  .app-background {
-	    will-change: opacity, background-position;
-	    transform: translateZ(0);
-	    backface-visibility: hidden;
-	  }
+  .app-background {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
 
 	  :global(body.layout-default) .gradient-bg,
 	  :global(body.layout-default) .aurora-field,
@@ -245,6 +244,31 @@ if (type === 'gradient') {
 	    backdrop-filter: none !important;
 	    -webkit-backdrop-filter: none !important;
 	  }
+
+  :global(body.layout-home) .gradient-bg {
+    animation-duration: 34s;
+  }
+
+  :global(body.layout-home) .aurora-field {
+    opacity: 0.42;
+    filter: blur(18px);
+    animation-duration: 30s;
+  }
+
+  :global(body.layout-home) .motion-grid {
+    opacity: 0.12;
+    transform: none;
+    animation: none;
+  }
+
+  :global(body.layout-home) .light-sweep {
+    display: none;
+  }
+
+  :global(body.layout-home) .background-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 
   @keyframes gradient-drift {
     from { background-position: 0% 44%, 100% 50%, center; }

@@ -57,7 +57,7 @@ const rawGitHubToken = githubConfig.token || import.meta.env.GITHUB_TOKEN;
 const GITHUB_TOKEN = rawGitHubToken && !/^your[_-]?github[_-]?token$/i.test(rawGitHubToken)
   ? rawGitHubToken
   : '';
-const REQUEST_TIMEOUT_MS = 10000;
+const REQUEST_TIMEOUT_MS = 6500;
 
 const pendingRequests = new Map<string, Promise<any>>();
 
@@ -424,11 +424,24 @@ export async function getUserRepos(username: string): Promise<GitHubRepo[]> {
       const repos: GitHubRepo[] = [];
       let page = 1;
       let hasMore = true;
+      const etag = githubCache.getETag(cacheKey);
+      let newEtag: string | undefined;
 
       while (hasMore) {
         const response = await fetchGitHub(
-          `${GITHUB_API}/users/${username}/repos?sort=updated&per_page=100&page=${page}`
+          `${GITHUB_API}/users/${username}/repos?sort=updated&per_page=100&page=${page}`,
+          page === 1 ? etag : undefined,
         );
+
+        if (page === 1) {
+          newEtag = response.headers.get('etag') || undefined;
+        }
+
+        if (response.status === 304 && staleCached) {
+          console.log(`✅ 304 Not Modified: user repos for ${username}`);
+          githubCache.set(cacheKey, staleCached, response.headers.get('etag') || etag);
+          return staleCached;
+        }
 
         if (!response.ok) {
           console.warn(`⚠️ Failed to fetch repos for ${username}: ${response.status}`);
@@ -462,7 +475,7 @@ export async function getUserRepos(username: string): Promise<GitHubRepo[]> {
       }
 
       // Write to cache
-      githubCache.set(cacheKey, repos);
+      githubCache.set(cacheKey, repos, newEtag);
       console.log(`💾 Cached: ${repos.length} repos for ${username}`);
 
       return repos;

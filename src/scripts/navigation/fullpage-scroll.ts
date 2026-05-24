@@ -11,18 +11,26 @@ export class FullPageScroll {
   private isAnimating: boolean = false;
   private touchStartY: number = 0;
   private lastScrollTime: number = 0;
-  private scrollCooldown: number = 680;
+  private scrollCooldown: number = 520;
   private wheelDelta: number = 0;
   private wheelResetTimer: number | undefined;
-  private animationDuration: number = 760;
+  private animationDuration: number = 560;
   private lastWheelDirection: number = 0;
+  private scrollableBySection = new Map<HTMLElement, HTMLElement[]>();
+  private dotHandlers = new Map<HTMLButtonElement, EventListener>();
+  private animationTimer: number | undefined;
+  private readyFrame: number | undefined;
+  private destroyed = false;
+  private handleWheelBound = (event: WheelEvent) => this.handleWheel(event);
+  private handleTouchStartBound = (event: TouchEvent) => this.handleTouchStart(event);
+  private handleTouchMoveBound = (event: TouchEvent) => this.handleTouchMove(event);
+  private handleKeydownBound = (event: KeyboardEvent) => this.handleKeydown(event);
 
   constructor() {
     const container = document.getElementById('fullpage-container');
     
     if (!container) {
-      console.error('[FullPageScroll] Required elements not found');
-      return;
+      throw new Error('[FullPageScroll] Required elements not found');
     }
 
     this.container = container;
@@ -37,9 +45,11 @@ export class FullPageScroll {
     this.sections.forEach((section, index) => {
       section.dataset.ready = 'false';
       section.dataset.active = index === 0 ? 'true' : 'false';
+      this.scrollableBySection.set(section, this.collectScrollableElements(section));
     });
 
-    requestAnimationFrame(() => {
+    this.readyFrame = requestAnimationFrame(() => {
+      if (this.destroyed) return;
       this.sections.forEach((section) => {
         section.dataset.ready = 'true';
       });
@@ -54,13 +64,15 @@ export class FullPageScroll {
     
     this.updateSectionPositions();
     
-    window.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
-    window.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
-    window.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
-    window.addEventListener('keydown', this.handleKeydown.bind(this));
+    window.addEventListener('wheel', this.handleWheelBound, { passive: false });
+    window.addEventListener('touchstart', this.handleTouchStartBound, { passive: true });
+    window.addEventListener('touchmove', this.handleTouchMoveBound, { passive: false });
+    window.addEventListener('keydown', this.handleKeydownBound);
     
     this.dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => this.scrollToSection(index));
+      const handler = () => this.scrollToSection(index);
+      this.dotHandlers.set(dot, handler);
+      dot.addEventListener('click', handler);
     });
     
     this.updateDots();
@@ -74,18 +86,27 @@ export class FullPageScroll {
       const offset = (index - this.currentSection) * 100;
       section.style.transform = `translate3d(0, ${offset}%, 0)`;
       const isActive = index === this.currentSection;
-      section.style.opacity = isActive ? '1' : '0';
       section.dataset.active = isActive ? 'true' : 'false';
+    });
+  }
+
+  private collectScrollableElements(section: HTMLElement) {
+    const elements = Array.from(section.querySelectorAll<HTMLElement>('*'));
+
+    return elements.filter((element) => {
+      if (element.scrollHeight <= element.clientHeight + 2) return false;
+
+      const style = window.getComputedStyle(element);
+      return /(auto|scroll)/.test(style.overflowY);
     });
   }
 
   private resetSectionScroll(section: HTMLElement) {
     section.scrollTop = 0;
-    section.querySelectorAll<HTMLElement>('*').forEach((element) => {
-      const style = window.getComputedStyle(element);
-      if (/(auto|scroll)/.test(style.overflowY) && element.scrollHeight > element.clientHeight + 2) {
-        element.scrollTop = 0;
-      }
+    const scrollables = this.scrollableBySection.get(section) ?? [];
+
+    scrollables.forEach((element) => {
+      element.scrollTop = 0;
     });
   }
 
@@ -94,6 +115,8 @@ export class FullPageScroll {
    * Implements cooldown period to prevent rapid scrolling
    */
   private handleWheel(e: WheelEvent) {
+    if (this.destroyed) return;
+
     if (this.shouldLetActiveSectionScroll(e.deltaY, e.target)) {
       return;
     }
@@ -122,8 +145,12 @@ export class FullPageScroll {
       this.wheelDelta = 0;
     }, 180);
 
-    const threshold = e.deltaMode === WheelEvent.DOM_DELTA_LINE ? 7 : 128;
-    if (Math.abs(this.wheelDelta) >= threshold) {
+    const threshold = e.deltaMode === WheelEvent.DOM_DELTA_LINE ? 5 : 72;
+    const directTrigger = Math.abs(e.deltaY) >= threshold * 0.82;
+
+    this.wheelDelta = Math.max(-threshold * 1.6, Math.min(threshold * 1.6, this.wheelDelta));
+
+    if (directTrigger || Math.abs(this.wheelDelta) >= threshold) {
       if (this.wheelDelta > 0) {
         this.scrollDown();
       } else {
@@ -178,6 +205,7 @@ export class FullPageScroll {
    * Records initial touch position for swipe detection
    */
   private handleTouchStart(e: TouchEvent) {
+    if (this.destroyed) return;
     this.touchStartY = e.touches[0].clientY;
   }
 
@@ -186,6 +214,7 @@ export class FullPageScroll {
    * Implements cooldown and swipe threshold
    */
   private handleTouchMove(e: TouchEvent) {
+    if (this.destroyed) return;
     if (this.isAnimating) return;
     
     const touchEndY = e.touches[0].clientY;
@@ -204,7 +233,7 @@ export class FullPageScroll {
     }
 
     // Swipe threshold: tuned for mobile without making small movements jump pages.
-    if (Math.abs(diff) > 88) {
+    if (Math.abs(diff) > 68) {
       if (diff > 0) {
         this.scrollDown();
       } else {
@@ -220,6 +249,7 @@ export class FullPageScroll {
    * Supports arrow keys, page up/down, home, and end
    */
   private handleKeydown(e: KeyboardEvent) {
+    if (this.destroyed) return;
     if (this.isAnimating) return;
     
     switch(e.key) {
@@ -287,7 +317,11 @@ export class FullPageScroll {
     this.updateDots();
     
     // Unlock after the CSS transition finishes
-    setTimeout(() => {
+    if (this.animationTimer) {
+      window.clearTimeout(this.animationTimer);
+    }
+
+    this.animationTimer = window.setTimeout(() => {
       this.isAnimating = false;
     }, this.animationDuration);
   }
@@ -324,6 +358,47 @@ export class FullPageScroll {
   public goToSection(index: number): void {
     this.scrollToSection(index);
   }
+
+  /**
+   * Remove global listeners before Astro swaps this page out.
+   */
+  public destroy(): void {
+    this.destroyed = true;
+
+    window.removeEventListener('wheel', this.handleWheelBound);
+    window.removeEventListener('touchstart', this.handleTouchStartBound);
+    window.removeEventListener('touchmove', this.handleTouchMoveBound);
+    window.removeEventListener('keydown', this.handleKeydownBound);
+
+    this.dotHandlers.forEach((handler, dot) => {
+      dot.removeEventListener('click', handler);
+      dot.classList.remove('active');
+    });
+    this.dotHandlers.clear();
+
+    if (this.wheelResetTimer) {
+      window.clearTimeout(this.wheelResetTimer);
+      this.wheelResetTimer = undefined;
+    }
+
+    if (this.animationTimer) {
+      window.clearTimeout(this.animationTimer);
+      this.animationTimer = undefined;
+    }
+
+    if (this.readyFrame) {
+      cancelAnimationFrame(this.readyFrame);
+      this.readyFrame = undefined;
+    }
+
+    this.sections.forEach((section, index) => {
+      section.style.transform = index === 0 ? 'translate3d(0, 0, 0)' : '';
+      delete section.dataset.ready;
+      delete section.dataset.active;
+    });
+
+    this.scrollableBySection.clear();
+  }
 }
 
 /**
@@ -331,6 +406,10 @@ export class FullPageScroll {
  * @returns FullPageScroll instance or null if DOM not ready
  */
 export function initFullPageScroll(): FullPageScroll | null {
+  if (!document.getElementById('fullpage-container')) {
+    return null;
+  }
+
   if (document.readyState === 'loading') {
     let instance: FullPageScroll | null = null;
     document.addEventListener('DOMContentLoaded', () => {

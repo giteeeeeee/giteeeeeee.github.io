@@ -68,10 +68,10 @@ const htmlContent = await marked(processedContent);
   description={repoInfo.description || `${repoInfo.name} Project Details`}
 >
   <!-- Back button -->
-  <button class="back-button" onclick="history.back()">
+  <a class="back-button" href="/projects">
     <i class="i-carbon:arrow-left"></i>
     <span data-i18n="projectsPage.back">{t('projectsPage.back')}</span>
-  </button>
+  </a>
 
   <!-- Project header info -->
   <ProjectDetailHeader project={repoInfo} />
@@ -92,6 +92,7 @@ const htmlContent = await marked(processedContent);
     color: var(--md-sys-color-on-surface);
     font-size: 0.8125rem;
     font-weight: 500;
+    text-decoration: none;
     cursor: pointer;
     transition: all 0.3s ease;
     margin-bottom: 1.25rem;

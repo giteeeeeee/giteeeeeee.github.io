@@ -35,6 +35,16 @@ export class TypewriterEffect {
   private descriptionIndex: number = 0;
   
   private config: TypewriterConfig;
+  private timers = new Set<number>();
+  private destroyed = false;
+  private handleLanguageChange = () => {
+    this.setTimer(() => {
+      if (this.destroyed) return;
+
+      this.updateTexts();
+      this.restart();
+    }, 50);
+  };
 
   constructor(config: Partial<TypewriterConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -53,15 +63,19 @@ export class TypewriterEffect {
     this.descriptionText = this.descriptionElement?.getAttribute('data-text') || '';
     
     // Listen for language change events to restart animation
-    window.addEventListener('languagechange', () => {
-      // Wait for content update to complete
-      setTimeout(() => {
-        this.updateTexts();
-        this.restart();
-      }, 50);
-    });
+    window.addEventListener('languagechange', this.handleLanguageChange);
     
     this.start();
+  }
+
+  private setTimer(callback: () => void, delay: number) {
+    const timer = window.setTimeout(() => {
+      this.timers.delete(timer);
+      callback();
+    }, delay);
+
+    this.timers.add(timer);
+    return timer;
   }
   
   /**
@@ -80,11 +94,16 @@ export class TypewriterEffect {
    * Start typewriter effect
    */
   private start() {
+    if (this.destroyed) return;
+
+    this.nameIndex = 0;
+    this.descriptionIndex = 0;
+
     // Clear initial content
     if (this.nameElement) this.nameElement.textContent = '';
     if (this.descriptionElement) this.descriptionElement.textContent = '';
     
-    setTimeout(() => {
+    this.setTimer(() => {
       this.typeName();
     }, this.config.nameDelay);
   }
@@ -93,20 +112,20 @@ export class TypewriterEffect {
    * Type out the name character by character
    */
   private typeName() {
-    if (!this.nameElement) return;
+    if (this.destroyed || !this.nameElement) return;
     
     if (this.nameIndex < this.nameText.length) {
       this.nameElement.textContent += this.nameText.charAt(this.nameIndex);
       this.nameIndex++;
       
-      setTimeout(() => this.typeName(), this.config.nameSpeed);
+      this.setTimer(() => this.typeName(), this.config.nameSpeed);
     } else {
       // Name typing complete, remove cursor
       this.nameElement.classList.add('typing-complete');
       
       // Start typing description
       if (this.descriptionElement && this.descriptionText) {
-        setTimeout(() => {
+        this.setTimer(() => {
           this.typeDescription();
         }, this.config.descriptionDelay);
       } else {
@@ -120,19 +139,19 @@ export class TypewriterEffect {
    * Type out the description character by character
    */
   private typeDescription() {
-    if (!this.descriptionElement) return;
+    if (this.destroyed || !this.descriptionElement) return;
     
     if (this.descriptionIndex < this.descriptionText.length) {
       this.descriptionElement.textContent += this.descriptionText.charAt(this.descriptionIndex);
       this.descriptionIndex++;
       
-      setTimeout(() => this.typeDescription(), this.config.descriptionSpeed);
+      this.setTimer(() => this.typeDescription(), this.config.descriptionSpeed);
     } else {
       // Description typing complete, remove cursor
       this.descriptionElement.classList.add('typing-complete');
       
       // Show bio section
-      setTimeout(() => {
+      this.setTimer(() => {
         this.showBio();
       }, this.config.bioDelay);
     }
@@ -142,12 +161,14 @@ export class TypewriterEffect {
    * Show bio with fade-up animation
    */
   private showBio() {
+    if (this.destroyed) return;
+
     if (this.bioContent) {
       this.bioContent.classList.add('fade-up');
     }
     
     // Show social icons
-    setTimeout(() => {
+    this.setTimer(() => {
       this.showSocialIcons();
     }, this.config.socialDelay);
   }
@@ -157,7 +178,8 @@ export class TypewriterEffect {
    */
   private showSocialIcons() {
     this.socialIcons.forEach((icon, index) => {
-      setTimeout(() => {
+      this.setTimer(() => {
+        if (this.destroyed) return;
         icon.classList.add('fade-scale');
       }, index * (this.config.socialInterval || 200));
     });
@@ -196,8 +218,17 @@ export class TypewriterEffect {
    * Restart animation from beginning
    */
   public restart() {
+    if (this.destroyed) return;
+
     this.reset();
-    setTimeout(() => this.start(), 100);
+    this.setTimer(() => this.start(), 100);
+  }
+
+  public destroy() {
+    this.destroyed = true;
+    window.removeEventListener('languagechange', this.handleLanguageChange);
+    this.timers.forEach((timer) => window.clearTimeout(timer));
+    this.timers.clear();
   }
 }
 
