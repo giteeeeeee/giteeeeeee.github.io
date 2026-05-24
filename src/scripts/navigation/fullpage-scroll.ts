@@ -303,6 +303,10 @@ export class FullPageScroll {
         dot.classList.remove('active');
       }
     });
+
+    window.dispatchEvent(new CustomEvent('reay:fullpage-section', {
+      detail: { index: this.currentSection },
+    }));
   }
 
   /**
