@@ -36,33 +36,34 @@ try {
 }
 ---
 
-<div class="projects-section h-full box-border flex flex-col px-4 py-6 overflow-y-auto">
-  <div class="max-w-6xl mx-auto w-full flex-shrink-0">
+<div class="home-section-frame projects-section h-full box-border flex flex-col px-4 py-6 overflow-y-auto">
+  <div class="home-section-shell home-section-accent-tertiary max-w-6xl mx-auto w-full flex-shrink-0">
     <!-- Section Header -->
-    <div class="section-header text-center mb-6 relative">
+    <div class="section-header home-section-heading mb-6 relative">
       <div class="absolute inset-0 -z-10 opacity-30">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-[var(--md-sys-color-tertiary)]/10 to-[var(--md-sys-color-primary)]/10 rounded-full blur-3xl"></div>
       </div>
       
-      <h2 class="section-title inline-flex items-center justify-center gap-2 text-2xl md:text-3xl font-700 text-[var(--md-sys-color-on-surface)] mb-2">
-        <span class="icon-wrapper inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[var(--md-sys-color-tertiary-container)] to-[var(--md-sys-color-primary-container)] rounded-xl">
-          <i class="i-carbon:cube text-xl text-[var(--md-sys-color-tertiary)]"></i>
-        </span>
-        <span class="bg-gradient-to-r from-[var(--md-sys-color-tertiary)] to-[var(--md-sys-color-primary)] bg-clip-text text-transparent" data-i18n="projects.title">
+      <span class="section-logo icon-wrapper inline-flex items-center justify-center bg-gradient-to-br from-[var(--md-sys-color-tertiary-container)] to-[var(--md-sys-color-primary-container)] rounded-xl" aria-hidden="true">
+        <i class="i-carbon:cube text-xl text-[var(--md-sys-color-tertiary)]"></i>
+      </span>
+      <h2 class="section-title inline-flex items-center justify-start gap-2 text-2xl md:text-3xl font-700 text-[var(--md-sys-color-on-surface)] mb-2">
+        <span class="section-title-text bg-gradient-to-r from-[var(--md-sys-color-tertiary)] to-[var(--md-sys-color-primary)] bg-clip-text text-transparent" data-i18n="projects.title">
           Project Lab
         </span>
       </h2>
-      <p class="section-subtitle text-xs md:text-sm text-[var(--md-sys-color-on-surface-variant)] font-500" data-i18n="projects.subtitle">
-        Project experiments · open-source practice · continuous iteration
+      <p class="section-subtitle text-xs md:text-sm text-[var(--md-sys-color-on-surface-variant)] font-500">
+        <span class="section-subtitle-text" data-i18n="projects.subtitle">Project experiments · open-source practice · continuous iteration</span>
       </p>
       
-      <div class="flex items-center justify-center gap-2 mt-3">
+      <div class="section-divider flex items-center justify-start gap-2 mt-3">
         <div class="w-12 h-0.5 bg-gradient-to-r from-transparent to-[var(--md-sys-color-tertiary)]/50"></div>
         <div class="w-2 h-2 rounded-full bg-[var(--md-sys-color-tertiary)]"></div>
         <div class="w-12 h-0.5 bg-gradient-to-l from-transparent to-[var(--md-sys-color-tertiary)]/50"></div>
       </div>
     </div>
 
+    <div class="home-section-content">
     <!-- Project grid -->
     {featuredProjects.length > 0 ? (
       <div class="projects-grid grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -183,6 +184,7 @@ try {
         </div>
       </div>
     )}
+    </div>
   </div>
 </div>
 
