@@ -7,6 +7,7 @@ import { initPageInteractions } from './page-interactions';
 import { initRoutePrefetch } from './route-prefetch';
 import { initRouteTransitions } from './route-transition';
 import { initSeasonalEffects } from './seasonal-effects';
+import { initThemeSync } from './theme-sync';
 
 type Cleanup = () => void;
 
@@ -119,6 +120,7 @@ export function initReayClientRuntime() {
 
   initRouteTransitions();
   initRoutePrefetch();
+  initThemeSync();
 
   document.addEventListener('astro:before-swap', cleanupPageRuntime);
   document.addEventListener('astro:page-load', initPageRuntime);

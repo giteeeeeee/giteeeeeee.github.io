@@ -43,18 +43,18 @@ const THEME = createTheme(getThemeConfig())
       (function() {
         const storageKey = 'theme';
         const theme = localStorage.getItem(storageKey);
+        var resolvedTheme;
         
-        if (theme && theme !== 'system') {
-          document.documentElement.setAttribute('data-theme', theme);
+        if (theme === 'light' || theme === 'dark') {
+          resolvedTheme = theme;
         }
         else {
           const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (prefersDark) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-          } else {
-            document.documentElement.setAttribute('data-theme', 'light');
-          }
+          resolvedTheme = prefersDark ? 'dark' : 'light';
         }
+
+        document.documentElement.setAttribute('data-theme', resolvedTheme);
+        document.documentElement.style.colorScheme = resolvedTheme;
       })();
     </script>
 
@@ -64,7 +64,7 @@ const THEME = createTheme(getThemeConfig())
     <ClientRouter fallback="swap" />
 
     <!-- Theme CSS variables (includes light/dark + override rules) -->
-    <style is:inline set:html={themeToCSSVars(THEME)}></style>
+    <style is:inline data-astro-transition-persist="reay-theme-vars" set:html={themeToCSSVars(THEME)}></style>
     <PageTransition />
     <ClientRuntime />
 

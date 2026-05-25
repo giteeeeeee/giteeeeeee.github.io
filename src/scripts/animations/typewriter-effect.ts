@@ -23,7 +23,18 @@ const DEFAULT_CONFIG: TypewriterConfig = {
   socialInterval: 200,
 };
 
+type TypewriterGlobal = Window & {
+  __reayTypewriterEffect?: TypewriterEffect;
+};
+
+let instanceSeed = 0;
+
+function getTypewriterGlobal() {
+  return window as TypewriterGlobal;
+}
+
 export class TypewriterEffect {
+  private readonly instanceId = `reay-typewriter-${Date.now()}-${++instanceSeed}`;
   private nameElement: HTMLElement | null;
   private descriptionElement: HTMLElement | null;
   private bioContent: HTMLElement | null;
@@ -58,6 +69,14 @@ export class TypewriterEffect {
       console.warn('[TypewriterEffect] Name element not found');
       return;
     }
+
+    const activeInstance = getTypewriterGlobal().__reayTypewriterEffect;
+    if (activeInstance && activeInstance !== this) {
+      activeInstance.destroy();
+    }
+
+    getTypewriterGlobal().__reayTypewriterEffect = this;
+    this.markOwner();
     
     this.nameText = this.nameElement.getAttribute('data-text') || '';
     this.descriptionText = this.descriptionElement?.getAttribute('data-text') || '';
@@ -68,14 +87,46 @@ export class TypewriterEffect {
     this.start();
   }
 
+  private markOwner() {
+    if (this.nameElement) {
+      this.nameElement.dataset.reayTypewriterOwner = this.instanceId;
+    }
+
+    if (this.descriptionElement) {
+      this.descriptionElement.dataset.reayTypewriterOwner = this.instanceId;
+    }
+  }
+
+  private releaseOwner() {
+    if (this.nameElement?.dataset.reayTypewriterOwner === this.instanceId) {
+      delete this.nameElement.dataset.reayTypewriterOwner;
+    }
+
+    if (this.descriptionElement?.dataset.reayTypewriterOwner === this.instanceId) {
+      delete this.descriptionElement.dataset.reayTypewriterOwner;
+    }
+  }
+
+  private isActive() {
+    return !this.destroyed
+      && getTypewriterGlobal().__reayTypewriterEffect === this
+      && this.nameElement?.dataset.reayTypewriterOwner === this.instanceId;
+  }
+
   private setTimer(callback: () => void, delay: number) {
     const timer = window.setTimeout(() => {
       this.timers.delete(timer);
+      if (!this.isActive()) return;
       callback();
     }, delay);
 
     this.timers.add(timer);
     return timer;
+  }
+
+  private clearTimers() {
+    this.timers.forEach((timer) => window.clearTimeout(timer));
+    this.timers.clear();
   }
   
   /**
@@ -94,7 +145,7 @@ export class TypewriterEffect {
    * Start typewriter effect
    */
   private start() {
-    if (this.destroyed) return;
+    if (!this.isActive()) return;
 
     this.nameIndex = 0;
     this.descriptionIndex = 0;
@@ -112,11 +163,11 @@ export class TypewriterEffect {
    * Type out the name character by character
    */
   private typeName() {
-    if (this.destroyed || !this.nameElement) return;
+    if (!this.isActive() || !this.nameElement) return;
     
     if (this.nameIndex < this.nameText.length) {
-      this.nameElement.textContent += this.nameText.charAt(this.nameIndex);
       this.nameIndex++;
+      this.nameElement.textContent = this.nameText.slice(0, this.nameIndex);
       
       this.setTimer(() => this.typeName(), this.config.nameSpeed);
     } else {
@@ -139,11 +190,11 @@ export class TypewriterEffect {
    * Type out the description character by character
    */
   private typeDescription() {
-    if (this.destroyed || !this.descriptionElement) return;
+    if (!this.isActive() || !this.descriptionElement) return;
     
     if (this.descriptionIndex < this.descriptionText.length) {
-      this.descriptionElement.textContent += this.descriptionText.charAt(this.descriptionIndex);
       this.descriptionIndex++;
+      this.descriptionElement.textContent = this.descriptionText.slice(0, this.descriptionIndex);
       
       this.setTimer(() => this.typeDescription(), this.config.descriptionSpeed);
     } else {
@@ -161,7 +212,7 @@ export class TypewriterEffect {
    * Show bio with fade-up animation
    */
   private showBio() {
-    if (this.destroyed) return;
+    if (!this.isActive()) return;
 
     if (this.bioContent) {
       this.bioContent.classList.add('fade-up');
@@ -177,9 +228,11 @@ export class TypewriterEffect {
    * Show social icons with fade-scale animation
    */
   private showSocialIcons() {
+    if (!this.isActive()) return;
+
     this.socialIcons.forEach((icon, index) => {
       this.setTimer(() => {
-        if (this.destroyed) return;
+        if (!this.isActive()) return;
         icon.classList.add('fade-scale');
       }, index * (this.config.socialInterval || 200));
     });
@@ -189,6 +242,8 @@ export class TypewriterEffect {
    * Reset animation to initial state
    */
   public reset() {
+    if (this.destroyed) return;
+
     // Reset indices
     this.nameIndex = 0;
     this.descriptionIndex = 0;
@@ -218,17 +273,24 @@ export class TypewriterEffect {
    * Restart animation from beginning
    */
   public restart() {
-    if (this.destroyed) return;
+    if (!this.isActive()) return;
 
+    this.clearTimers();
     this.reset();
     this.setTimer(() => this.start(), 100);
   }
 
   public destroy() {
+    if (this.destroyed) return;
+
     this.destroyed = true;
     window.removeEventListener('languagechange', this.handleLanguageChange);
-    this.timers.forEach((timer) => window.clearTimeout(timer));
-    this.timers.clear();
+    this.clearTimers();
+    this.releaseOwner();
+
+    if (getTypewriterGlobal().__reayTypewriterEffect === this) {
+      delete getTypewriterGlobal().__reayTypewriterEffect;
+    }
   }
 }
 
@@ -238,13 +300,17 @@ export class TypewriterEffect {
  * @returns TypewriterEffect instance or null if DOM not ready
  */
 export function initTypewriterEffect(config?: Partial<TypewriterConfig>): TypewriterEffect | null {
-  if (document.readyState === 'loading') {
-    let instance: TypewriterEffect | null = null;
-    document.addEventListener('DOMContentLoaded', () => {
-      instance = new TypewriterEffect(config);
-    });
-    return instance;
-  } else {
+  const createInstance = () => {
+    getTypewriterGlobal().__reayTypewriterEffect?.destroy();
     return new TypewriterEffect(config);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      createInstance();
+    }, { once: true });
+    return null;
   }
+
+  return createInstance();
 }

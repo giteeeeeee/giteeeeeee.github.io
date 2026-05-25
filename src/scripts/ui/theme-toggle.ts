@@ -123,14 +123,19 @@ export class ThemeToggle {
    * @param mode - Theme mode to apply
    */
   private apply(mode: ThemeMode) {
+    let resolvedTheme: 'light' | 'dark';
+
     // Set data-theme attribute
     if (mode === 'system') {
       // When system mode, detect system preference and apply
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      this.el.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      resolvedTheme = prefersDark ? 'dark' : 'light';
     } else {
-      this.el.setAttribute('data-theme', mode);
+      resolvedTheme = mode;
     }
+
+    this.el.setAttribute('data-theme', resolvedTheme);
+    this.el.style.colorScheme = resolvedTheme;
 
     // Save to localStorage
     localStorage.setItem(this.config.storageKey!, mode);
