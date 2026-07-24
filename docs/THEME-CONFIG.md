@@ -2,6 +2,8 @@
 
 Astro Theme Reay 使用一个 `defineTheme({ ... })` 对象管理预设、MD3 配色、字体、圆角、背景和动效。用户只需编辑 `src/app/config/theme.config.ts`；`presets/themes/` 保存可复用基础方案，不保存姓名、内容或凭据。
 
+想先比较实际效果，可浏览 [完整主题画廊](./THEME-GALLERY.md)。画廊中的 13 张图片均为本仓库在 Chrome 中运行的真实首页截图。
+
 ## 最小配置
 
 ```ts

@@ -11,9 +11,54 @@
   <img alt="License" src="https://img.shields.io/badge/license-Apache--2.0-0f766e?style=flat-square">
 </p>
 
+<p align="center">
+  <a href="./docs/THEME-GALLERY.md"><img src="./docs/assets/screenshots/technology.webp" alt="Astro Theme Reay 科技流光主题首页" width="100%"></a>
+</p>
+
+<p align="center">
+  <sub>真实 Chrome 首页截图 · 点击查看完整主题画廊</sub>
+</p>
+
 Astro Theme Reay 面向个人博客、摄影记录、开源项目与长期知识归档。站点以静态 HTML 为核心，个人身份、主题、导航和可选集成集中配置，Blog 与 Plog 使用 Markdown/MDX 维护；不依赖 CMS、数据库或账户系统。
 
 仓库默认只包含语义占位值。`YOUR_NAME`、`yourusername`、`your.email@example.com` 等内容用于标明字段用途，生产检查会阻止它们被直接发布。
+
+## 主题预览
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <a href="./docs/THEME-GALLERY.md#基础阅读"><img src="./docs/assets/screenshots/technology.webp" alt="Technology 科技流光主题" width="100%"></a><br>
+      <sub><strong>Technology</strong> · 科技流光</sub>
+    </td>
+    <td width="50%" align="center">
+      <a href="./docs/THEME-GALLERY.md#基础阅读"><img src="./docs/assets/screenshots/paper.webp" alt="Paper 米纸手记主题" width="100%"></a><br>
+      <sub><strong>Paper</strong> · 米纸手记</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <a href="./docs/THEME-GALLERY.md#东方表达"><img src="./docs/assets/screenshots/monochrome-ink.webp" alt="Monochrome Ink 墨白丹朱主题" width="100%"></a><br>
+      <sub><strong>Monochrome Ink</strong> · 墨白丹朱</sub>
+    </td>
+    <td width="50%" align="center">
+      <a href="./docs/THEME-GALLERY.md#场景主题"><img src="./docs/assets/screenshots/anime-night.webp" alt="Anime Night 动画夜城主题" width="100%"></a><br>
+      <sub><strong>Anime Night</strong> · 动画夜城</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <a href="./docs/THEME-GALLERY.md#场景主题"><img src="./docs/assets/screenshots/cosmic-abyss.webp" alt="Cosmic Abyss 星渊银河主题" width="100%"></a><br>
+      <sub><strong>Cosmic Abyss</strong> · 星渊银河</sub>
+    </td>
+    <td width="50%" align="center">
+      <a href="./docs/THEME-GALLERY.md#场景主题"><img src="./docs/assets/screenshots/retro-terminal.webp" alt="Retro Terminal 复古终端主题" width="100%"></a><br>
+      <sub><strong>Retro Terminal</strong> · 复古终端</sub>
+    </td>
+  </tr>
+</table>
+
+<p align="center"><a href="./docs/THEME-GALLERY.md"><strong>浏览全部 13 套主题 →</strong></a></p>
 
 ## 主要能力
 
@@ -70,7 +115,7 @@ export const themeConfig = defineTheme({
 - 东方表达：`inkwash`、`monochrome-ink`、`ukiyo`
 - 场景主题：`anime-spring`、`anime-night`、`cosmic-abyss`、`ocean`、`retro-terminal`
 
-只设置 `primary` 时，MD3 会从新主色生成完整 light/dark 配色；使用 `source` 可进一步指定辅助关键色。字体、shape、背景和 effects 在预设之上深度合并。详见 [主题配置](./docs/THEME-CONFIG.md) 与 [预设目录](./presets/themes/README.md)。
+只设置 `primary` 时，MD3 会从新主色生成完整 light/dark 配色；使用 `source` 可进一步指定辅助关键色。字体、shape、背景和 effects 在预设之上深度合并。详见 [完整主题画廊](./docs/THEME-GALLERY.md)、[主题配置](./docs/THEME-CONFIG.md) 与 [预设目录](./presets/themes/README.md)。
 
 ## 内容结构
 
@@ -168,6 +213,7 @@ npm run audit
 - [快速开始](./docs/QUICK-START.md)
 - [安装与环境](./docs/INSTALLATION.md)
 - [用户配置](./docs/USER-CONFIG.md)
+- [主题画廊](./docs/THEME-GALLERY.md)
 - [主题配置](./docs/THEME-CONFIG.md)
 - [内容系统](./docs/BLOG-SYSTEM.md)
 - [项目展示](./docs/PROJECTS.md)

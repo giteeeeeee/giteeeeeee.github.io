@@ -7,6 +7,7 @@
 - [快速开始](./QUICK-START.md)：从克隆到本地预览的最短路径。
 - [安装与环境](./INSTALLATION.md)：Node、依赖安装和常见环境问题。
 - [用户配置](./USER-CONFIG.md)：身份、联系方式、双语简介和 About 的单一来源。
+- [主题画廊](./THEME-GALLERY.md)：13 套主题的真实 Chrome 首页预览与选择建议。
 - [主题配置](./THEME-CONFIG.md)：13 套预设、MD3 配色、字体、背景和动效。
 
 ## 内容与功能
@@ -34,9 +35,10 @@
 
 1. [快速开始](./QUICK-START.md)
 2. [用户配置](./USER-CONFIG.md)
-3. [主题配置](./THEME-CONFIG.md)
-4. [Blog 系统](./BLOG-SYSTEM.md) 或 [Plog 与音乐](./MEDIA.md)
-5. [部署指南](./DEPLOYMENT.md)
+3. [主题画廊](./THEME-GALLERY.md)
+4. [主题配置](./THEME-CONFIG.md)
+5. [Blog 系统](./BLOG-SYSTEM.md) 或 [Plog 与音乐](./MEDIA.md)
+6. [部署指南](./DEPLOYMENT.md)
 
 参与开发者：
 
