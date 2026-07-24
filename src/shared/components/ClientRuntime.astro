@@ -1,0 +1,13 @@
+---
+/**
+ * ClientRuntime
+ * Boots interactive page behavior once, then rebuilds page-scoped instances
+ * across Astro ClientRouter navigations.
+ */
+---
+
+<script>
+  import { initReayClientRuntime } from '@shared/client/runtime/client-runtime';
+
+  initReayClientRuntime();
+</script>

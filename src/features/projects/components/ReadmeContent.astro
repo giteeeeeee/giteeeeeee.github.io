@@ -1,0 +1,225 @@
+---
+/**
+ * ReadmeContent.astro
+ * README 内容展示组件
+ * 使用与博客相同的 Markdown 样式系统
+ */
+import { currentMarkdownStyle } from '@app/config/markdown-style.config';
+import { generateMarkdownStyles } from '@features/blog/lib/markdown-style-generator';
+
+interface Props {
+  htmlContent: string;
+}
+
+const { htmlContent } = Astro.props;
+
+// 生成与博客相同的 Markdown 样式
+const markdownStyles = generateMarkdownStyles(currentMarkdownStyle);
+---
+
+<div class="readme-content">
+  <div class="prose prose-lg max-w-none" set:html={htmlContent} />
+</div>
+
+<!-- 使用与博客相同的 Markdown 样式 -->
+<style is:global set:html={markdownStyles}></style>
+
+<style>
+  .readme-content {
+    margin-top: 0;
+    padding-top: clamp(1.6rem, 4vw, 2.5rem);
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.48);
+  }
+
+  @media (max-width: 768px) {
+    .readme-content {
+      padding-top: 1.35rem;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * 代码块增强功能
+   * - 添加复制按钮
+   * - 添加语言标签
+   */
+  
+  function enhanceCodeBlocks() {
+    const codeBlocks = document.querySelectorAll('.readme-content pre');
+    
+    codeBlocks.forEach((pre) => {
+      if (pre.parentElement?.classList.contains('code-block-wrapper')) {
+        return;
+      }
+      
+      const codeElement = pre.querySelector('code');
+      if (!codeElement) return;
+      
+      // 检测语言
+      let language = pre.getAttribute('data-language') ||
+                     codeElement.getAttribute('data-language') || '';
+      
+      if (!language) {
+        const patterns = [
+          /language-(\w+)/,
+          /lang-(\w+)/,
+          /\blanguage:(\w+)/,
+          /^([a-z]+)$/,
+        ];
+        
+        const codeClasses = codeElement.className.split(/\s+/);
+        for (const className of codeClasses) {
+          for (const pattern of patterns) {
+            const match = className.match(pattern);
+            if (match && match[1]) {
+              language = match[1];
+              break;
+            }
+          }
+          if (language) break;
+        }
+        
+        if (!language) {
+          const preClasses = (pre as HTMLElement).className.split(/\s+/);
+          for (const className of preClasses) {
+            for (const pattern of patterns) {
+              const match = className.match(pattern);
+              if (match && match[1]) {
+                language = match[1];
+                break;
+              }
+            }
+            if (language) break;
+          }
+        }
+      }
+      
+      if (!language) {
+        language = 'plaintext';
+      }
+      
+      // 创建包装器
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block-wrapper';
+      pre.parentNode?.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+      
+      pre.setAttribute('data-language', language);
+      
+      // 创建复制按钮
+      const copyButton = document.createElement('button');
+      copyButton.className = 'code-copy-button';
+      copyButton.innerHTML = `
+        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      `;
+      copyButton.setAttribute('aria-label', 'Copy code to clipboard');
+      copyButton.setAttribute('title', 'Copy');
+      
+      copyButton.addEventListener('click', async () => {
+        try {
+          const code = codeElement.textContent || '';
+          await navigator.clipboard.writeText(code);
+          
+          const copyIcon = copyButton.querySelector('.copy-icon') as HTMLElement;
+          const checkIcon = copyButton.querySelector('.check-icon') as HTMLElement;
+          if (copyIcon && checkIcon) {
+            copyIcon.style.display = 'none';
+            checkIcon.style.display = 'block';
+          }
+          copyButton.classList.add('copied');
+          copyButton.setAttribute('title', 'Copied!');
+          
+          setTimeout(() => {
+            if (copyIcon && checkIcon) {
+              copyIcon.style.display = 'block';
+              checkIcon.style.display = 'none';
+            }
+            copyButton.classList.remove('copied');
+            copyButton.setAttribute('title', 'Copy');
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy code:', err);
+        }
+      });
+      
+      wrapper.appendChild(copyButton);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', enhanceCodeBlocks);
+  } else {
+    enhanceCodeBlocks();
+  }
+  
+  document.addEventListener('astro:page-load', enhanceCodeBlocks);
+</script>
+
+<script>
+  /**
+   * 任务列表交互功能
+   */
+  
+  function enhanceTaskLists() {
+    const taskItems = document.querySelectorAll('.readme-content input[type="checkbox"]');
+    
+    taskItems.forEach((checkbox) => {
+      const input = checkbox as HTMLInputElement;
+      if (input.dataset.reayTaskBound === 'true') return;
+      input.dataset.reayTaskBound = 'true';
+      input.removeAttribute('disabled');
+      
+      const articlePath = window.location.pathname;
+      const taskListItem = input.closest('li');
+      const taskText = taskListItem?.textContent?.trim() || '';
+      const taskId = `task-${articlePath}-${taskText.substring(0, 50)}`;
+      
+      const savedState = localStorage.getItem(taskId);
+      if (savedState !== null) {
+        input.checked = savedState === 'true';
+      }
+      
+      input.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        const isChecked = target.checked;
+        
+        localStorage.setItem(taskId, isChecked.toString());
+        
+        const listItem = target.closest('li');
+        if (listItem) {
+          if (isChecked) {
+            listItem.classList.add('task-completed');
+          } else {
+            listItem.classList.remove('task-completed');
+          }
+        }
+        
+        if (isChecked) {
+          target.parentElement?.classList.add('task-check-animation');
+          setTimeout(() => {
+            target.parentElement?.classList.remove('task-check-animation');
+          }, 300);
+        }
+      });
+      
+      if (input.checked) {
+        taskListItem?.classList.add('task-completed');
+      }
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', enhanceTaskLists);
+  } else {
+    enhanceTaskLists();
+  }
+  
+  document.addEventListener('astro:page-load', enhanceTaskLists);
+</script>

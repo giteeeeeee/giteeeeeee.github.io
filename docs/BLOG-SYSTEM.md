@@ -121,7 +121,7 @@ See [Blog Frontmatter Reference](./BLOG-FRONTMATTER.md) for complete details.
 
 [Link text](https://example.com)
 
-![Image alt](/ images/example.jpg)
+![Image alt](/images/example.jpg)
 ```
 
 ### Code Blocks
@@ -184,7 +184,7 @@ src/content/blog/interactive-post.mdx
 title: Interactive Post
 ---
 
-import CustomComponent from '@/components/CustomComponent.astro';
+import CustomComponent from '@features/custom/components/CustomComponent.astro';
 
 # Regular Markdown
 
@@ -327,7 +327,7 @@ Automatically calculated and displayed:
 - ~200 words per minute
 - Rounded up to nearest minute
 
-Customize in `src/data/user.config.ts`:
+Customize in `src/app/config/user.config.ts`:
 ```typescript
 export const site = {
   showReadingTime: true,  // Set false to hide
@@ -376,7 +376,7 @@ See posts organized by year/month at `/archives`.
 
 ## RSS Feed
 
-RSS is not configured by default. Add an Astro RSS endpoint if your site needs `/rss.xml`.
+Published posts are included in `/rss.xml`. The endpoint is implemented in `src/pages/rss.xml.ts` and uses the configured `SITE` URL.
 
 ## Best Practices
 

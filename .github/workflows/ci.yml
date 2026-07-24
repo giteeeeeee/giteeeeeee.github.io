@@ -25,14 +25,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Restore GitHub API cache
         uses: actions/cache@v4
         with:
           path: .cache/github
-          key: ${{ runner.os }}-github-cache-${{ github.ref_name }}-${{ hashFiles('src/utils/github.ts', 'src/data/projects.config.ts', 'src/data/user.config.ts') }}
+          key: ${{ runner.os }}-github-cache-${{ github.ref_name }}-${{ hashFiles('src/features/projects/lib/github.ts', 'src/app/config/projects.config.ts', 'src/app/config/user.config.ts') }}
           restore-keys: |
             ${{ runner.os }}-github-cache-${{ github.ref_name }}-
             ${{ runner.os }}-github-cache-
@@ -40,7 +40,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify application
+        run: npm run verify
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dependency audit
+        run: npm run audit

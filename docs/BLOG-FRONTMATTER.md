@@ -32,7 +32,7 @@ publishDate: 2025-10-17
 ---
 # === 基础信息 ===
 title: '深入理解 Astro Content Collections'
-description: 'Astro 5 Content Collections 完全指南，包含最佳实践和常见问题'
+description: 'Astro 7 Content Collections 完全指南，包含最佳实践和常见问题'
 
 # === 时间信息 ===
 publishDate: 2025-10-17          # 发布日期

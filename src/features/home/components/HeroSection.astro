@@ -1,0 +1,164 @@
+---
+/**
+ * HeroSection Component
+ * Fullscreen hero section with typewriter effects
+ * Layout: text content (left) + avatar (right)
+ */
+import { getLocalizedUserContent, getThemeConfig, getUserContactLinks, getUserProfile } from '@app/config/site.config';
+import { useI18n } from '@features/i18n/lib/i18n';
+
+const { t, currentLang } = useI18n();
+const user = getUserProfile();
+const preferredHeroContactOrder = ['github', 'twitter', 'x', 'email'];
+const heroContactLinks = getUserContactLinks()
+  .filter((link) => preferredHeroContactOrder.includes(link.id))
+  .sort((left, right) => {
+    const leftIndex = preferredHeroContactOrder.indexOf(left.id);
+    const rightIndex = preferredHeroContactOrder.indexOf(right.id);
+    return (leftIndex < 0 ? 99 : leftIndex) - (rightIndex < 0 ? 99 : rightIndex);
+  });
+const userContent = getLocalizedUserContent(currentLang);
+const effectsConfig = getThemeConfig().effects;
+const showHomeWave = effectsConfig.homeWave.enabled;
+const homeWaveIntensity = effectsConfig.homeWave.intensity;
+---
+
+<section class="hero-section h-full min-h-[calc(100dvh-4rem)] w-full flex items-center justify-center relative overflow-hidden">
+  <div class="hero-light hero-light-a" aria-hidden="true"></div>
+  <div class="hero-light hero-light-b" aria-hidden="true"></div>
+
+  <div class="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10 pt-12 md:pt-0">
+    <div class="grid grid-cols-1 lg:grid-cols-[1.08fr_0.92fr] gap-8 lg:gap-12 items-center">
+      <!-- Text Content -->
+      <div class="hero-copy text-left space-y-5">
+        <div class="status-pill inline-flex items-center gap-2 px-3 py-1.5 text-xs font-700 text-[var(--md-sys-color-primary)]">
+          <span class="status-dot"></span>
+          <span data-i18n="home.hero.badge">{t('home.hero.badge')}</span>
+        </div>
+
+        <!-- Title with typewriter effect -->
+        <div class="min-h-[68px] sm:min-h-[80px]">
+          <h1 class="hero-title">
+            <span class="text-[var(--md-sys-color-on-surface)]" data-i18n="home.hero.greeting">{t('home.hero.greeting')}</span>
+            <span class="text-[var(--md-sys-color-on-surface)]"> </span>
+            <span
+              id="name-typewriter"
+              class="name-gradient bg-gradient-to-r from-[var(--md-sys-color-primary)] via-[var(--reay-color-warning)] to-[var(--md-sys-color-tertiary)] bg-clip-text text-transparent"
+              data-text={user.name}
+            ></span>
+            <span class="title-icon inline-grid place-items-center align-middle ml-2">
+              <i class="i-carbon:sun text-[1rem] sm:text-[1.15rem]"></i>
+            </span>
+          </h1>
+        </div>
+
+        <!-- Description with typewriter effect -->
+        <div class="min-h-[44px]">
+          <p
+            id="description-typewriter"
+            class="hero-tagline text-sm sm:text-base text-[var(--md-sys-color-on-surface-variant)] font-500 italic"
+            data-text={userContent.tagline}
+            data-user-content="tagline"
+          ></p>
+        </div>
+
+        <!-- Bio with fade-in effect -->
+        <div
+          id="bio-content"
+          class="min-h-[60px] opacity-0 translate-y-[10px]"
+        >
+          <p class="hero-bio text-sm sm:text-base text-[var(--md-sys-color-on-surface-variant)] font-500 leading-relaxed max-w-2xl" data-user-content="bio">
+            {userContent.bio}
+          </p>
+        </div>
+
+        <div class="hero-actions flex flex-wrap items-center gap-3 pt-1">
+          <a href="/projects" class="hero-primary-btn group" data-astro-prefetch="hover">
+            <span data-i18n="home.hero.projects">{t('home.hero.projects')}</span>
+            <i class="i-carbon:arrow-right text-lg group-hover:translate-x-1 transition-transform"></i>
+          </a>
+          <a href="/blog" class="hero-secondary-btn group">
+            <i class="i-carbon:blog text-lg"></i>
+            <span data-i18n="home.hero.blog">{t('home.hero.blog')}</span>
+          </a>
+        </div>
+
+        <!-- Social icons with scale animation -->
+        <div id="social-icons-container" class="pt-1">
+          <div class="flex items-center gap-2.5">
+            {heroContactLinks.map((contact, index) => (
+              <a
+                href={contact.href}
+                target={contact.external ? '_blank' : undefined}
+                rel={contact.external ? 'noopener noreferrer' : undefined}
+                class="social-icon group relative opacity-0 scale-80"
+                style={`animation-delay: ${index * 100}ms;`}
+                aria-label={contact.label}
+                title={contact.label}
+                data-contact-id={contact.id}
+                data-contact-kind={contact.kind}
+              >
+                <div class="social-button inline-flex items-center justify-center w-10 h-10 rounded-full">
+                  <i class={`${contact.icon} text-base text-[var(--md-sys-color-on-surface-variant)] group-hover:text-[var(--md-sys-color-primary)] transition-colors`}></i>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧：大头像 -->
+      <div class="flex items-center justify-center lg:justify-end">
+        <div class="relative avatar-container hero-avatar-stage">
+          <div class="avatar-holo-frame" aria-hidden="true"></div>
+          <div class="avatar-panel-lines" aria-hidden="true"></div>
+          <!-- 头像 -->
+          <div class="avatar-image-wrap relative">
+            <img
+              src={user.avatar}
+              alt={user.name}
+              width="512"
+              height="512"
+              decoding="async"
+              fetchpriority="high"
+              class="relative w-36 h-36 sm:w-44 sm:h-44 lg:w-56 lg:h-56 rounded-full object-cover"
+            />
+          </div>
+          <div class="avatar-caption hidden sm:flex items-center gap-2">
+            <i class="i-carbon:development text-base text-[var(--md-sys-color-primary)]"></i>
+            <span data-i18n="home.hero.caption">{t('home.hero.caption')}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {showHomeWave && (
+    <div class="hero-wave-field" data-wave-intensity={homeWaveIntensity} aria-hidden="true">
+      <div class="wave-glow"></div>
+      <svg class="hero-wave-svg wave-layer-back" viewBox="0 0 1440 180" preserveAspectRatio="none">
+        <path d="M0 92L60 82C120 72 240 52 360 58C480 64 600 96 720 103C840 110 960 92 1080 76C1200 60 1320 46 1380 39L1440 32V180H0V92Z"></path>
+      </svg>
+      <svg class="hero-wave-svg wave-layer-mid" viewBox="0 0 1440 180" preserveAspectRatio="none">
+        <path d="M0 112L80 98C160 84 320 56 480 72C640 88 800 148 960 145C1120 142 1280 76 1360 43L1440 10V180H0V112Z"></path>
+      </svg>
+      <svg class="hero-wave-svg wave-layer-front" viewBox="0 0 1440 180" preserveAspectRatio="none">
+        <path d="M0 132L80 121C160 110 320 88 480 98C640 108 800 150 960 154C1120 158 1280 124 1360 107L1440 90V180H0V132Z"></path>
+      </svg>
+    </div>
+  )}
+
+  <!-- 滚动提示 -->
+  <div class="scroll-cue absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
+    <span class="text-xs text-[var(--md-sys-color-on-surface-variant)]" data-i18n="home.hero.scroll">{t('home.hero.scroll')}</span>
+    <i class="i-carbon:chevron-down text-xl text-[var(--md-sys-color-on-surface-variant)]"></i>
+  </div>
+</section>
+
+<style>
+  @import "../styles/hero-section.css";
+
+  .hero-title {
+    font-family: var(--reay-font-brand);
+  }
+</style>

@@ -3,27 +3,19 @@
  * Project Detail Page
  * Display GitHub README as blog post
  */
-import { marked } from 'marked';
-import ProjectDetailLayout from '../../../layouts/projects/ProjectDetailLayout.astro';
-import ProjectDetailHeader from '../../../components/projects/ProjectDetailHeader.astro';
-import ReadmeContent from '../../../components/projects/ReadmeContent.astro';
-import { getGitHubRepo, getRepoReadme, getUserRepos } from '../../../utils/github';
-import { getProjectsConfig } from '../../../data/site.config';
-import { useI18n } from '../../../utils/i18n';
+import ProjectDetailLayout from '@app/layouts/projects/ProjectDetailLayout.astro';
+import ProjectDetailHeader from '@features/projects/components/ProjectDetailHeader.astro';
+import ReadmeContent from '@features/projects/components/ReadmeContent.astro';
+import { getGitHubRepo, getRepoReadme } from '@features/projects/lib/github';
+import { getConfiguredProjects } from '@features/projects/lib/projects';
+import { useI18n } from '@features/i18n/lib/i18n';
+import { renderSafeReadme } from '@features/projects/lib/readme';
 
 const { t } = useI18n();
 
 // Generate static paths
 export async function getStaticPaths() {
-  const { githubUsername } = getProjectsConfig();
-  // Only fetch user's public repositories
-  const userRepos = await getUserRepos(githubUsername);
-  const projects = userRepos
-    .filter(repo => !repo.isFork && !repo.isArchived)
-    .map(repo => ({
-      owner: repo.owner,
-      name: repo.name,
-    }));
+  const projects = await getConfiguredProjects();
   return projects.map(project => ({
     params: {
       owner: project.owner,
@@ -50,17 +42,7 @@ if (!readmeContent) {
   return Astro.redirect('/404');
 }
 
-// Remove YAML front matter (if exists)
-// Match YAML blocks in the form --- ... ---
-let processedContent = readmeContent;
-const yamlFrontMatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
-const match = processedContent.match(yamlFrontMatterRegex);
-if (match) {
-  processedContent = processedContent.replace(yamlFrontMatterRegex, '');
-}
-
-// Convert Markdown to HTML
-const htmlContent = await marked(processedContent);
+const htmlContent = await renderSafeReadme(readmeContent);
 ---
 
 <ProjectDetailLayout
@@ -85,24 +67,18 @@ const htmlContent = await marked(processedContent);
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0.5rem 1rem;
-    background: var(--md-sys-color-surface-container-low);
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 999px;
-    color: var(--md-sys-color-on-surface);
-    font-size: 0.8125rem;
-    font-weight: 500;
+    padding: 0.25rem 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.72rem;
+    font-weight: 740;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.1rem;
   }
 
   .back-button:hover {
-    background: var(--md-sys-color-surface-container);
-    border-color: var(--md-sys-color-primary);
     color: var(--md-sys-color-primary);
-    transform: translateX(-4px);
+    transform: translateX(-2px);
   }
 
   .back-button i {

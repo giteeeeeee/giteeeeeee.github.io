@@ -1,0 +1,129 @@
+---
+/**
+ * CategoryTabs.astro
+ * 项目分类标签组件
+ */
+import type { ProjectCategory } from '@app/config/projects.config';
+import { useI18n } from '@features/i18n/lib/i18n';
+
+interface Props {
+  categories: ProjectCategory[];
+  projectCounts: Record<string, number>;
+  currentCategory?: string;
+}
+
+const { categories, projectCounts, currentCategory = 'all' } = Astro.props;
+const { t } = useI18n();
+const getCategoryKey = (id: string) => `projects.category.${id}` as keyof typeof import('@app/config/i18n.config').translations.en;
+---
+
+<nav class="projects-categories">
+  {categories.map((category) => {
+    const count = projectCounts[category.id] || 0;
+    
+    return (
+      <a
+        href={`/projects?category=${category.id}`}
+        class={`category-tab ${currentCategory === category.id ? 'active' : ''}`}
+        data-category={category.id}
+      >
+        <i class={category.icon}></i>
+        <span data-i18n={getCategoryKey(category.id)}>{t(getCategoryKey(category.id)) || category.name}</span>
+        <span class="count">{count}</span>
+      </a>
+    );
+  })}
+</nav>
+
+<style>
+  .projects-categories {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    padding: 0 0 0.65rem;
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.46);
+    scrollbar-width: thin;
+    scrollbar-color: var(--md-sys-color-outline-variant) transparent;
+  }
+
+  .projects-categories::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .projects-categories::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .projects-categories::-webkit-scrollbar-thumb {
+    background: var(--md-sys-color-outline-variant);
+    border-radius: 3px;
+  }
+
+  .projects-categories::-webkit-scrollbar-thumb:hover {
+    background: var(--md-sys-color-outline);
+  }
+
+  .category-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0;
+    background: transparent;
+    border: 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.78rem;
+    font-weight: 720;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .category-tab::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -0.7rem;
+    left: 0;
+    height: 2px;
+    background: var(--md-sys-color-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+  }
+
+  .category-tab i {
+    font-size: 0.95rem;
+  }
+
+  .category-tab .count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1rem;
+    height: auto;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+  }
+
+  .category-tab:hover {
+    color: var(--md-sys-color-primary);
+  }
+
+  .category-tab.active {
+    color: var(--md-sys-color-primary);
+  }
+
+  .category-tab.active::after {
+    transform: scaleX(1);
+  }
+
+  .category-tab.active .count {
+    color: var(--md-sys-color-primary);
+  }
+</style>

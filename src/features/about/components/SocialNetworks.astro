@@ -1,0 +1,87 @@
+---
+import { useI18n } from '@features/i18n/lib/i18n';
+import type { UserContactLink } from '@app/config/site.config';
+
+interface Props { socials: UserContactLink[]; }
+const { socials } = Astro.props;
+const { t } = useI18n();
+---
+
+<section class="socials-section">
+  <header>
+    <p><i class="i-carbon:share" aria-hidden="true"></i>{String(socials.length).padStart(2, '0')}</p>
+    <h2 data-i18n="about.social.title">{t('about.social.title')}</h2>
+    <span data-i18n="about.social.description">{t('about.social.description')}</span>
+  </header>
+  <div class="socials-list">
+    {socials.map((social) => (
+      <a
+        href={social.href}
+        target={social.external ? '_blank' : undefined}
+        rel={social.external ? 'noopener noreferrer' : undefined}
+        data-contact-kind={social.kind}
+      >
+        <i class={social.icon} aria-hidden="true"></i>
+        <span><strong>{social.label}</strong><small>{social.value}</small></span>
+        <i class="i-carbon:arrow-up-right arrow" aria-hidden="true"></i>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  .socials-section {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: clamp(1.25rem, 4vw, 2.75rem);
+    margin-bottom: 2.7rem;
+  }
+
+  header > p {
+    display: flex;
+    align-items: center;
+    gap: 0.42rem;
+    margin: 0 0 0.4rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.68rem;
+    font-weight: 850;
+  }
+
+  header h2 { margin: 0; color: var(--md-sys-color-on-surface); font-size: 1.12rem; font-weight: 860; }
+  header > span { display: block; margin-top: 0.38rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.73rem; line-height: 1.55; }
+
+  .socials-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.46);
+  }
+
+  a {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    gap: 0.65rem;
+    align-items: center;
+    min-height: 4.4rem;
+    padding: 0.65rem 0.75rem;
+    border-right: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.34);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.4);
+  }
+
+  a:nth-child(2n) { border-right: 0; }
+  a:hover { background: linear-gradient(110deg, rgba(var(--md-sys-color-primary-rgb), 0.08), transparent 70%); }
+  a > i:first-child { display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 0.68rem; background: rgba(var(--md-sys-color-primary-container-rgb), 0.55); color: var(--md-sys-color-primary); }
+  a span { min-width: 0; }
+  strong, small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  strong { color: var(--md-sys-color-on-surface); font-size: 0.79rem; }
+  small { margin-top: 0.16rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.67rem; }
+  .arrow { color: var(--md-sys-color-primary); font-size: 0.76rem; }
+
+  @media (max-width: 660px) {
+    .socials-section { grid-template-columns: 1fr; gap: 0.8rem; }
+  }
+
+  @media (max-width: 460px) {
+    .socials-list { grid-template-columns: 1fr; }
+    a { border-right: 0; }
+  }
+</style>

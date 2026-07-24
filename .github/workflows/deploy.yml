@@ -33,27 +33,40 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Restore GitHub API cache
         uses: actions/cache@v4
         with:
           path: .cache/github
-          key: ${{ runner.os }}-github-cache-main-${{ hashFiles('src/utils/github.ts', 'src/data/projects.config.ts', 'src/data/user.config.ts') }}
+          key: ${{ runner.os }}-github-cache-main-${{ hashFiles('src/features/projects/lib/github.ts', 'src/app/config/projects.config.ts', 'src/app/config/user.config.ts') }}
           restore-keys: |
             ${{ runner.os }}-github-cache-main-
             ${{ runner.os }}-github-cache-
       
       - name: Install dependencies
         run: npm ci
-      
-      - name: Build with Astro
-        run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Validate production configuration
+        run: npm run check:production
         env:
-          # 如果你使用了 GitHub Token
+          SITE: ${{ vars.SITE }}
+          BASE: /
+
+      - name: Verify production build
+        run: npm run verify
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+          SITE: ${{ vars.SITE }}
+          BASE: /
+
+      - name: Dependency audit
+        run: npm run audit
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

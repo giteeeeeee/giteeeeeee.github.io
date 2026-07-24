@@ -1,0 +1,94 @@
+---
+/**
+ * LanguageToggle.astro
+ * 语言切换按钮 (中文/English)
+ */
+import { defaultLang } from '@app/config/i18n.config';
+
+const defaultLangLabel = {
+  en: 'EN',
+  zh: '中',
+}[defaultLang];
+---
+
+<button
+  class="header-tool-button lang-toggle"
+  aria-label="切换语言"
+  title="切换语言 / Switch Language"
+  data-i18n="lang.switch"
+  data-i18n-attrs="aria-label,title"
+  data-lang-toggle
+>
+  <i class="i-carbon:language" aria-hidden="true"></i>
+  <span class="lang-label" data-lang-label>{defaultLangLabel}</span>
+</button>
+
+<style>
+  .lang-toggle {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    padding: 0;
+    background: var(--reay-button-bg, rgba(var(--md-sys-color-surface-container-rgb), 0.52));
+    border: 1px solid var(--reay-button-border, rgba(var(--md-sys-color-outline-variant-rgb), 0.36));
+    border-radius: var(--reay-icon-button-radius, 0.95rem);
+    color: var(--md-sys-color-on-surface);
+    box-shadow: var(--reay-button-shadow, inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.16));
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    transition: transform 0.25s var(--reay-ease-out, ease), background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .lang-toggle i {
+    font-size: 1.1rem;
+  }
+
+  .lang-label {
+    position: absolute;
+    right: 0.22rem;
+    bottom: 0.18rem;
+    min-width: 0.8rem;
+    height: 0.72rem;
+    padding: 0 0.14rem;
+    border-radius: 999px;
+    background: rgba(var(--md-sys-color-primary-container-rgb), 0.78);
+    color: var(--md-sys-color-on-primary-container);
+    font-size: 0.5rem;
+    font-weight: 800;
+    line-height: 0.72rem;
+    text-align: center;
+    box-shadow: 0 0 0 1px rgba(var(--md-sys-color-surface-bright-rgb), 0.18);
+  }
+  
+  .lang-toggle::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(
+      135deg,
+      var(--md-sys-color-primary),
+      var(--md-sys-color-tertiary)
+    );
+    -webkit-mask: linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0) content-box, linear-gradient(rgb(var(--md-sys-color-surface-bright-rgb)) 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .lang-toggle:hover {
+    color: var(--md-sys-color-primary);
+    border-color: rgba(var(--md-sys-color-primary-rgb), 0.48);
+    background: var(--reay-button-bg-hover, rgba(var(--md-sys-color-primary-container-rgb), 0.42));
+    transform: translateY(-1px);
+    box-shadow: var(--reay-button-shadow-hover, 0 16px 32px -22px rgba(var(--md-sys-color-primary-rgb), 0.8));
+  }
+
+  .lang-toggle:hover::before {
+    opacity: 0.55;
+  }
+</style>

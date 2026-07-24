@@ -1,0 +1,40 @@
+---
+/** Homepage document layout with flow/snap body behavior. */
+import DocumentShell from '@app/layouts/base/DocumentShell.astro';
+import type { BackgroundConfig } from '@app/config/theme.config';
+import { getFeaturesConfig } from '@app/config/site.config';
+
+const {
+  title = 'My Website',
+  description = 'Technical notes and project practice',
+  ogImage,
+  background,
+} = Astro.props as {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  background?: Partial<BackgroundConfig>;
+};
+
+const homeLayout = getFeaturesConfig().home.layout;
+---
+
+<DocumentShell
+  {title}
+  {description}
+  {ogImage}
+  variant="home"
+  {homeLayout}
+  {background}
+>
+  <slot name="head" slot="head" />
+  <slot name="header-extra" slot="header-extra" />
+
+  <main class="overflow-auto relative min-h-0" data-pagefind-body>
+    <div data-page-transition data-page-transition-scope="home">
+      <slot />
+    </div>
+  </main>
+
+  <slot name="footer" />
+</DocumentShell>

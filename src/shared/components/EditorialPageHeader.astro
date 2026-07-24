@@ -1,0 +1,185 @@
+---
+export interface EditorialStat {
+  label: string;
+  value: string | number;
+  labelKey?: string;
+  icon?: string;
+  date?: Date;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  icon: string;
+  titleKey?: string;
+  descriptionKey?: string;
+  eyebrow?: string;
+  eyebrowKey?: string;
+  stats?: EditorialStat[];
+}
+
+const {
+  title,
+  description,
+  icon,
+  titleKey,
+  descriptionKey,
+  eyebrow,
+  eyebrowKey,
+  stats = [],
+} = Astro.props;
+---
+
+<header class="editorial-page-header" data-editorial-page-header>
+  <div class="editorial-page-heading">
+    <p class="editorial-page-eyebrow">
+      <i class={icon} aria-hidden="true"></i>
+      {eyebrow && <span data-i18n={eyebrowKey}>{eyebrow}</span>}
+    </p>
+    <h1 data-i18n={titleKey}>{title}</h1>
+    <p class="editorial-page-description" data-i18n={descriptionKey}>{description}</p>
+  </div>
+
+  {stats.length > 0 && (
+    <dl class="editorial-page-stats">
+      {stats.map((stat) => (
+        <div>
+          <dt>
+            {stat.icon && <i class={stat.icon} aria-hidden="true"></i>}
+            <span data-i18n={stat.labelKey}>{stat.label}</span>
+          </dt>
+          <dd
+            data-i18n-date={stat.date?.toISOString()}
+            data-i18n-date-format={stat.date ? 'short' : undefined}
+          >
+            {stat.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  )}
+</header>
+
+<style>
+  .editorial-page-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.9fr);
+    align-items: end;
+    gap: clamp(1.5rem, 5vw, 4.5rem);
+    margin-bottom: clamp(1.8rem, 4vw, 2.7rem);
+    padding-bottom: clamp(1.25rem, 3vw, 1.8rem);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.52);
+  }
+
+  .editorial-page-heading {
+    min-width: 0;
+  }
+
+  .editorial-page-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.48rem;
+    min-height: 1.25rem;
+    margin: 0 0 0.55rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .editorial-page-eyebrow i {
+    font-size: 1rem;
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: clamp(1.85rem, 4vw, 2.6rem);
+    font-weight: 760;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    font-family: var(--reay-font-heading);
+  }
+
+  .editorial-page-description {
+    max-width: 42rem;
+    margin: 0.72rem 0 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  .editorial-page-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+    gap: 0;
+    margin: 0;
+    font-family: var(--reay-font-metadata);
+  }
+
+  .editorial-page-stats > div {
+    min-width: 0;
+    padding: 0.1rem 0.9rem 0.15rem;
+    border-left: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.48);
+  }
+
+  .editorial-page-stats dt {
+    display: flex;
+    align-items: center;
+    gap: 0.32rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.67rem;
+    font-weight: 650;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+  }
+
+  .editorial-page-stats dt i {
+    color: var(--md-sys-color-primary);
+    font-size: 0.82rem;
+  }
+
+  .editorial-page-stats dd {
+    margin: 0.3rem 0 0;
+    overflow: hidden;
+    color: var(--md-sys-color-on-surface);
+    font-size: clamp(0.94rem, 1.8vw, 1.16rem);
+    font-weight: 720;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+  }
+
+  .editorial-page-stats dd[data-i18n-date] {
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 860px) {
+    .editorial-page-header {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .editorial-page-stats {
+      width: 100%;
+    }
+
+    .editorial-page-stats > div:first-child {
+      border-left: 0;
+      padding-left: 0;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .editorial-page-stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 0.85rem;
+    }
+
+    .editorial-page-stats > div:nth-child(odd) {
+      border-left: 0;
+      padding-left: 0;
+    }
+  }
+</style>

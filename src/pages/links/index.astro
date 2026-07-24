@@ -5,32 +5,55 @@
  * 
  * Features:
  * - Group display by type (friends, sites, social)
- * - Card display with background preview
- * - Semi-transparent mask, disappears on hover
+ * - Avatar backdrop by default, screenshot preview on interaction
+ * - Bounded responsive card grid
  * - Category filtering
  * - Responsive layout
  */
-import LinksLayout from '../../layouts/links/LinksLayout.astro';
-import LinksHeader from '../../components/links/LinksHeader.astro';
-import LinksCategoryTabs from '../../components/links/LinksCategoryTabs.astro';
-import LinkCard from '../../components/links/LinkCard.astro';
-import { getLinksConfig } from '../../data/site.config';
-import { useI18n } from '../../utils/i18n';
+import LinksLayout from '@app/layouts/links/LinksLayout.astro';
+import LinksCategoryTabs from '@features/links/components/LinksCategoryTabs.astro';
+import LinkCard from '@features/links/components/LinkCard.astro';
+import EditorialPageHeader from '@shared/components/EditorialPageHeader.astro';
+import {
+  getLinksConfig,
+  getSiteProfile,
+  getUserContactLinks,
+  getUserProfile,
+  getUserSocialLinks,
+} from '@app/config/site.config';
+import type { FriendLink } from '@app/config/links.config';
+import type { TranslationKey } from '@app/config/i18n.config';
+import { useI18n } from '@features/i18n/lib/i18n';
 
-const { t } = useI18n();
-const { friendLinks, linkCategories, linkApplicationInfo, mySiteInfo } = getLinksConfig();
+const { t, currentLang } = useI18n();
+const { friendLinks, linkCategories, linkApplicationInfo } = getLinksConfig();
+const user = getUserProfile();
+const mySiteInfo = getSiteProfile(currentLang);
+const contactLinks = getUserContactLinks();
+const applicationDescriptionKey = linkApplicationInfo.description.startsWith('links.')
+  ? linkApplicationInfo.description
+  : undefined;
+const applicationDescription = applicationDescriptionKey
+  ? t(applicationDescriptionKey as TranslationKey)
+  : linkApplicationInfo.description;
 
 // Group by type
 const friendsLinks = friendLinks.filter(link => link.type === 'friend');
 const sitesLinks = friendLinks.filter(link => link.type === 'site');
-const socialLinks = friendLinks.filter(link => link.type === 'social');
+const socialLinks: FriendLink[] = getUserSocialLinks().map((link) => ({
+  name: link.label,
+  url: link.href,
+  avatar: user.avatar,
+  description: link.value,
+  category: 'all',
+  type: 'social',
+}));
 
 // Calculate statistics
-const totalLinks = friendLinks.length;
+const totalLinks = friendLinks.length + socialLinks.length;
 const featuredLinks = friendLinks.filter(link => link.featured).length;
 const friendsCount = friendsLinks.length;
 const sitesCount = sitesLinks.length;
-const socialCount = socialLinks.length;
 
 // Calculate link count for each type category
 function getLinkCounts(links: typeof friendLinks, categories: typeof linkCategories.friend) {
@@ -57,48 +80,26 @@ const requiredFields = [
   { icon: 'i-carbon:image', text: t('links.apply.field.avatar') },
   { icon: 'i-carbon:text-long-paragraph', text: t('links.apply.field.desc') },
 ];
-
-function getContactHref(value: string, label?: string) {
-  const raw = value.trim();
-  const lowerLabel = label?.toLowerCase() ?? '';
-
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) {
-    return { href: `mailto:${raw}`, external: false, copyOnly: false };
-  }
-
-  if (/^https?:\/\//i.test(raw)) {
-    return { href: raw, external: true, copyOnly: false };
-  }
-
-  if (/^(github|twitter|x)\.com\//i.test(raw)) {
-    return { href: `https://${raw}`, external: true, copyOnly: false };
-  }
-
-  if (raw.startsWith('@')) {
-    const username = raw.slice(1);
-    const host = lowerLabel.includes('github') ? 'github.com' : 'x.com';
-    return { href: `https://${host}/${username}`, external: true, copyOnly: false };
-  }
-
-  return { href: '#', external: false, copyOnly: true };
-}
-
-const contactLinks = linkApplicationInfo.contacts.map((contact) => ({
-  ...contact,
-  ...getContactHref(contact.value, contact.label),
-}));
+const headerStats = [
+  { icon: 'i-carbon:link', labelKey: 'links.totalLinks', label: t('links.totalLinks'), value: totalLinks },
+  { icon: 'i-carbon:star-filled', labelKey: 'links.featured', label: t('links.featured'), value: featuredLinks },
+  { icon: 'i-carbon:user-favorite', labelKey: 'links.friends', label: t('links.friends'), value: friendsCount },
+  { icon: 'i-carbon:earth', labelKey: 'links.sites', label: t('links.sites'), value: sitesCount },
+];
 
 console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${sitesLinks.length} sites, ${socialLinks.length} social`);
 ---
 
 <LinksLayout>
-  <!-- Page title and statistics -->
-  <LinksHeader 
-    totalLinks={totalLinks}
-    featuredLinks={featuredLinks}
-    friendsCount={friendsCount}
-    sitesCount={sitesCount}
-    socialCount={socialCount}
+  <EditorialPageHeader
+    title={t('links.title')}
+    description={t('links.subtitle')}
+    titleKey="links.title"
+    descriptionKey="links.subtitle"
+    eyebrow={t('links.eyebrow')}
+    eyebrowKey="links.eyebrow"
+    icon="i-carbon:link"
+    stats={headerStats}
   />
 
   <!-- Friend links -->
@@ -194,7 +195,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
           <h3 data-i18n="links.apply.requirements">{t('links.apply.requirements')}</h3>
         </div>
         <div class="apply-card-content">
-          <p class="apply-intro">{linkApplicationInfo.description}</p>
+          <p class="apply-intro" data-i18n={applicationDescriptionKey}>{applicationDescription}</p>
 
           <div class="requirements-list">
             <div class="requirement-item">
@@ -232,7 +233,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
             </div>
           </div>
 
-          <div class="contact-section">
+          {contactLinks.length > 0 && <div class="contact-section">
             <p class="contact-hint" data-i18n="links.apply.contactHint">{t('links.apply.contactHint')}</p>
             <div class="contact-buttons">
               {contactLinks.map((contact) => (
@@ -242,7 +243,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
                   target={contact.external ? '_blank' : undefined}
                   rel={contact.external ? 'noopener noreferrer' : undefined}
                   data-contact={contact.value}
-                  data-copy-only={contact.copyOnly ? 'true' : undefined}
+                  data-contact-kind={contact.kind}
                   aria-label={`${t('links.apply.contactOpen')} ${contact.label}`}
                 >
                   <i class={contact.icon}></i>
@@ -250,7 +251,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
                 </a>
               ))}
             </div>
-          </div>
+          </div>}
         </div>
       </div>
 
@@ -275,7 +276,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
                   <i class="i-carbon:copy"></i>
                 </button>
               </div>
-              <div class="info-row" data-copy={mySiteInfo.url}>
+              {mySiteInfo.url && <div class="info-row" data-copy={mySiteInfo.url}>
                 <div class="info-content">
                   <span class="info-label" data-i18n="links.apply.siteUrl">{t('links.apply.siteUrl')}</span>
                   <span class="info-value">{mySiteInfo.url}</span>
@@ -283,7 +284,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
                 <button class="copy-btn" title={t('links.copy')} data-i18n="links.copy" data-i18n-attr="title">
                   <i class="i-carbon:copy"></i>
                 </button>
-              </div>
+              </div>}
               <div class="info-row" data-copy={mySiteInfo.description}>
                 <div class="info-content">
                   <span class="info-label" data-i18n="links.apply.siteDesc">{t('links.apply.siteDesc')}</span>
@@ -309,16 +310,18 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
 
   .section-header {
     margin-bottom: 1.25rem;
-    text-align: center;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+    text-align: left;
   }
 
   .section-title {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.5rem;
-    font-size: 1.375rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 840;
     color: var(--md-sys-color-on-surface);
     margin: 0 0 0.375rem 0;
   }
@@ -337,28 +340,28 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
   /* Links grid */
   .links-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 0.875rem;
-    margin-top: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18.5rem), 1fr));
+    gap: 0.9rem;
+    margin-top: 0.15rem;
   }
 
   /* Apply for link exchange section */
   .apply-section {
-    margin-top: 4rem;
-    padding-top: 2.5rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
     border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.48);
   }
 
   .apply-section-title {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.5rem;
-    font-size: 1.375rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 840;
     color: var(--md-sys-color-on-surface);
     width: fit-content;
-    margin: 0 auto 1.5rem;
+    margin: 0 0 1.25rem;
   }
 
   .apply-section-title i {
@@ -369,23 +372,25 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
   .apply-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.25rem;
+    gap: 0;
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.46);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.46);
   }
 
   .apply-card {
     position: relative;
-    background:
-      linear-gradient(145deg, rgba(var(--md-sys-color-surface-rgb), 0.78), rgba(var(--md-sys-color-surface-container-rgb), 0.52)),
-      radial-gradient(circle at 12% 0%, rgba(var(--md-sys-color-primary-rgb), 0.1), transparent 34%);
-    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
-    border-radius: var(--reay-radius-lg, 1.35rem);
+    background: rgba(var(--md-sys-color-surface-container-rgb), 0.26);
+    border: 0;
+    border-radius: 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     min-height: 340px;
-    box-shadow:
-      0 22px 54px -42px rgba(var(--md-sys-color-shadow-rgb), 0.72),
-      inset 0 1px 0 rgba(var(--md-sys-color-surface-bright-rgb), 0.16);
+    box-shadow: none;
+  }
+
+  .apply-card:first-child {
+    border-right: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
   }
 
   .apply-card::before {
@@ -396,7 +401,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
     border-radius: inherit;
     background:
       linear-gradient(115deg, transparent 0%, rgba(var(--md-sys-color-surface-bright-rgb), 0.16) 42%, transparent 70%);
-    opacity: 0.55;
+    display: none;
   }
 
   .apply-card-header {
@@ -406,11 +411,7 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
     align-items: center;
     gap: 0.625rem;
     padding: 1.125rem 1.25rem;
-    background: linear-gradient(
-      135deg,
-      rgba(var(--md-sys-color-primary-container-rgb), 0.7) 0%,
-      rgba(var(--md-sys-color-secondary-container-rgb), 0.58) 100%
-    );
+    background: transparent;
     border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.38);
   }
 
@@ -728,22 +729,19 @@ console.log(`📊 Loaded ${totalLinks} links: ${friendsLinks.length} friends, ${
 
   /* Responsive design */
   @media (max-width: 968px) {
-    .links-grid {
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    }
-
     .apply-grid {
       grid-template-columns: 1fr;
+    }
+
+    .apply-card:first-child {
+      border-right: 0;
+      border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
     }
   }
 
   @media (max-width: 768px) {
     .links-section {
       margin-bottom: 2.5rem;
-    }
-
-    .links-grid {
-      grid-template-columns: 1fr;
     }
 
     .section-title {

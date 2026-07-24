@@ -1,0 +1,177 @@
+---
+/** Open editorial entry for one article series. */
+import type { CollectionEntry } from 'astro:content';
+import { calculateReadingTime, getSeriesUrl } from '@features/blog/lib/blog';
+import { useI18n } from '@features/i18n/lib/i18n';
+
+interface Props {
+  series: string;
+  count: number;
+  posts: CollectionEntry<'blog'>[];
+}
+
+const { series, count, posts = [] } = Astro.props;
+const { t } = useI18n();
+const latestPost = [...posts].sort(
+  (left, right) => right.data.publishDate.getTime() - left.data.publishDate.getTime()
+)[0];
+const topTags = [...new Set(posts.flatMap((post) => post.data.tags))].slice(0, 3);
+const readingMinutes = posts.reduce((sum, post) => sum + calculateReadingTime(post.body), 0);
+const chapterPreview = posts.slice(0, 3);
+---
+
+<article class="series-entry" data-series-entry>
+  <a href={getSeriesUrl(series)} data-astro-prefetch="hover">
+    <span class="series-copy">
+      <span class="series-kicker">
+        <i class="i-carbon:folder" aria-hidden="true"></i>
+        {count} <span data-i18n="archives.postsCount">{t('archives.postsCount')}</span>
+      </span>
+      <h3>{series}</h3>
+      {chapterPreview.length > 0 && (
+        <ol class="series-preview">
+          {chapterPreview.map((post, index) => (
+            <li><span>{String(index + 1).padStart(2, '0')}</span>{post.data.title}</li>
+          ))}
+        </ol>
+      )}
+      {topTags.length > 0 && (
+        <span class="series-tags">{topTags.map((tag) => <span>#{tag}</span>)}</span>
+      )}
+    </span>
+    <span class="series-meta">
+      <span><i class="i-carbon:time" aria-hidden="true"></i>{readingMinutes} <span data-i18n="blog.readTime">{t('blog.readTime')}</span></span>
+      {latestPost && (
+        <time
+          datetime={latestPost.data.publishDate.toISOString()}
+          data-i18n-date={latestPost.data.publishDate.toISOString()}
+          data-i18n-date-format="short"
+        >
+          {latestPost.data.publishDate.toLocaleDateString('zh-CN')}
+        </time>
+      )}
+      <i class="i-carbon:arrow-up-right series-arrow" aria-hidden="true"></i>
+    </span>
+  </a>
+</article>
+
+<style>
+  .series-entry {
+    min-width: 0;
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+  }
+
+  .series-entry:first-child {
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.5);
+  }
+
+  .series-entry > a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.9rem;
+    padding: 1rem 0.6rem;
+    color: inherit;
+  }
+
+  .series-entry > a:hover {
+    padding-right: 0.35rem;
+    padding-left: 0.85rem;
+    background: linear-gradient(90deg, rgba(var(--md-sys-color-primary-rgb), 0.065), transparent 75%);
+  }
+
+  .series-copy {
+    min-width: 0;
+  }
+
+  .series-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.22rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.64rem;
+    font-weight: 680;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 1rem;
+    font-weight: 720;
+  }
+
+  .series-preview {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0.58rem 0 0;
+    padding: 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.7rem;
+    line-height: 1.4;
+    list-style: none;
+  }
+
+  .series-preview li {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .series-preview li span {
+    margin-right: 0.48rem;
+    color: var(--md-sys-color-primary);
+    font-family: var(--reay-font-metadata);
+    font-size: 0.58rem;
+  }
+
+  .series-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.38rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.64rem;
+  }
+
+  .series-meta {
+    display: grid;
+    justify-items: end;
+    gap: 0.42rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.64rem;
+    white-space: nowrap;
+  }
+
+  .series-meta > span {
+    display: flex;
+    align-items: center;
+    gap: 0.32rem;
+  }
+
+  time {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.62rem;
+    white-space: nowrap;
+  }
+
+  .series-arrow {
+    color: var(--md-sys-color-primary);
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 600px) {
+    .series-entry > a {
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    .series-meta > span,
+    .series-meta time {
+      display: none;
+    }
+  }
+</style>

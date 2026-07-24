@@ -1,0 +1,221 @@
+---
+/** Visual link portrait with a blurred avatar backdrop and optional site preview. */
+import { getLinksConfig } from '@app/config/site.config';
+import type { TranslationKey } from '@app/config/i18n.config';
+import type { FriendLink } from '@app/config/links.config';
+import { useI18n } from '@features/i18n/lib/i18n';
+
+interface Props { link: FriendLink; }
+const { link } = Astro.props;
+const { t } = useI18n();
+const previews = getLinksConfig().previews;
+const descriptionKey = link.description.startsWith('links.') ? link.description : undefined;
+const description = descriptionKey ? t(descriptionKey as TranslationKey) : link.description;
+const previewUrl = link.screenshot || (previews.provider === 'microlink'
+  ? `${previews.endpoint}?url=${encodeURIComponent(link.url)}&screenshot=true&meta=false&embed=screenshot.url`
+  : '');
+---
+
+<a
+  href={link.url}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="link-portrait-card"
+  data-link-card
+  data-category={link.category}
+  data-featured={link.featured}
+  data-preview-src={previewUrl || undefined}
+>
+  <span class="link-backdrop" aria-hidden="true">
+    <img src={link.avatar} alt="" loading="lazy" decoding="async" />
+  </span>
+  <span class="link-preview" aria-hidden="true">
+    <img alt="" data-link-preview loading="lazy" decoding="async" />
+  </span>
+  <span class="link-scrim" aria-hidden="true"></span>
+
+  <img src={link.avatar} alt="" class="link-avatar" loading="lazy" decoding="async" />
+  <span class="link-copy">
+    <span class="link-heading">
+      <strong>{link.name}</strong>
+      {link.featured && <i class="i-carbon:star-filled" aria-label={t('links.featured')}></i>}
+    </span>
+    <span data-i18n={descriptionKey}>{description}</span>
+  </span>
+  <span class="link-visit" aria-hidden="true">
+    <i class="i-carbon:arrow-up-right"></i>
+  </span>
+</a>
+
+<style>
+  .link-portrait-card {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 3.3rem minmax(0, 1fr);
+    gap: 0.95rem;
+    align-items: end;
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+    overflow: hidden;
+    padding: 1.05rem;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
+    border-radius: 1.05rem;
+    background:
+      radial-gradient(circle at 16% 12%, rgba(var(--md-sys-color-primary-rgb), 0.24), transparent 40%),
+      var(--md-sys-color-surface-container-low);
+    color: inherit;
+    box-shadow: 0 20px 52px -42px rgba(var(--md-sys-color-shadow-rgb), 0.74);
+    contain: layout paint;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .link-portrait-card:hover {
+    border-color: rgba(var(--md-sys-color-primary-rgb), 0.42);
+    box-shadow: 0 28px 68px -42px rgba(var(--md-sys-color-shadow-rgb), 0.82);
+    transform: translateY(-2px);
+  }
+
+  .link-backdrop,
+  .link-preview,
+  .link-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    pointer-events: none;
+  }
+
+  .link-backdrop {
+    overflow: hidden;
+    opacity: 0.64;
+    transition: opacity 0.32s ease;
+  }
+
+  .link-backdrop img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(7px) saturate(1.12);
+    transform: scale(1.24);
+  }
+
+  .link-preview {
+    z-index: -2;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .link-portrait-card.has-preview:hover .link-preview,
+  .link-portrait-card.has-preview:focus-visible .link-preview {
+    opacity: 0.88;
+  }
+
+  .link-portrait-card.has-preview:hover .link-backdrop,
+  .link-portrait-card.has-preview:focus-visible .link-backdrop {
+    opacity: 0.12;
+  }
+
+  .link-portrait-card.preview-error .link-backdrop {
+    opacity: 0.7;
+  }
+
+  .link-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.04);
+    transition: transform 0.5s ease;
+  }
+
+  .link-portrait-card:hover .link-preview img,
+  .link-portrait-card:focus-visible .link-preview img {
+    transform: scale(1);
+  }
+
+  .link-scrim {
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgba(var(--md-sys-color-surface-rgb), 0.2) 0%, rgba(var(--md-sys-color-surface-rgb), 0.82) 100%),
+      linear-gradient(105deg, rgba(var(--md-sys-color-surface-rgb), 0.72), transparent 76%);
+  }
+
+  .link-avatar {
+    width: 3.3rem;
+    height: 3.3rem;
+    border: 1px solid rgba(var(--md-sys-color-surface-bright-rgb), 0.28);
+    border-radius: 0.95rem;
+    object-fit: cover;
+    background: var(--md-sys-color-surface-container-high);
+    box-shadow: 0 12px 30px -20px rgba(var(--md-sys-color-shadow-rgb), 0.82);
+  }
+
+  .link-copy,
+  .link-heading {
+    min-width: 0;
+  }
+
+  .link-copy {
+    align-self: end;
+    padding-right: 2.2rem;
+  }
+
+  .link-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.42rem;
+  }
+
+  .link-heading strong {
+    overflow: hidden;
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.92rem;
+    font-weight: 860;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .link-heading i {
+    color: var(--md-sys-color-tertiary);
+    font-size: 0.72rem;
+  }
+
+  .link-copy > span:last-child {
+    display: -webkit-box;
+    margin-top: 0.3rem;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  .link-visit {
+    position: absolute;
+    top: 0.95rem;
+    right: 0.95rem;
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.46);
+    border-radius: 999px;
+    color: var(--md-sys-color-primary);
+    background: rgba(var(--md-sys-color-surface-container-high-rgb), 0.64);
+    font-size: 0.82rem;
+    transition: transform 0.22s ease, background 0.22s ease;
+  }
+
+  .link-portrait-card:hover .link-visit {
+    background: var(--md-sys-color-primary-container);
+    transform: translate(2px, -2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link-portrait-card,
+    .link-visit {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,37 @@
+---
+import EditorialPageLayout from '../base/EditorialPageLayout.astro';
+import EditorialPageHeader, { type EditorialStat } from '@shared/components/EditorialPageHeader.astro';
+import { useI18n } from '@features/i18n/lib/i18n';
+
+interface Props {
+  title: string;
+  description: string;
+  titleKey?: string;
+  descriptionKey?: string;
+  stats?: EditorialStat[];
+}
+
+const { title, description, titleKey, descriptionKey, stats = [] } = Astro.props;
+const { t } = useI18n();
+---
+
+<EditorialPageLayout {title} {description} pageClass="archive-layout">
+  <EditorialPageHeader
+    {title}
+    {description}
+    {titleKey}
+    {descriptionKey}
+    eyebrow={t('archives.eyebrow')}
+    eyebrowKey="archives.eyebrow"
+    icon="i-carbon:analytics"
+    {stats}
+  />
+
+  <div class="archive-main"><slot /></div>
+</EditorialPageLayout>
+
+<style>
+  .archive-main {
+    min-width: 0;
+  }
+</style>

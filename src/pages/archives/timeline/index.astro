@@ -1,22 +1,23 @@
 ---
-/**
- * Timeline Page
- * Display all posts in chronological order
- */
-import ArchiveLayout from '../../../layouts/archives/ArchiveLayout.astro';
-import TimelineArchive from '../../../components/archives/TimelineArchive.astro';
-import { getPostsByYear } from '../../../utils/blog';
-import { useI18n } from '../../../utils/i18n';
+import ArchiveLayout from '@app/layouts/archives/ArchiveLayout.astro';
+import ArchiveChronicle from '@features/archives/components/ArchiveChronicle.astro';
+import { getPostsByYear } from '@features/blog/lib/blog';
+import { useI18n } from '@features/i18n/lib/i18n';
 
-// Data layer: Get posts grouped by year
 const postsByYear = await getPostsByYear();
+const posts = postsByYear.flatMap(([, yearPosts]) => yearPosts);
 const { t } = useI18n();
-
-// Statistics
-const totalPosts = postsByYear.reduce((sum, [, posts]) => sum + posts.length, 0);
-const totalYears = postsByYear.length;
-const firstYear = postsByYear[postsByYear.length - 1]?.[0];
+const firstYear = postsByYear.at(-1)?.[0];
 const latestYear = postsByYear[0]?.[0];
+const timeRange = firstYear && latestYear
+  ? (firstYear === latestYear ? String(firstYear) : `${firstYear}–${latestYear}`)
+  : '-';
+const headerStats = [
+  { icon: 'i-carbon:calendar', labelKey: 'archives.timeline.yearsSpan', label: t('archives.timeline.yearsSpan'), value: postsByYear.length },
+  { icon: 'i-carbon:document', labelKey: 'archives.timeline.totalPosts', label: t('archives.timeline.totalPosts'), value: posts.length },
+  { icon: 'i-carbon:growth', labelKey: 'archives.timeline.averageOutput', label: t('archives.timeline.averageOutput'), value: postsByYear.length > 0 ? Math.round(posts.length / postsByYear.length) : 0 },
+  { icon: 'i-carbon:time', labelKey: 'archives.timeline.timeRange', label: t('archives.timeline.timeRange'), value: timeRange },
+];
 ---
 
 <ArchiveLayout
@@ -24,411 +25,41 @@ const latestYear = postsByYear[0]?.[0];
   description={t('archives.timeline.subtitle')}
   titleKey="archives.timeline.title"
   descriptionKey="archives.timeline.subtitle"
-  showBackButton={true}
-  backUrl="/archives"
+  stats={headerStats}
 >
-  <!-- Timeline statistics -->
-  <div class="timeline-summary">
-    <div class="summary-card reay-card">
-      <div class="summary-icon">
-        <i class="i-carbon:calendar"></i>
-      </div>
-      <div class="summary-content">
-        <div class="summary-value">{totalYears}</div>
-        <div class="summary-label" data-i18n="archives.timeline.yearsSpan">{t('archives.timeline.yearsSpan')}</div>
-      </div>
-    </div>
-
-    <div class="summary-card reay-card">
-      <div class="summary-icon">
-        <i class="i-carbon:document"></i>
-      </div>
-      <div class="summary-content">
-        <div class="summary-value">{totalPosts}</div>
-        <div class="summary-label" data-i18n="archives.timeline.totalPosts">{t('archives.timeline.totalPosts')}</div>
-      </div>
-    </div>
-
-    <div class="summary-card reay-card">
-      <div class="summary-icon">
-        <i class="i-carbon:growth"></i>
-      </div>
-      <div class="summary-content">
-        <div class="summary-value">
-          {totalYears > 0 ? Math.round(totalPosts / totalYears) : 0}
-        </div>
-        <div class="summary-label" data-i18n="archives.timeline.averageOutput">{t('archives.timeline.averageOutput')}</div>
-      </div>
-    </div>
-
-    <div class="summary-card reay-card">
-      <div class="summary-icon">
-        <i class="i-carbon:time"></i>
-      </div>
-      <div class="summary-content">
-        <div class="summary-value">{firstYear}-{latestYear}</div>
-        <div class="summary-label" data-i18n="archives.timeline.timeRange">{t('archives.timeline.timeRange')}</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Year quick navigation -->
-  {postsByYear.length > 0 && (
-    <div class="year-nav">
-      <span class="year-nav-label">
-        <i class="i-carbon:location"></i>
-        {t('archives.timeline.quickJump')}
-      </span>
-      <div class="year-nav-links">
-        {postsByYear.map(([year]) => (
-          <a href={`#year-${year}`} class="year-nav-link">
-            {year}
-          </a>
-        ))}
-      </div>
-    </div>
+  {postsByYear.length > 1 && (
+    <nav class="year-jump" aria-label={t('archives.timeline.quickJump')}>
+      <span><i class="i-carbon:location" aria-hidden="true"></i><span data-i18n="archives.timeline.quickJump">{t('archives.timeline.quickJump')}</span></span>
+      {postsByYear.map(([year]) => <a href={`#archive-year-${year}`}>{year}</a>)}
+    </nav>
   )}
 
-  <!-- Timeline -->
-  {postsByYear.length > 0 ? (
-    <div class="timeline-container">
-      {postsByYear.map(([year, posts]) => (
-        <div id={`year-${year}`} class="year-section">
-          <TimelineArchive postsByYear={[[year, posts]]} groupByMonth={false} />
-        </div>
-      ))}
-    </div>
+  {posts.length > 0 ? (
+    <ArchiveChronicle {posts} />
   ) : (
-    <div class="empty-state">
-      <i class="i-carbon:document-blank"></i>
-      <h3 data-i18n="archives.empty.posts.title">{t('archives.empty.posts.title')}</h3>
+    <div class="archive-empty">
+      <i class="i-carbon:document-blank" aria-hidden="true"></i>
+      <h2 data-i18n="archives.empty.posts.title">{t('archives.empty.posts.title')}</h2>
       <p data-i18n="archives.empty.posts.description">{t('archives.empty.posts.description')}</p>
     </div>
   )}
-
-  <!-- Back to top button -->
-  <button id="back-to-top" class="back-to-top" aria-label="Back to top">
-    <i class="i-carbon:arrow-up"></i>
-  </button>
 </ArchiveLayout>
 
 <style>
-  .timeline-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .summary-card {
+  .year-jump {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
-    background: var(--reay-surface-bg);
-    border: 1px solid var(--reay-surface-border);
-    border-radius: 1.1rem;
-    transition: all 0.3s ease;
-  }
-
-  .summary-card:hover {
-    background: var(--reay-surface-bg-hover);
-    transform: translateY(-3px);
-    box-shadow: var(--reay-surface-shadow-hover);
-  }
-
-  .summary-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, 
-      var(--md-sys-color-primary-container), 
-      var(--md-sys-color-secondary-container)
-    );
-    color: var(--md-sys-color-on-primary-container);
-    font-size: 1.5rem;
-  }
-
-  .summary-content {
-    flex: 1;
-  }
-
-  .summary-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--md-sys-color-on-surface);
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .summary-label {
-    font-size: 0.75rem;
-    color: var(--md-sys-color-on-surface-variant);
-    margin-top: 0.25rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  /* Year navigation */
-  .year-nav {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    margin-bottom: 2rem;
-    background: var(--md-sys-color-surface-container-lowest);
-    border-radius: 12px;
-    border: 1px solid var(--md-sys-color-outline-variant);
+    gap: 0.9rem;
+    margin: -0.45rem 0 2rem;
+    padding-bottom: 0.7rem;
     overflow-x: auto;
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
   }
-
-  .year-nav-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface-variant);
-    white-space: nowrap;
-  }
-
-  .year-nav-links {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .year-nav-link {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--md-sys-color-primary);
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-  }
-
-  .year-nav-link:hover {
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-  }
-
-  .timeline-container {
-    position: relative;
-  }
-
-  .year-section {
-    scroll-margin-top: 100px;
-  }
-
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 2rem;
-    text-align: center;
-    background: var(--md-sys-color-surface-container-lowest);
-    border-radius: 16px;
-    border: 1px dashed var(--md-sys-color-outline-variant);
-  }
-
-  .empty-state i {
-    font-size: 4rem;
-    color: var(--md-sys-color-outline);
-    margin-bottom: 1rem;
-  }
-
-  .empty-state h3 {
-    font-size: 1.5rem;
-    color: var(--md-sys-color-on-surface);
-    margin: 0 0 0.5rem 0;
-  }
-
-  .empty-state p {
-    color: var(--md-sys-color-on-surface-variant);
-    margin: 0;
-  }
-
-  .back-to-top {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    border: none;
-    border-radius: 12px;
-    font-size: 1.25rem;
-    cursor: pointer;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.2);
-    z-index: 100;
-  }
-
-  .back-to-top.visible {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .back-to-top:hover {
-    background: var(--md-sys-color-primary);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(var(--md-sys-color-shadow-rgb), 0.3);
-  }
-
-  @media (max-width: 768px) {
-    .timeline-summary {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-
-    .summary-card {
-      padding: 1rem;
-    }
-
-    .summary-icon {
-      width: 40px;
-      height: 40px;
-      font-size: 1.25rem;
-    }
-
-    .summary-value {
-      font-size: 1.5rem;
-    }
-
-    .year-nav {
-      padding: 0.75rem 1rem;
-      gap: 0.75rem;
-    }
-
-    .year-nav-links {
-      gap: 0.375rem;
-    }
-
-    .year-nav-link {
-      padding: 0.375rem 0.75rem;
-      font-size: 0.8125rem;
-    }
-
-    .back-to-top {
-      bottom: 1rem;
-      right: 1rem;
-      width: 44px;
-      height: 44px;
-    }
-  }
-
-    /* Scrollbar styles */
-  ::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  .year-nav::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .year-nav::-webkit-scrollbar-thumb {
-    background: var(--md-sys-color-outline-variant);
-    border-radius: 2px;
-  }
-
-  .year-nav::-webkit-scrollbar-thumb:hover {
-    background: var(--md-sys-color-outline);
-  }
+  .year-jump span, .year-jump a { flex: 0 0 auto; font-size: 0.7rem; }
+  .year-jump > span { display: flex; align-items: center; gap: 0.35rem; color: var(--md-sys-color-on-surface-variant); font-weight: 760; }
+  .year-jump a { color: var(--md-sys-color-primary); font-family: var(--reay-font-metadata); font-weight: 700; }
+  .archive-empty { padding: 3rem 0; text-align: center; color: var(--md-sys-color-on-surface-variant); }
+  .archive-empty i { color: var(--md-sys-color-outline); font-size: 2rem; }
+  .archive-empty h2 { margin: 0.7rem 0 0.35rem; color: var(--md-sys-color-on-surface); font-size: 1rem; }
+  .archive-empty p { margin: 0; font-size: 0.78rem; }
 </style>
-
-<script>
-  // Back to top button logic
-  const backToTopBtn = document.getElementById('back-to-top');
-
-  if (backToTopBtn) {
-    // Listen for scroll events
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 300) {
-        backToTopBtn.classList.add('show');
-      } else {
-        backToTopBtn.classList.remove('show');
-      }
-    });
-
-    // Click to scroll to top
-    backToTopBtn.addEventListener('click', () => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    });
-  }
-
-  // Smooth scroll to anchors
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href') as string);
-      if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }
-    });
-  });
-
-  /**
-   * Save and restore scroll position
-   * When clicking post links, save current page scroll position
-   * When returning from post page, restore to previous scroll position
-   */
-  const SCROLL_KEY = 'timeline-scroll-position';
-  const PATH_KEY = 'timeline-scroll-path';
-
-  function saveScrollPosition() {
-    sessionStorage.setItem(SCROLL_KEY, window.scrollY.toString());
-    sessionStorage.setItem(PATH_KEY, window.location.pathname);
-  }
-
-  // Restore scroll position
-  function restoreScrollPosition() {
-    const savedScroll = sessionStorage.getItem(SCROLL_KEY);
-    const savedPath = sessionStorage.getItem(PATH_KEY);
-
-    if (savedScroll && savedPath) {
-      requestAnimationFrame(() => {
-        // Only restore scroll position for the same path
-        if (window.location.pathname === savedPath) {
-          window.scrollTo(0, parseInt(savedScroll));
-        }
-        // Clear after use
-        sessionStorage.removeItem(SCROLL_KEY);
-        sessionStorage.removeItem(PATH_KEY);
-      });
-    }
-  }
-
-  // Save scroll position when clicking post links
-  document.querySelectorAll('a[href^="/blog/"]').forEach((link) => {
-    link.addEventListener('click', saveScrollPosition);
-  });
-
-  // Execute on page load
-  // 1. Check if scroll position needs to be restored
-  restoreScrollPosition();
-</script>
-
-<script>
-  import { initI18n } from '../../../scripts/i18n-content-updater';
-  initI18n();
-</script>

@@ -1,0 +1,17 @@
+---
+import { useI18n } from '@features/i18n/lib/i18n';
+
+const { t } = useI18n();
+---
+
+<a
+  href="/search"
+  class="header-tool-button"
+  aria-label={t('nav.search')}
+  title={t('nav.search')}
+  data-i18n="nav.search"
+  data-i18n-attrs="aria-label,title"
+  data-astro-prefetch="hover"
+>
+  <i class="i-carbon:search" aria-hidden="true"></i>
+</a>

@@ -1,292 +1,72 @@
 ---
-/**
- * Single Tag Page
- * Display all posts under a specific tag
- */
-import ArchiveLayout from '../../../layouts/archives/ArchiveLayout.astro';
-import BlogTimeline from '../../../components/blog/BlogTimeline.astro';
-import { decodeRouteParam, getPostsByTag, getAllTags, getTagUrl } from '../../../utils/blog';
-import { useI18n } from '../../../utils/i18n';
+import ArchiveLayout from '@app/layouts/archives/ArchiveLayout.astro';
+import BlogTimeline from '@features/blog/components/BlogTimeline.astro';
+import { decodeRouteParam, getAllTags, getPostsByTag, getTagUrl } from '@features/blog/lib/blog';
+import { useI18n } from '@features/i18n/lib/i18n';
+import EditorialSectionHeader from '@shared/components/EditorialSectionHeader.astro';
 
 export async function getStaticPaths() {
   const tags = await getAllTags();
-  
-  return tags.map(({ tag }) => ({
-    params: { tag: encodeURIComponent(tag) },
-  }));
+  return tags.map(({ tag }) => ({ params: { tag } }));
 }
 
 const tag = decodeRouteParam(Astro.params.tag);
-
-// Data layer: Get all posts under this tag
 const posts = await getPostsByTag(tag);
 const allTags = await getAllTags();
-const currentTagInfo = allTags.find(t => t.tag === tag);
-
-// Related tags (frequently appearing together)
-const getRelatedTags = () => {
-  const tagMap = new Map<string, number>();
-  posts.forEach(post => {
-    post.data.tags.forEach(t => {
-      if (t !== tag) {
-        tagMap.set(t, (tagMap.get(t) || 0) + 1);
-      }
-    });
-  });
-  return Array.from(tagMap.entries())
-    .map(([t, count]) => ({ tag: t, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
-};
-
-const relatedTags = getRelatedTags();
+const rank = allTags.findIndex((item) => item.tag === tag) + 1;
+const relatedTagCounts = new Map<string, number>();
+posts.forEach((post) => post.data.tags.forEach((item) => {
+  if (item !== tag) relatedTagCounts.set(item, (relatedTagCounts.get(item) ?? 0) + 1);
+}));
+const relatedTags = [...relatedTagCounts.entries()]
+  .sort((left, right) => right[1] - left[1])
+  .slice(0, 6)
+  .map(([name, count]) => ({ name, count }));
 const { t } = useI18n();
+const headerStats = [
+  { icon: 'i-carbon:document', labelKey: 'archives.timeline.totalPosts', label: t('archives.timeline.totalPosts'), value: posts.length },
+  { icon: 'i-carbon:trophy', labelKey: 'archives.series.rank', label: t('archives.series.rank'), value: rank > 0 ? `#${rank}` : '-' },
+  { icon: 'i-carbon:connect', labelKey: 'archives.tags.related', label: t('archives.tags.related'), value: relatedTags.length },
+];
 ---
 
 <ArchiveLayout
   title={`#${tag}`}
   description={t('archives.tags.subtitle')}
   descriptionKey="archives.tags.subtitle"
-  showBackButton={true}
-  backUrl="/archives/tags"
+  stats={headerStats}
 >
-  <!-- Tag info card -->
-  <div class="tag-info-card reay-card">
-    <div class="tag-header">
-      <div class="tag-icon">
-        <i class="i-carbon:tag"></i>
+  {relatedTags.length > 0 && (
+    <section class="related-tags">
+      <EditorialSectionHeader title={t('archives.tags.related')} titleKey="archives.tags.related" icon="i-carbon:connect" />
+      <div>
+        {relatedTags.map((item) => (
+          <a href={getTagUrl(item.name)}><span>#{item.name}</span><small>{item.count}</small></a>
+        ))}
       </div>
-      <div class="tag-details">
-        <h2 class="tag-name">#{tag}</h2>
-        <p class="tag-stats">
-          {posts.length} <span data-i18n="archives.postsCount">{t('archives.postsCount')}</span>
-          {currentTagInfo && allTags.length > 0 && (
-            <span class="tag-rank">
-              · Rank #{allTags.findIndex(t => t.tag === tag) + 1}/{allTags.length}
-            </span>
-          )}
-        </p>
-      </div>
-    </div>
+    </section>
+  )}
 
-    <!-- Related tags -->
-    {relatedTags.length > 0 && (
-      <div class="related-tags">
-        <h3 class="related-title">
-          <i class="i-carbon:connect"></i>
-          <span data-i18n="archives.tags.related">{t('archives.tags.related')}</span>
-        </h3>
-        <div class="related-tags-list">
-          {relatedTags.map(t => (
-            <a href={getTagUrl(t.tag)} class="related-tag">
-              #{t.tag}
-              <span class="related-count">{t.count}</span>
-            </a>
-          ))}
-        </div>
-      </div>
-    )}
-  </div>
-
-  <!-- Posts list -->
   {posts.length > 0 ? (
-    <section class="posts-section">
-      <h3 class="section-title">
-        <i class="i-carbon:document"></i>
-        <span data-i18n="archives.blogList">{t('archives.blogList')}</span>
-      </h3>
-      <BlogTimeline posts={posts} />
+    <section class="tag-posts">
+      <EditorialSectionHeader title={t('archives.blogList')} titleKey="archives.blogList" icon="i-carbon:document" />
+      <BlogTimeline {posts} />
     </section>
   ) : (
-    <div class="empty-state">
-      <i class="i-carbon:document-blank"></i>
-      <h3 data-i18n="archives.empty.posts.title">{t('archives.empty.posts.title')}</h3>
+    <div class="archive-empty">
+      <h2 data-i18n="archives.empty.posts.title">{t('archives.empty.posts.title')}</h2>
       <p data-i18n="archives.empty.posts.description">{t('archives.empty.posts.description')}</p>
     </div>
   )}
 </ArchiveLayout>
 
 <style>
-  .tag-info-card {
-    padding: 1.25rem;
-    background: var(--reay-surface-bg);
-    border-radius: 1.1rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--reay-surface-border);
-    box-shadow: var(--reay-surface-shadow);
-  }
-
-  .tag-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .tag-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    font-size: 1.5rem;
-    flex-shrink: 0;
-  }
-
-  .tag-details {
-    flex: 1;
-  }
-
-  .tag-name {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--md-sys-color-on-primary-container);
-    margin: 0 0 0.25rem 0;
-    line-height: 1.2;
-  }
-
-  .tag-stats {
-    font-size: 0.875rem;
-    color: var(--md-sys-color-on-primary-container);
-    opacity: 0.9;
-    margin: 0;
-  }
-
-  .tag-rank {
-    opacity: 0.7;
-  }
-
-  .related-tags {
-    padding-top: 1rem;
-    border-top: 1px solid var(--md-sys-color-outline-variant);
-  }
-
-  .related-title {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--md-sys-color-on-primary-container);
-    margin: 0 0 0.75rem 0;
-  }
-
-  .related-tags-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .related-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.75rem;
-    background: var(--md-sys-color-surface-container-low);
-    border: 1px solid var(--md-sys-color-outline-variant);
-    border-radius: 6px;
-    text-decoration: none;
-    color: var(--md-sys-color-on-surface);
-    font-size: 0.875rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-
-  .related-tag:hover {
-    background: var(--md-sys-color-surface-container);
-    border-color: var(--md-sys-color-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(var(--md-sys-color-shadow-rgb), 0.1);
-  }
-
-  .related-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 1.25rem;
-    height: 1.25rem;
-    padding: 0 0.25rem;
-    font-size: 0.625rem;
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    border-radius: 999px;
-  }
-
-  .posts-section {
-    margin-top: 1.5rem;
-  }
-
-  .section-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--md-sys-color-on-surface);
-    margin: 0 0 1rem 0;
-  }
-
-  .section-title i {
-    color: var(--md-sys-color-primary);
-  }
-
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 2rem;
-    text-align: center;
-    background: var(--md-sys-color-surface-container-lowest);
-    border-radius: 16px;
-    border: 1px dashed var(--md-sys-color-outline-variant);
-  }
-
-  .empty-state i {
-    font-size: 4rem;
-    color: var(--md-sys-color-outline);
-    margin-bottom: 1rem;
-  }
-
-  .empty-state h3 {
-    font-size: 1.5rem;
-    color: var(--md-sys-color-on-surface);
-    margin: 0 0 0.5rem 0;
-  }
-
-  .empty-state p {
-    color: var(--md-sys-color-on-surface-variant);
-    margin: 0;
-  }
-
-  @media (max-width: 768px) {
-    .tag-info-card {
-      padding: 1rem;
-    }
-
-    .tag-header {
-      gap: 0.75rem;
-    }
-
-    .tag-icon {
-      width: 40px;
-      height: 40px;
-      font-size: 1.25rem;
-    }
-
-    .tag-name {
-      font-size: 1.25rem;
-    }
-
-    .tag-stats {
-      font-size: 0.75rem;
-    }
-
-    .section-title {
-      font-size: 1.125rem;
-    }
-  }
+  .related-tags { margin-bottom: 2.3rem; }
+  .related-tags > div { display: flex; flex-wrap: wrap; gap: 0.55rem 1rem; }
+  .related-tags a { display: inline-flex; align-items: baseline; gap: 0.35rem; padding: 0.32rem 0; color: var(--md-sys-color-on-surface); font-size: 0.76rem; font-weight: 760; }
+  .related-tags a:hover { color: var(--md-sys-color-primary); }
+  .related-tags small { color: var(--md-sys-color-on-surface-variant); font-family: var(--reay-font-metadata); font-size: 0.62rem; }
+  .archive-empty { padding: 3rem 0; text-align: center; color: var(--md-sys-color-on-surface-variant); }
+  .archive-empty h2 { margin: 0 0 0.35rem; color: var(--md-sys-color-on-surface); font-size: 1rem; }
+  .archive-empty p { margin: 0; font-size: 0.78rem; }
 </style>

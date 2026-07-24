@@ -8,41 +8,28 @@
  * - GitHub API caching
  * - Request deduplication
  */
-import ProjectsLayout from '../../layouts/projects/ProjectsLayout.astro';
-import ProjectHeader from '../../components/projects/ProjectHeader.astro';
-import CategoryTabs from '../../components/projects/CategoryTabs.astro';
-import ProjectCard from '../../components/projects/ProjectCard.astro';
-import GitHubActivityPanel from '../../components/projects/GitHubActivityPanel.astro';
-import { getProjectsConfig } from '../../data/site.config';
-import { getGitHubContributionCalendar, getLanguageColor, getUserRepos } from '../../utils/github';
-import { useI18n } from '../../utils/i18n';
+import ProjectsLayout from '@app/layouts/projects/ProjectsLayout.astro';
+import CategoryTabs from '@features/projects/components/CategoryTabs.astro';
+import ProjectCard from '@features/projects/components/ProjectCard.astro';
+import GitHubActivityPanel from '@features/projects/components/GitHubActivityPanel.astro';
+import EditorialPageHeader from '@shared/components/EditorialPageHeader.astro';
+import { getGitHubConfig, getProjectsConfig } from '@app/config/site.config';
+import { formatNumber, getGitHubContributionCalendar, getLanguageColor } from '@features/projects/lib/github';
+import { getConfiguredProjects } from '@features/projects/lib/projects';
+import { useI18n } from '@features/i18n/lib/i18n';
 
 const { t } = useI18n();
 const projectsConfig = getProjectsConfig();
 const projectCategories = projectsConfig.categories;
-const githubUsername = projectsConfig.githubUsername;
+const githubUsername = getGitHubConfig().username;
 
 const loadTimerLabel = `⏱️  Total project load time ${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 const repoTimerLabel = `⏱️  Fetch user repos ${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 console.time(loadTimerLabel);
 
-// Only fetch user's all public repositories
 console.time(repoTimerLabel);
-const userRepos = await getUserRepos(githubUsername);
+const allRepos = await getConfiguredProjects();
 console.timeEnd(repoTimerLabel);
-
-const allRepos = userRepos
-  .filter(repo => !repo.isFork && !repo.isArchived)
-  .map(repo => ({
-    ...repo,
-    category: 'all',
-    featured: false,
-    customDescription: undefined,
-    customTags: [],
-  }));
-
-// Sort by update time
-allRepos.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
 // Statistics
 const totalProjects = allRepos.length;
@@ -69,23 +56,34 @@ const projectCounts: Record<string, number> = {};
 projectCategories.forEach(category => {
   if (category.id === 'all') {
     projectCounts[category.id] = allRepos.length;
+  } else if (category.id === 'featured') {
+    projectCounts[category.id] = allRepos.filter((project) => project.featured).length;
   } else {
-    projectCounts[category.id] = 0;
+    projectCounts[category.id] = allRepos.filter((project) => project.category === category.id).length;
   }
 });
 
 const currentCategory = 'all';
+const headerStats = [
+  { icon: 'i-carbon:folder', labelKey: 'projects.stats.projects', label: t('projects.stats.projects'), value: totalProjects },
+  { icon: 'i-carbon:star', labelKey: 'projects.stats.stars', label: t('projects.stats.stars'), value: formatNumber(totalStars) },
+  { icon: 'i-carbon:branch', labelKey: 'projects.stats.forks', label: t('projects.stats.forks'), value: formatNumber(totalForks) },
+];
 
 console.timeEnd(loadTimerLabel);
 console.log(`📊 Loaded ${allRepos.length} projects (⭐ ${totalStars} stars, 🔀 ${totalForks} forks)`);
 ---
 
 <ProjectsLayout>
-  <!-- Page title and statistics -->
-  <ProjectHeader 
-    totalProjects={totalProjects}
-    totalStars={totalStars}
-    totalForks={totalForks}
+  <EditorialPageHeader
+    title={t('projectsPage.title')}
+    description={t('projectsPage.subtitle')}
+    titleKey="projectsPage.title"
+    descriptionKey="projectsPage.subtitle"
+    eyebrow={t('projectsPage.eyebrow')}
+    eyebrowKey="projectsPage.eyebrow"
+    icon="i-carbon:cube"
+    stats={headerStats}
   />
 
   <GitHubActivityPanel calendar={contributionCalendar} languages={languageCounts} />
@@ -118,8 +116,14 @@ console.log(`📊 Loaded ${allRepos.length} projects (⭐ ${totalStars} stars, �
   .projects-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 0;
     margin-bottom: 3rem;
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.5);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.5);
+  }
+
+  .projects-list > :global(:nth-child(odd)) {
+    border-right: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
   }
 
   /* Hide filtered projects - use CSS class instead of inline style */
@@ -157,6 +161,10 @@ console.log(`📊 Loaded ${allRepos.length} projects (⭐ ${totalStars} stars, �
   @media (max-width: 968px) {
     .projects-list {
       grid-template-columns: 1fr;
+    }
+
+    .projects-list > :global(:nth-child(odd)) {
+      border-right: 0;
     }
   }
 </style>

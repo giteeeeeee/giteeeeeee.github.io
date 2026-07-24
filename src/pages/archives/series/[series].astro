@@ -1,607 +1,108 @@
 ---
-/**
- * Single Series Page
- * Display all posts in a series
- */
-import ArchiveLayout from '../../../layouts/archives/ArchiveLayout.astro';
-import { decodeRouteParam, getAllSeries, getPostsBySeries, formatDate, getPostUrl, getSeriesUrl } from '../../../utils/blog';
-import { useI18n } from '../../../utils/i18n';
+import ArchiveLayout from '@app/layouts/archives/ArchiveLayout.astro';
+import SeriesCard from '@features/archives/components/SeriesCard.astro';
+import { calculateReadingTime, decodeRouteParam, getAllSeries, getPostUrl, getPostsBySeries } from '@features/blog/lib/blog';
+import { useI18n } from '@features/i18n/lib/i18n';
+import EditorialSectionHeader from '@shared/components/EditorialSectionHeader.astro';
 
 export async function getStaticPaths() {
   const series = await getAllSeries();
-  
-  return series.map(({ series: seriesName }) => ({
-    params: { series: encodeURIComponent(seriesName) },
-  }));
+  return series.map(({ series: seriesName }) => ({ params: { series: seriesName } }));
 }
 
 const series = decodeRouteParam(Astro.params.series);
-
-// Data layer: Get all posts in this series
 const posts = await getPostsBySeries(series);
 const allSeries = await getAllSeries();
-const currentSeries = allSeries.find(s => s.series === series);
-
-// Calculate progress
-const totalPosts = posts.length;
-const completedPosts = totalPosts; // Simplified: assume all posts are completed
-const progress = totalPosts > 0 ? Math.round((completedPosts / totalPosts) * 100) : 0;
+const rank = allSeries.findIndex((item) => item.series === series) + 1;
+const latestDate = [...posts].sort(
+  (left, right) => right.data.publishDate.getTime() - left.data.publishDate.getTime()
+)[0]?.data.publishDate;
+const otherSeries = allSeries.filter((item) => item.series !== series).slice(0, 3);
 const { t } = useI18n();
+const headerStats = [
+  { icon: 'i-carbon:document', labelKey: 'archives.timeline.totalPosts', label: t('archives.timeline.totalPosts'), value: posts.length },
+  { icon: 'i-carbon:trophy', labelKey: 'archives.series.rank', label: t('archives.series.rank'), value: rank > 0 ? `#${rank}` : '-' },
+  {
+    icon: 'i-carbon:recently-viewed',
+    labelKey: 'blog.stats.updated',
+    label: t('blog.stats.updated'),
+    value: latestDate ? latestDate.toLocaleDateString('zh-CN') : '-',
+    date: latestDate,
+  },
+];
 ---
 
 <ArchiveLayout
   title={series}
   description={t('archives.series.subtitle')}
   descriptionKey="archives.series.subtitle"
-  showBackButton={true}
-  backUrl="/archives/series"
+  stats={headerStats}
 >
-  <!-- Series info card -->
-  <div class="series-info-card reay-card">
-    <div class="series-header">
-      <div class="series-icon">
-        <i class="i-carbon:folder"></i>
-      </div>
-      <div class="series-details">
-        <h2 class="series-name">{series}</h2>
-        <div class="series-meta">
-          <span class="meta-item">
-            <i class="i-carbon:document"></i>
-            {posts.length} <span data-i18n="archives.postsCount">{t('archives.postsCount')}</span>
-          </span>
-          <span class="meta-item">
-            <i class="i-carbon:time"></i>
-            <span data-i18n="archives.series.aboutPrefix">{t('archives.series.aboutPrefix')}</span> {posts.length * 5} <span data-i18n="blog.readTime">{t('blog.readTime')}</span>
-          </span>
-          {currentSeries && allSeries.length > 0 && (
-            <span class="meta-item">
-              <i class="i-carbon:trophy"></i>
-              <span data-i18n="archives.series.rank">{t('archives.series.rank')}</span> #{allSeries.findIndex(s => s.series === series) + 1}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-
-    <!-- Progress bar -->
-    <div class="series-progress">
-      <div class="progress-header">
-        <span class="progress-label" data-i18n="archives.series.progress">{t('archives.series.progress')}</span>
-        <span class="progress-percentage">{progress}%</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style={`width: ${progress}%`}></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Posts list -->
   {posts.length > 0 ? (
-    <section class="posts-section">
-      <h3 class="section-title">
-        <i class="i-carbon:book"></i>
-        <span data-i18n="archives.series.chapters">{t('archives.series.chapters')}</span>
-      </h3>
-      <div class="posts-list">
+    <section class="series-chapters">
+      <EditorialSectionHeader title={t('archives.series.chapters')} titleKey="archives.series.chapters" icon="i-carbon:book" />
+      <ol>
         {posts.map((post, index) => (
-          <a href={getPostUrl(post)} class="post-card reay-card reay-card--compact">
-            <div class="post-number">{(post.data.seriesOrder || index + 1).toString().padStart(2, '0')}</div>
-            <div class="post-content">
-              <h4 class="post-title">{post.data.title}</h4>
-              {post.data.description && (
-                <p class="post-description">{post.data.description}</p>
-              )}
-              <div class="post-footer">
-                <span class="post-date">
-                  <i class="i-carbon:calendar"></i>
-                  {formatDate(post.data.publishDate)}
-                </span>
-                {post.data.tags && post.data.tags.length > 0 && (
-                  <div class="post-tags">
-                    {post.data.tags.slice(0, 3).map(tag => (
-                      <span class="tag-badge reay-chip">#{tag}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div class="post-arrow">
-              <i class="i-carbon:arrow-right"></i>
-            </div>
-          </a>
+          <li>
+            <a href={getPostUrl(post)} data-astro-prefetch="hover">
+              <span class="chapter-number">{String(post.data.seriesOrder ?? index + 1).padStart(2, '0')}</span>
+              <span class="chapter-copy">
+                <h2>{post.data.title}</h2>
+                {post.data.description && <p>{post.data.description}</p>}
+                {post.data.tags.length > 0 && <small>{post.data.tags.slice(0, 3).map((tag) => `#${tag}`).join('  ')}</small>}
+              </span>
+              <span class="chapter-meta">
+                <time
+                  datetime={post.data.publishDate.toISOString()}
+                  data-i18n-date={post.data.publishDate.toISOString()}
+                  data-i18n-date-format="short"
+                >
+                  {post.data.publishDate.toLocaleDateString('zh-CN')}
+                </time>
+                <small>{calculateReadingTime(post.body)} <span data-i18n="blog.readTime">{t('blog.readTime')}</span></small>
+              </span>
+              <i class="i-carbon:arrow-up-right" aria-hidden="true"></i>
+            </a>
+          </li>
         ))}
-      </div>
+      </ol>
     </section>
   ) : (
-    <div class="empty-state">
-      <i class="i-carbon:document-blank"></i>
-      <h3 data-i18n="archives.empty.series.title">{t('archives.empty.series.title')}</h3>
+    <div class="archive-empty">
+      <h2 data-i18n="archives.empty.series.title">{t('archives.empty.series.title')}</h2>
       <p data-i18n="archives.empty.series.description">{t('archives.empty.series.description')}</p>
     </div>
   )}
 
-  <!-- Series navigation -->
-  {allSeries.length > 1 && (
-    <section class="series-nav-section">
-      <h3 class="section-title">
-        <i class="i-carbon:grid"></i>
-        <span data-i18n="archives.series.other">{t('archives.series.other')}</span>
-      </h3>
-      <div class="series-nav-grid">
-        {allSeries
-          .filter(s => s.series !== series)
-          .slice(0, 4)
-          .map(s => (
-            <a href={getSeriesUrl(s.series)} class="series-nav-card reay-card reay-card--compact">
-              <div class="nav-card-icon">
-                <i class="i-carbon:folder"></i>
-              </div>
-              <div class="nav-card-content">
-                <h4 class="nav-card-title">{s.series}</h4>
-                <p class="nav-card-count">{s.count} <span data-i18n="archives.postsCount">{t('archives.postsCount')}</span></p>
-              </div>
-              <i class="i-carbon:arrow-right nav-card-arrow"></i>
-            </a>
-          ))}
-      </div>
+  {otherSeries.length > 0 && (
+    <section class="other-series">
+      <EditorialSectionHeader title={t('archives.series.other')} titleKey="archives.series.other" icon="i-carbon:folders" actionHref="/archives/series" actionLabel={t('archives.viewAllSeries')} actionKey="archives.viewAllSeries" />
+      <div>{otherSeries.map((item) => <SeriesCard {...item} />)}</div>
     </section>
   )}
 </ArchiveLayout>
 
-<script>
-  /**
-   * Save scroll position
-   * When clicking post links, save current page scroll position
-   */
-  function saveScrollPosition() {
-    const scrollPosition = {
-      x: window.scrollX,
-      y: window.scrollY,
-      path: window.location.pathname
-    };
-    sessionStorage.setItem('scrollPosition', JSON.stringify(scrollPosition));
-  }
-
-  // Restore scroll position
-  function restoreScrollPosition() {
-    const saved = sessionStorage.getItem('scrollPosition');
-    if (saved) {
-      try {
-        const { x, y, path } = JSON.parse(saved);
-        // Only restore scroll position for the same path
-        if (path === window.location.pathname) {
-          setTimeout(() => {
-            window.scrollTo(x, y);
-            sessionStorage.removeItem('scrollPosition');
-          }, 100);
-        }
-      } catch (e) {
-        console.error('Failed to restore scroll position:', e);
-      }
-    }
-  }
-
-  // Attach scroll save listeners to all post links
-  function attachScrollSaveListeners() {
-    document.querySelectorAll('a[href^="/blog/"]').forEach(link => {
-      link.addEventListener('click', saveScrollPosition);
-    });
-  }
-
-  // Execute on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      restoreScrollPosition();
-      attachScrollSaveListeners();
-    });
-  } else {
-    restoreScrollPosition();
-    attachScrollSaveListeners();
-  }
-
-  // Support Astro View Transitions
-  document.addEventListener('astro:page-load', () => {
-    restoreScrollPosition();
-    attachScrollSaveListeners();
-  });
-</script>
-
 <style>
-  .series-info-card {
-    padding: 2rem;
-    background: var(--reay-surface-bg);
-    border-radius: 1.1rem;
-    margin-bottom: 2rem;
-    border: 1px solid var(--reay-surface-border);
-    box-shadow: var(--reay-surface-shadow);
-  }
+  .series-chapters ol { margin: 0; padding: 0; list-style: none; border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.5); }
+  .series-chapters li { border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44); }
+  .series-chapters a { display: grid; grid-template-columns: 2.4rem minmax(0, 1fr) auto auto; align-items: start; gap: 1rem; padding: 1rem 0.6rem; color: inherit; }
+  .series-chapters a:hover { padding-right: 0.35rem; padding-left: 0.85rem; background: linear-gradient(90deg, rgba(var(--md-sys-color-primary-rgb), 0.065), transparent 75%); }
+  .chapter-number { padding-top: 0.1rem; color: var(--md-sys-color-primary); font-family: var(--reay-font-metadata); font-size: 0.72rem; font-weight: 680; }
+  .chapter-copy { min-width: 0; }
+  .chapter-copy h2 { margin: 0; color: var(--md-sys-color-on-surface); font-size: 0.98rem; font-weight: 720; line-height: 1.35; }
+  .chapter-copy p { display: -webkit-box; margin: 0.3rem 0 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: var(--md-sys-color-on-surface-variant); font-size: 0.74rem; line-height: 1.5; }
+  .chapter-copy small { display: block; margin-top: 0.35rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.62rem; white-space: pre; }
+  .chapter-meta { display: grid; gap: 0.25rem; justify-items: end; color: var(--md-sys-color-on-surface-variant); font-size: 0.66rem; white-space: nowrap; }
+  .chapter-meta small { font-size: 0.62rem; }
+  .series-chapters a > i { color: var(--md-sys-color-primary); font-size: 0.86rem; }
+  .other-series { margin-top: clamp(2.5rem, 6vw, 4rem); }
+  .other-series > div { max-width: 62rem; }
+  .archive-empty { padding: 3rem 0; text-align: center; color: var(--md-sys-color-on-surface-variant); }
+  .archive-empty h2 { margin: 0 0 0.35rem; color: var(--md-sys-color-on-surface); font-size: 1rem; }
+  .archive-empty p { margin: 0; font-size: 0.78rem; }
 
-  .series-header {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .series-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    font-size: 2rem;
-    flex-shrink: 0;
-  }
-
-  .series-details {
-    flex: 1;
-  }
-
-  .series-name {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--md-sys-color-on-primary-container);
-    margin: 0 0 0.75rem 0;
-    line-height: 1.2;
-  }
-
-  .series-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-  }
-
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.875rem;
-    color: var(--md-sys-color-on-primary-container);
-    opacity: 0.9;
-  }
-
-  .series-progress {
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--md-sys-color-outline-variant);
-  }
-
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-  }
-
-  .progress-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--md-sys-color-on-primary-container);
-  }
-
-  .progress-percentage {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--md-sys-color-on-primary-container);
-  }
-
-  .progress-bar {
-    height: 8px;
-    background: var(--md-sys-color-surface-container);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      var(--md-sys-color-primary),
-      var(--md-sys-color-tertiary)
-    );
-    border-radius: 999px;
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .posts-section {
-    margin-bottom: 3rem;
-  }
-
-  .section-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--md-sys-color-on-surface);
-    margin: 0 0 1.5rem 0;
-  }
-
-  .section-title i {
-    color: var(--md-sys-color-primary);
-  }
-
-  .posts-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .post-card {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    background: var(--reay-surface-bg);
-    border: 1px solid var(--reay-surface-border);
-    border-radius: var(--reay-card-radius);
-    box-shadow: var(--reay-surface-shadow);
-    backdrop-filter: blur(var(--reay-glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--reay-glass-blur)) saturate(150%);
-    text-decoration: none;
-    color: inherit;
-    transition:
-      transform 0.36s var(--reay-ease-out),
-      background 0.32s ease,
-      border-color 0.32s ease,
-      box-shadow 0.32s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .post-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--md-sys-color-primary);
-    border-radius: var(--reay-card-radius) 0 0 var(--reay-card-radius);
-    transform: scaleY(0);
-    transform-origin: center;
-    transition: transform 0.3s ease;
-  }
-
-  .post-card:hover {
-    background: var(--reay-surface-bg-hover);
-    border-color: var(--reay-surface-border-hover);
-    transform: translateX(6px) translateY(-2px);
-    box-shadow: var(--reay-surface-shadow-hover);
-  }
-
-  .post-card:hover::before {
-    transform: scaleY(1);
-  }
-
-  .post-number {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--md-sys-color-primary);
-    background: var(--md-sys-color-primary-container);
-    border-radius: 10px;
-    flex-shrink: 0;
-  }
-
-  .post-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .post-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface);
-    margin: 0 0 0.5rem 0;
-    line-height: 1.4;
-  }
-
-  .post-description {
-    font-size: 0.875rem;
-    color: var(--md-sys-color-on-surface-variant);
-    margin: 0 0 0.75rem 0;
-    line-height: 1.6;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-
-  .post-footer {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .post-date {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.8125rem;
-    color: var(--md-sys-color-on-surface-variant);
-  }
-
-  .post-tags {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .tag-badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.625rem;
-    background: var(--reay-chip-bg);
-    border: 1px solid var(--reay-chip-border);
-    border-radius: 999px;
-    color: var(--md-sys-color-on-surface-variant);
-  }
-
-  .post-arrow {
-    color: var(--md-sys-color-primary);
-    font-size: 1.25rem;
-    transition: transform 0.3s ease;
-  }
-
-  .post-card:hover .post-arrow {
-    transform: translateX(4px);
-  }
-
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 2rem;
-    text-align: center;
-    background: var(--md-sys-color-surface-container-lowest);
-    border-radius: 16px;
-    border: 1px dashed var(--md-sys-color-outline-variant);
-  }
-
-  .empty-state i {
-    font-size: 4rem;
-    color: var(--md-sys-color-outline);
-    margin-bottom: 1rem;
-  }
-
-  .empty-state h3 {
-    font-size: 1.5rem;
-    color: var(--md-sys-color-on-surface);
-    margin: 0 0 0.5rem 0;
-  }
-
-  .empty-state p {
-    color: var(--md-sys-color-on-surface-variant);
-    margin: 0;
-  }
-
-  .series-nav-section {
-    margin-top: 3rem;
-  }
-
-  .series-nav-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-  }
-
-  .series-nav-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: var(--reay-surface-bg);
-    border: 1px solid var(--reay-surface-border);
-    border-radius: var(--reay-card-radius);
-    box-shadow: var(--reay-surface-shadow);
-    backdrop-filter: blur(var(--reay-glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--reay-glass-blur)) saturate(150%);
-    text-decoration: none;
-    color: inherit;
-    transition:
-      transform 0.32s var(--reay-ease-out),
-      background 0.32s ease,
-      border-color 0.32s ease,
-      box-shadow 0.32s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .series-nav-card:hover {
-    background: var(--reay-surface-bg-hover);
-    border-color: var(--reay-surface-border-hover);
-    transform: translateY(-3px);
-    box-shadow: var(--reay-surface-shadow-hover);
-  }
-
-  .nav-card-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    font-size: 1.25rem;
-    flex-shrink: 0;
-  }
-
-  .nav-card-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .nav-card-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--md-sys-color-on-surface);
-    margin: 0 0 0.25rem 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .nav-card-count {
-    font-size: 0.75rem;
-    color: var(--md-sys-color-on-surface-variant);
-    margin: 0;
-  }
-
-  .nav-card-arrow {
-    color: var(--md-sys-color-primary);
-    transition: transform 0.3s ease;
-  }
-
-  .series-nav-card:hover .nav-card-arrow {
-    transform: translateX(4px);
-  }
-
-  @media (max-width: 768px) {
-    .series-info-card {
-      padding: 1.5rem;
-    }
-
-    .series-header {
-      gap: 1rem;
-    }
-
-    .series-icon {
-      width: 56px;
-      height: 56px;
-      font-size: 1.75rem;
-    }
-
-    .series-name {
-      font-size: 1.5rem;
-    }
-
-    .series-meta {
-      gap: 1rem;
-    }
-
-    .post-card {
-      grid-template-columns: auto 1fr;
-      gap: 1rem;
-      padding: 1rem;
-    }
-
-    .post-arrow {
-      display: none;
-    }
-
-    .series-nav-grid {
-      grid-template-columns: 1fr;
-    }
+  @media (max-width: 650px) {
+    .series-chapters a { grid-template-columns: 2rem minmax(0, 1fr) auto; gap: 0.7rem; padding-right: 0; padding-left: 0; }
+    .chapter-meta { grid-column: 2; justify-items: start; }
   }
 </style>

@@ -1,0 +1,284 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getPostUrl, getSeriesUrl } from '@features/blog/lib/blog';
+import { useI18n } from '@features/i18n/lib/i18n';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  posts: CollectionEntry<'blog'>[];
+  variant: 'context' | 'navigation';
+}
+
+const { post, posts, variant } = Astro.props;
+const { t } = useI18n();
+const series = post.data.series;
+const currentIndex = posts.findIndex((item) => item.id === post.id);
+const isVisible = Boolean(series) && currentIndex >= 0;
+const position = currentIndex + 1;
+const previousPost = currentIndex > 0 ? posts[currentIndex - 1] : undefined;
+const nextPost = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : undefined;
+const seriesUrl = series ? getSeriesUrl(series) : '';
+---
+
+{isVisible && variant === 'context' && (
+  <div class="post-series-context" data-post-series-context>
+    <i class="i-carbon:book" aria-hidden="true"></i>
+    <p>
+      <span data-i18n="blog.series.context">{t('blog.series.context')}</span>
+      <span aria-hidden="true">·</span>
+      <span class="series-position series-position-zh">
+        <span data-i18n="blog.series.chapterPrefix">{t('blog.series.chapterPrefix')}</span>
+        <strong data-series-position-value>{position} / {posts.length}</strong>
+        <span data-i18n="blog.series.chapterSuffix">{t('blog.series.chapterSuffix')}</span>
+      </span>
+      <span class="series-position series-position-en">
+        <span data-i18n="blog.series.chapter">{t('blog.series.chapter')}</span>
+        <strong data-series-position-value>{position} / {posts.length}</strong>
+      </span>
+    </p>
+    <a href={seriesUrl} data-astro-prefetch="hover">
+      <span>{series}</span>
+      <i class="i-carbon:arrow-up-right" aria-hidden="true"></i>
+    </a>
+  </div>
+)}
+
+{isVisible && variant === 'navigation' && (
+  <nav
+    class="post-series-navigation"
+    data-post-series-navigation
+    aria-label={t('blog.series.navigation')}
+    data-i18n="blog.series.navigation"
+    data-i18n-attr="aria-label"
+  >
+    <header>
+      <div>
+        <p>
+          <span data-i18n="blog.series.context">{t('blog.series.context')}</span>
+          <span aria-hidden="true">·</span>
+          <span class="series-position series-position-zh">
+            <span data-i18n="blog.series.chapterPrefix">{t('blog.series.chapterPrefix')}</span>
+            <strong data-series-position-value>{position} / {posts.length}</strong>
+            <span data-i18n="blog.series.chapterSuffix">{t('blog.series.chapterSuffix')}</span>
+          </span>
+          <span class="series-position series-position-en">
+            <span data-i18n="blog.series.chapter">{t('blog.series.chapter')}</span>
+            <strong data-series-position-value>{position} / {posts.length}</strong>
+          </span>
+        </p>
+        <h2>{series}</h2>
+      </div>
+      <a class="series-directory-link" href={seriesUrl} data-astro-prefetch="hover">
+        <span data-i18n="blog.series.directory">{t('blog.series.directory')}</span>
+        <i class="i-carbon:arrow-up-right" aria-hidden="true"></i>
+      </a>
+    </header>
+
+    {(previousPost || nextPost) && (
+      <div class="series-chapter-links">
+        {previousPost && (
+          <a class="series-chapter-link is-previous" href={getPostUrl(previousPost)} data-series-previous data-astro-prefetch="hover">
+            <span><i class="i-carbon:arrow-left" aria-hidden="true"></i><span data-i18n="blog.series.previous">{t('blog.series.previous')}</span></span>
+            <strong>{previousPost.data.title}</strong>
+          </a>
+        )}
+        {nextPost && (
+          <a class="series-chapter-link is-next" href={getPostUrl(nextPost)} data-series-next data-astro-prefetch="hover">
+            <span><span data-i18n="blog.series.next">{t('blog.series.next')}</span><i class="i-carbon:arrow-right" aria-hidden="true"></i></span>
+            <strong>{nextPost.data.title}</strong>
+          </a>
+        )}
+      </div>
+    )}
+  </nav>
+)}
+
+<style>
+  .series-position-en {
+    display: none;
+  }
+
+  :global(html[data-lang='en']) .series-position-zh {
+    display: none;
+  }
+
+  :global(html[data-lang='en']) .series-position-en {
+    display: inline-flex;
+  }
+
+  .series-position {
+    align-items: baseline;
+    gap: 0.18rem;
+  }
+
+  .series-position strong {
+    color: var(--md-sys-color-on-surface);
+    font-family: var(--reay-font-metadata);
+    font-size: 0.94em;
+  }
+
+  .post-series-context {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.65rem;
+    margin-top: 1rem;
+    padding: 0.58rem 0;
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
+    color: var(--md-sys-color-on-surface-variant);
+    font-family: var(--reay-font-metadata);
+    font-size: 0.67rem;
+    font-weight: 720;
+  }
+
+  .post-series-context > i {
+    color: var(--md-sys-color-primary);
+    font-size: 0.82rem;
+  }
+
+  .post-series-context p {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    margin: 0;
+  }
+
+  .post-series-context a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    min-width: 0;
+    color: var(--md-sys-color-primary);
+    text-decoration: none;
+  }
+
+  .post-series-context a:hover {
+    color: var(--md-sys-color-on-surface);
+  }
+
+  .post-series-navigation {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.56);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.48);
+  }
+
+  .post-series-navigation > header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.05rem 0;
+  }
+
+  .post-series-navigation header p {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    margin: 0 0 0.28rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-family: var(--reay-font-metadata);
+    font-size: 0.62rem;
+    font-weight: 780;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+  }
+
+  .post-series-navigation h2 {
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 1rem;
+    font-weight: 850;
+    line-height: 1.35;
+  }
+
+  .series-directory-link {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.68rem;
+    font-weight: 780;
+    text-decoration: none;
+  }
+
+  .series-directory-link:hover {
+    transform: translateX(2px);
+  }
+
+  .series-chapter-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.38);
+  }
+
+  .series-chapter-link {
+    display: grid;
+    align-content: start;
+    gap: 0.34rem;
+    min-width: 0;
+    padding: 1rem 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .series-chapter-link + .series-chapter-link {
+    padding-left: 1.25rem;
+    border-left: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.4);
+  }
+
+  .series-chapter-link > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32rem;
+    color: var(--md-sys-color-primary);
+    font-family: var(--reay-font-metadata);
+    font-size: 0.62rem;
+    font-weight: 780;
+  }
+
+  .series-chapter-link strong {
+    overflow: hidden;
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .series-chapter-link:hover {
+    background: linear-gradient(90deg, rgba(var(--md-sys-color-primary-rgb), 0.065), transparent 88%);
+  }
+
+  .series-chapter-link.is-next {
+    justify-items: end;
+    text-align: right;
+  }
+
+  .series-chapter-link.is-next:hover {
+    background: linear-gradient(270deg, rgba(var(--md-sys-color-primary-rgb), 0.065), transparent 88%);
+  }
+
+  @media (max-width: 620px) {
+    .post-series-navigation > header {
+      align-items: start;
+    }
+
+    .series-chapter-links {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .series-chapter-link + .series-chapter-link {
+      padding-left: 0;
+      border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.4);
+      border-left: 0;
+    }
+
+    .series-chapter-link.is-next {
+      justify-items: start;
+      text-align: left;
+    }
+  }
+</style>

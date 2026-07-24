@@ -192,7 +192,7 @@
 - `data-theme="dark"`: 强制暗色
 - 无属性: 跟随系统 `prefers-color-scheme`
 
-切换逻辑已在 `src/scripts/theme-toggle.ts` 实现。
+切换逻辑已在 `src/shared/client/ui/theme-toggle.ts` 实现。
 
 ---
 
@@ -226,7 +226,7 @@
 
 ## 🔧 自定义主色
 
-编辑 `src/data/theme.config.ts`：
+编辑 `src/app/config/theme.config.ts`：
 
 ```typescript
 export const themeConfig = {

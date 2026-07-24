@@ -1,0 +1,82 @@
+---
+import { useI18n } from '@features/i18n/lib/i18n';
+
+interface Props {
+  author?: string;
+  postUrl: string;
+}
+
+const { author, postUrl } = Astro.props;
+const { t } = useI18n();
+---
+
+<footer class="post-footer">
+  <div>
+    <span class="post-footer-label" data-i18n="blog.footer.author">{t('blog.footer.author')}</span>
+    <strong data-i18n={author ? undefined : 'blog.footer.defaultAuthor'}>{author || t('blog.footer.defaultAuthor')}</strong>
+  </div>
+  <div class="post-footer-source">
+    <span class="post-footer-label" data-i18n="blog.footer.permalink">{t('blog.footer.permalink')}</span>
+    <a href={postUrl}>{postUrl}</a>
+  </div>
+  <p>
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>
+  </p>
+</footer>
+
+<style>
+  .post-footer {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: end;
+    margin-top: clamp(3rem, 7vw, 5rem);
+    padding: 1.1rem 0;
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.5);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
+  }
+
+  .post-footer-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.6rem;
+    font-weight: 760;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  strong,
+  a {
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.72rem;
+  }
+
+  a:hover {
+    color: var(--md-sys-color-primary);
+  }
+
+  .post-footer-source {
+    min-width: 0;
+  }
+
+  .post-footer-source a {
+    display: block;
+    overflow: hidden;
+    color: var(--md-sys-color-on-surface-variant);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  p {
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 620px) {
+    .post-footer {
+      grid-template-columns: 1fr;
+      gap: 0.85rem;
+    }
+  }
+</style>

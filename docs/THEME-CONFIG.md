@@ -1,499 +1,219 @@
-# Theme Configuration
+# 主题配置
 
-Customize the visual appearance of your site using Material Design 3.
+Astro Theme Reay 使用一个 `defineTheme({ ... })` 对象管理预设、MD3 配色、字体、圆角、背景和动效。用户只需编辑 `src/app/config/theme.config.ts`；`presets/themes/` 保存可复用基础方案，不保存姓名、内容或凭据。
 
-## Configuration File
+## 最小配置
 
-Theme settings are in `src/data/theme.config.ts`
-
-## Basic Theme Configuration
-
-```typescript
-export const themeConfig = {
-  // Theme mode
-  mode: 'system',  // 'light' | 'dark' | 'system'
-  
-  // Primary color (main brand color)
-  primary: '#5B8CFF',
-  
-  // Enable smooth transitions
-  enableTransitions: true,
-  
-  // Animation duration
-  transitionDuration: '0.3s',
-}
+```ts
+export const themeConfig = defineTheme({
+  preset: 'technology',
+});
 ```
 
-## Theme Modes
+将 `preset` 改成下列任一值即可切换完整视觉基础：
+
+| ID | 中文名 | 视觉特点 |
+| --- | --- | --- |
+| `technology` | 科技流光 | 默认青蓝配色、圆体、柔和光晕与轻网格 |
+| `paper` | 米纸手记 | 米黄色、Neutral 低彩度色板、宋体正文与纸纤维 |
+| `eink` | 墨水屏 | 单色 MD3、近直角、无抬升阴影与电子纸颗粒 |
+| `forest` | 青苔护眼 | 鼠尾草绿、柔和圆角和低刺激纸面纹理 |
+| `editorial` | 朱砂刊物 | 朱砂红、衬线标题和独立杂志式边界 |
+| `inkwash` | 水墨江湖 | 烟青灰墨、朱砂点题、衬线正文与宣纸远山 |
+| `monochrome-ink` | 墨白丹朱 | 中性黑白宣纸、楷体细线、浓淡墨痕与克制朱砂印 |
+| `anime-spring` | 春日动画 | 天空蓝、樱花粉、圆体、云层与静态花瓣 |
+| `anime-night` | 动画夜城 | 靛蓝、霓虹青粉、星点与城市剪影 |
+| `cosmic-abyss` | 星渊银河 | 深空蓝紫、银河尘带、星野与黑洞吸积盘 |
+| `ukiyo` | 浮世绘 | 靛青、赭红、米纸、日轮与版画波纹 |
+| `ocean` | 海岸晴空 | 海蓝、青绿、沙白、海平线与日光水纹 |
+| `retro-terminal` | 复古终端 | 等宽字体、近直角、荧光绿、网格与扫描线 |
+
+预设不只提供一组颜色。最终主题包含两层：MD3 根据 key colors 生成可访问的 light/dark 配色；`data-theme-preset` 再启用该预设的材质与组件身份，例如水墨的宣纸和朱砂印、墨白丹朱的中性黑白表面与楷体细线、春日的贴纸边缘、夜城的霓虹玻璃、星渊银河的观测舷窗与引力光环、浮世绘的双线版画边界、海岸的水光表面，以及终端的 CRT 扫描线和方角控件。这些身份规则集中在 `src/design-system/styles/preset-identities.css`，页面组件不各自判断预设。
+
+## 同一对象直接修改
+
+不需要再维护单独的 `activeThemePreset` 和 `themeOverrides`：
+
+```ts
+export const themeConfig = defineTheme({
+  preset: 'paper',
+  mode: 'system',
+  primary: '#4E6B50',
 
-### Light Mode
-```typescript
-mode: 'light'
-```
-Always shows light theme, regardless of system preference.
-
-### Dark Mode
-```typescript
-mode: 'dark'
-```
-Always shows dark theme, regardless of system preference.
-
-### System Mode (Recommended)
-```typescript
-mode: 'system'
-```
-Automatically matches user's system preference.
-
-**User can override** with the theme toggle button.
-
-## Primary Color
-
-The primary color is your brand color. All other colors are generated from it.
-
-### Changing Primary Color
-
-```typescript
-primary: '#FF6B6B'  // Red
-primary: '#4ECDC4'  // Teal
-primary: '#95E1D3'  // Mint
-primary: '#F38181'  // Pink
-primary: '#5B8CFF'  // Blue (default)
-```
-
-### Material Design 3 Color System
-
-From your primary color, the theme automatically generates:
-
-**Light Mode Palette:**
-- Primary (your chosen color)
-- Primary Container (lighter variant)
-- Secondary (harmonious complement)
-- Secondary Container
-- Tertiary (accent color)
-- Tertiary Container
-- Surface colors (backgrounds)
-- Error colors
-
-**Dark Mode Palette:**
-- Automatically adjusted for dark backgrounds
-- Proper contrast ratios
-- WCAG AAA compliance
-
-### Color Preview
-
-To see your colors:
-
-1. Change `primary` in `theme.config.ts`
-2. Restart dev server
-3. Check homepage and toggle dark mode
-4. All components update automatically
-
-## Advanced Color Customization
-
-For complete control, edit `src/theme/config.ts`:
-
-```typescript
-export function createTheme(overrides?: UserThemeOverrides): ThemeConfig {
-  return {
-    mode: overrides?.mode || 'system',
-    
-    // Customize light mode palette
-    paletteLight: {
-      primary: '#5B8CFF',
-      onPrimary: '#FFFFFF',
-      primaryContainer: '#DBE6FF',
-      onPrimaryContainer: '#123060',
-      // ... more colors
-    },
-    
-    // Customize dark mode palette
-    paletteDark: {
-      primary: '#B3C7FF',
-      onPrimary: '#0A2948',
-      primaryContainer: '#2B4B7F',
-      onPrimaryContainer: '#DBE6FF',
-      // ... more colors
-    },
-    
-    // Typography
-    typography: {
-      fontFamily: 'Inter, sans-serif',
-      baseSize: 16,
-      lineHeight: 1.7,
-    },
-    
-    // Shape
-    shape: {
-      radiusSm: '8px',
-      radiusMd: '16px',
-      radiusLg: '24px',
-    }
-  }
-}
-```
-
-## Typography
-
-### Font Families
-
-**Default Stack:**
-```css
--apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
-```
-
-**Customize:**
-```typescript
-typography: {
-  fontFamily: '"Your Font", -apple-system, sans-serif',
-  fontFamilyMono: '"Fira Code", "JetBrains Mono", monospace',
-}
-```
-
-**Loading Custom Fonts:**
-
-Add to `src/layouts/base/BaseLayout.astro`:
-```html
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Your+Font&display=swap" rel="stylesheet">
-```
-
-### Type Scale
-
-```typescript
-typography: {
-  baseSize: 16,      // Base font size in px
-  lineHeight: 1.7,   // Line height multiplier
-  
-  scale: {
-    xs: 0.75,    // 12px
-    sm: 0.875,   // 14px
-    md: 1,       // 16px (base)
-    lg: 1.125,   // 18px
-    xl: 1.25,    // 20px
-    '2xl': 1.5,  // 24px
-    '3xl': 1.875 // 30px
-  }
-}
-```
-
-## Shape and Borders
-
-### Border Radius
-
-```typescript
-shape: {
-  radiusSm: '4px',   // Small components (buttons, inputs)
-  radiusMd: '12px',  // Medium components (cards)
-  radiusLg: '24px',  // Large components (dialogs)
-}
-```
-
-**Sharp Corners:**
-```typescript
-radiusSm: '0px',
-radiusMd: '0px',
-radiusLg: '0px',
-```
-
-**Extra Rounded:**
-```typescript
-radiusSm: '12px',
-radiusMd: '24px',
-radiusLg: '32px',
-```
-
-### Border Width
-
-```typescript
-shape: {
-  borderWidth: '1px',  // Standard border thickness
-}
-```
-
-### Shadows
-
-```typescript
-shape: {
-  shadowSm: '0 1px 2px rgba(0,0,0,.06)',
-  shadowMd: '0 8px 30px rgba(0,0,0,.08)',
-  shadowLg: '0 18px 40px rgba(0,0,0,.12)',
-}
-```
-
-**No Shadows (Flat Design):**
-```typescript
-shadowSm: 'none',
-shadowMd: 'none',
-shadowLg: 'none',
-```
-
-## Transitions and Animations
-
-### Global Transitions
-
-```typescript
-enableTransitions: true,          // Enable smooth transitions
-transitionDuration: '0.3s',       // Transition speed
-transitionTimingFunction: 'ease', // Easing function
-```
-
-**Faster Animations:**
-```typescript
-transitionDuration: '0.15s',
-```
-
-**Slower Animations:**
-```typescript
-transitionDuration: '0.5s',
-```
-
-**Disable Animations:**
-```typescript
-enableTransitions: false,
-```
-
-### Reduced Motion
-
-Automatically respects user's `prefers-reduced-motion` setting.
-
-## Component Customization
-
-### Header
-
-Edit `src/components/common/Header.astro`:
-
-```typescript
-// Height
-const headerHeight = '64px'
-
-// Background opacity
-const bgOpacity = 0.95
-
-// Blur effect
-const backdropBlur = '10px'
-```
-
-### Footer
-
-Edit `src/components/common/Footer.astro`:
-
-```typescript
-// Show powered by
-const showPoweredBy = true
-
-// Link style
-const linkColor = 'primary'
-```
-
-### Cards
-
-Global card styles in `src/styles/global.css`:
-
-```css
-.card {
-  background: var(--md-sys-color-surface-container);
-  border-radius: var(--md-sys-shape-corner-medium);
-  padding: 1.5rem;
-}
-```
-
-## Color Reference
-
-### Using CSS Variables
-
-All theme colors are available as CSS variables:
-
-```css
-/* Primary */
-var(--md-sys-color-primary)
-var(--md-sys-color-on-primary)
-var(--md-sys-color-primary-container)
-var(--md-sys-color-on-primary-container)
-
-/* Secondary */
-var(--md-sys-color-secondary)
-var(--md-sys-color-on-secondary)
-
-/* Surface */
-var(--md-sys-color-surface)
-var(--md-sys-color-on-surface)
-var(--md-sys-color-surface-variant)
-
-/* Background */
-var(--md-sys-color-background)
-var(--md-sys-color-on-background)
-
-/* Error */
-var(--md-sys-color-error)
-var(--md-sys-color-on-error)
-```
-
-See [MD3 Color Guide](./MD3-COLOR-GUIDE.md) for complete reference.
-
-## Preset Themes
-
-### Minimal Blue (Default)
-```typescript
-primary: '#5B8CFF'
-```
-
-### Vibrant Purple
-```typescript
-primary: '#A78BFA'
-```
-
-### Nature Green
-```typescript
-primary: '#10B981'
-```
-
-### Warm Orange
-```typescript
-primary: '#F59E0B'
-```
-
-### Ocean Teal
-```typescript
-primary: '#14B8A6'
-```
-
-### Sunset Pink
-```typescript
-primary: '#EC4899'
-```
-
-## Dark Mode Customization
-
-### Separate Dark Palette
-
-For full control over dark mode:
-
-```typescript
-paletteDark: {
-  primary: '#B3C7FF',           // Lighter for dark bg
-  onPrimary: '#0A2948',         // Darker text
-  surface: '#1A1C1E',           // Dark surface
-  onSurface: '#E3E2E6',         // Light text
-  background: '#131416',        // Darker background
-  // ...
-}
-```
-
-### Dark Mode Adjustments
-
-Common tweaks for dark mode:
-
-**Higher Contrast:**
-```typescript
-surface: '#000000',
-onSurface: '#FFFFFF',
-```
-
-**Softer Contrast:**
-```typescript
-surface: '#242424',
-onSurface: '#E0E0E0',
-```
-
-**True Black (OLED):**
-```typescript
-background: '#000000',
-surface: '#000000',
-```
-
-## Testing Your Theme
-
-### Checklist
-
-- [ ] Check light mode on all pages
-- [ ] Check dark mode on all pages
-- [ ] Toggle theme switches properly
-- [ ] All text is readable
-- [ ] Links are distinguishable
-- [ ] Focus states are visible
-- [ ] Hover states work
-- [ ] Cards have proper contrast
-- [ ] Code blocks are readable
-- [ ] Images look good in both modes
-
-### Contrast Ratio
-
-Ensure WCAG AAA compliance:
-- **Normal text**: 7:1 contrast ratio
-- **Large text**: 4.5:1 contrast ratio
-
-Use browser dev tools or online checkers.
-
-## Common Customizations
-
-### Corporate Branding
-
-```typescript
-export const themeConfig = {
-  primary: '#003DA5',  // Company blue
   typography: {
-    fontFamily: '"Corporate Font", sans-serif',
+    baseSize: 16,
+    lineHeight: 1.72,
   },
+
   shape: {
-    radiusSm: '0px',
-    radiusMd: '0px',
-    radiusLg: '0px',
-  }
+    radiusLg: '18px',
+  },
+
+  background: {
+    decoration: 'paper',
+  },
+});
+```
+
+所有字段都是可选覆盖。未填写的普通字段继续继承预设；typography/fontFamilies/scale、shape、background/imageStyle/gradient 和 effects/seasonal/seasons 会按层级合并。
+
+`mode` 是没有本地选择时的默认明暗模式。`anime-night`、`cosmic-abyss` 与 `retro-terminal` 默认 `dark`，`monochrome-ink` 默认 `light`，其余内置预设默认 `system`。访客实际使用主题按钮后，`localStorage.theme` 中的显式 `light | dark | system` 始终优先；仅加载预设默认值不会写入本地存储，因此以后更换预设仍会采用新预设的默认模式。
+
+## 配色规则
+
+配置系统区分三个明确层级：
+
+1. 不填写 `primary` 或 `source`：完整保留预设关键色。
+2. 填写 `primary`：以它重新生成整套 MD3 色板，不继承预设固定的 secondary、tertiary 或 neutral；预设的算法变体会保留，因此 `paper` 仍是低彩度 neutral、`eink` 仍是 monochrome。
+3. 填写 `source`：进入高级模式，只使用你显式填写的关键色，其余由 MD3 推导。`source.primary` 比顶层 `primary` 优先。
+
+最常用的方式只有一行：
+
+```ts
+export const themeConfig = defineTheme({
+  preset: 'paper',
+  primary: '#4E6B50',
+});
+```
+
+纸张纹理、字体、圆角与阴影仍来自 `paper`，但完整配色会从 `#4E6B50` 重新生成。
+
+扩展预设同样遵循这条规则：覆盖 `primary` 会重生成 MD3 配色，但仍保留水墨、春日、夜城、黑洞银河、浮世绘或海岸的布局材质身份。`monochrome-ink` 与 `retro-terminal` 是刻意的固定身份：前者始终保留中性黑白表面与朱砂点缀，后者始终保留经典近黑背景与磷光绿核心色；`primary` 仍参与配置解析，但不会覆盖这两层专属视觉身份。
+
+需要分别控制关键色时再使用 `source`：
+
+```ts
+export const themeConfig = defineTheme({
+  preset: 'editorial',
+  source: {
+    primary: '#8B2635',
+    secondary: '#76565A',
+    tertiary: '#805532',
+    neutral: '#777171',
+    neutralVariant: '#7D6D70',
+    variant: 'tonal-spot', // 也可使用低彩度 'neutral' 或单色 'monochrome'
+  },
+});
+```
+
+无论哪种方式，最终都会生成 light/dark 的 primary、secondary、tertiary、surface/container、outline、error 和对应 on-color。
+
+## 背景
+
+### MD3 渐变
+
+```ts
+background: {
+  type: 'gradient',
+  decoration: 'paper',
+  blur: false,
+  gradient: {
+    useMD3Colors: true,
+    direction: '155deg',
+  },
 }
 ```
 
-### Personal Blog
+### 自定义渐变
 
-```typescript
-export const themeConfig = {
-  primary: '#FF6B9D',  // Playful pink
-  shape: {
-    radiusSm: '12px',
-    radiusMd: '20px',
-    radiusLg: '28px',
-  }
+```ts
+background: {
+  type: 'gradient',
+  decoration: 'plain',
+  gradient: {
+    useMD3Colors: false,
+    colors: ['#f5f0e7', '#ddd5c5'],
+    direction: '145deg',
+  },
 }
 ```
 
-### Portfolio
+### 图片背景
 
-```typescript
-export const themeConfig = {
-  mode: 'dark',        // Dark by default
-  primary: '#00F5FF',  // Cyan accent
-  enableTransitions: true,
+```ts
+background: {
+  type: 'image',
+  decoration: 'plain',
+  imageUrl: '/images/background.jpg',
+  blur: false,
+  imageStyle: {
+    size: 'cover',
+    position: 'center',
+    repeat: 'no-repeat',
+    opacity: 0.72,
+  },
 }
 ```
 
-## Troubleshooting
+`decoration` 可为 `aurora | paper | eink | plain | inkwash | monochrome-ink | anime-spring | anime-night | cosmic-abyss | ukiyo | ocean | terminal`。切换为图片且不希望保留预设纹理时，应同时设置 `decoration: 'plain'`。`type: 'none'` 会关闭全局背景层。
 
-### Colors not updating
+扩展场景不依赖外部图片，而是使用 MD3 RGB token 和原创 CSS 图层绘制；除固定黑白朱砂身份的 `monochrome-ink` 与固定黑绿身份的 `retro-terminal` 外，覆盖 `primary` 或 `source` 后，场景色彩会与新色板同步。所有场景默认静态，移动端会减少细节，`prefers-reduced-motion` 会关闭背景动画与过渡。
 
-1. Restart dev server
-2. Clear browser cache
-3. Check browser console for errors
+## 字体
 
-### Theme toggle not working
+字体按用途分成 global、brand、navigation、heading、body、metadata、prose、proseHeading 和 mono。只改 `global` 时，原本继承预设 global 的角色会自动跟随；预设刻意设置的差异角色仍保留，也可以逐项覆盖。
 
-1. Verify JavaScript is enabled
-2. Check console for errors
-3. Test in different browser
+```ts
+typography: {
+  baseSize: 16,
+  lineHeight: 1.72,
+  fontFamilies: {
+    global: fontStacks.rounded.global,
+    prose: fontStacks.paper.global,
+  },
+  scale: {
+    '2xl': 1.55,
+  },
+}
+```
 
-### Fonts not loading
+当前仓库自托管 Nunito Variable、寒蝉全圆体和 Noto Sans SC Variable。`monochrome-ink` 使用系统 `Kaiti SC / STKaiti / KaiTi / 楷体` 回退栈，不产生新的网络字体请求；缺少楷体时回退到系统 serif。引入新的 WebFont 时仍需在 `DocumentShell.astro` 加载相应资源。
 
-1. Check font file paths
-2. Verify preconnect links
-3. Check network tab in dev tools
+## 圆角、阴影和动效
 
-### Contrast issues
+```ts
+shape: {
+  radiusXs: '2px',
+  radiusSm: '5px',
+  radiusMd: '9px',
+  radiusLg: '14px',
+  radiusXl: '18px',
+  radiusPill: '999px',
+  borderWidth: '1px',
+  shadowSm: 'none',
+  shadowMd: 'none',
+  shadowLg: 'none',
+},
+effects: {
+  homeWave: { enabled: false },
+  seasonal: {
+    enabled: false,
+    respectReducedMotion: true,
+    seasons: { autumn: true },
+  },
+}
+```
 
-1. Use contrast checker
-2. Adjust color brightness
-3. Test with actual users
+只需填写准备修改的字段。重新启用持续动效时建议保留 `respectReducedMotion: true` 并单独检查移动端性能。
 
-## Related Documentation
+## 兼容导出
 
-- [MD3 Color Guide](./MD3-COLOR-GUIDE.md)
-- [Markdown Styles](./MARKDOWN-CUSTOM-GUIDE.md)
-- [User Configuration](./USER-CONFIG.md)
-- [Project Structure](./PROJECT-STRUCTURE.md)
+`activeThemePreset`、`fontFamilies` 和 `backgroundConfig` 仍会从最终 `themeConfig` 派生，供已有代码兼容。它们不是新的编辑入口，不要分别维护。
+
+## 创建自己的预设
+
+1. 复制 `presets/themes/` 中最接近的一套 `.ts` 文件。
+2. 修改名称、说明和完整 `config`。
+3. 在 `presets/themes/index.ts` 的 `themePresets` 注册新 ID。
+4. 在 `theme.config.ts` 的 `preset` 选择它。
+5. 运行验证。
+
+## 验证
+
+```bash
+npm run check
+npm run test:config
+npm run verify
+```
+
+至少检查首页、Blog 详情、归档和相册，并覆盖浅色、深色、1440×900 与 390×844。确认没有横向溢出、字体资源正常加载，背景纹理不会遮挡文字。

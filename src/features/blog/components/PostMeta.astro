@@ -1,0 +1,87 @@
+---
+import { useI18n } from '@features/i18n/lib/i18n';
+
+interface Props {
+  publishDate: Date;
+  updatedDate?: Date;
+  readingMinutes?: number;
+  language?: string;
+  tags?: string[];
+}
+
+const { publishDate, updatedDate, readingMinutes, language } = Astro.props;
+const { t } = useI18n();
+const items = [
+  { icon: 'i-carbon:calendar', label: t('blog.info.published'), key: 'blog.info.published', value: publishDate, date: true },
+  ...(updatedDate ? [{ icon: 'i-carbon:renew', label: t('blog.info.updated'), key: 'blog.info.updated', value: updatedDate, date: true }] : []),
+  ...(readingMinutes ? [{ icon: 'i-carbon:time', label: t('blog.info.reading'), key: 'blog.info.reading', value: `${readingMinutes} ${t('blog.readTime')}`, date: false }] : []),
+  ...(language ? [{ icon: 'i-carbon:language', label: t('blog.info.language'), key: 'blog.info.language', value: language, date: false }] : []),
+];
+---
+
+<dl class="post-meta">
+  {items.map((item) => (
+    <div>
+      <dt><i class={item.icon} aria-hidden="true"></i><span data-i18n={item.key}>{item.label}</span></dt>
+      <dd>
+        {item.date && item.value instanceof Date ? (
+          <time datetime={item.value.toISOString()} data-i18n-date={item.value.toISOString()} data-i18n-date-format="short">
+            {item.value.toLocaleDateString('zh-CN')}
+          </time>
+        ) : item.value}
+      </dd>
+    </div>
+  ))}
+</dl>
+
+<style>
+  .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 0;
+    margin: 0;
+  }
+
+  .post-meta > div {
+    min-width: 7.5rem;
+    padding: 0 1rem;
+    border-left: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.48);
+  }
+
+  .post-meta > div:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 0.32rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.62rem;
+    font-weight: 760;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+  }
+
+  dt i {
+    color: var(--md-sys-color-primary);
+    font-size: 0.78rem;
+  }
+
+  dd {
+    margin: 0.25rem 0 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.72rem;
+    font-weight: 720;
+  }
+
+  @media (max-width: 560px) {
+    .post-meta > div {
+      min-width: 50%;
+      padding-right: 0.6rem;
+      padding-left: 0;
+      border-left: 0;
+    }
+  }
+</style>

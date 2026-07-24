@@ -1,100 +1,72 @@
 # Links Page Configuration
 
-Configure friend links, resource links, and social profile links in `src/data/links.config.ts`.
-
-Application code reads this file through `src/data/site.config.ts`, so most users should edit `links.config.ts` only.
+`src/app/config/links.config.ts` owns curated friend/resource entries, categories, preview behavior, and link-exchange copy. Personal contacts and the site card are derived from `user.config.ts` and must not be repeated here.
 
 ## Main Shape
 
-```typescript
+```ts
 export const linksConfig = {
-  friendLinks,
-  linkCategories,
-  linkApplicationInfo,
-  mySiteInfo,
-}
-```
-
-## Link Items
-
-Add links to `friendLinks`:
-
-```typescript
-export const friendLinks = [
-  {
-    name: 'Astro',
-    url: 'https://astro.build',
-    avatar: 'https://astro.build/assets/press/astro-icon-light-gradient.svg',
-    description: 'Modern static site generator',
-    category: 'framework',
-    type: 'site',
-    featured: true,
+  previews: {
+    provider: 'microlink',
+    endpoint: 'https://api.microlink.io/',
   },
-]
-```
-
-Fields:
-
-- `name`: Display name.
-- `url`: Destination URL.
-- `avatar`: Logo or avatar URL.
-- `description`: Short card description.
-- `type`: One of `friend`, `site`, or `social`.
-- `category`: Optional category id used by tabs.
-- `featured`: Optional featured flag used by the featured filter.
-
-## Categories
-
-Tabs are configured by link type:
-
-```typescript
-export const linkCategories = {
-  friend: [
-    { id: 'all', label: 'All', icon: 'i-carbon:grid' },
-    { id: 'featured', label: 'Featured', icon: 'i-carbon:star-filled' },
-    { id: 'blog', label: 'Blogs', icon: 'i-carbon:blog' },
-  ],
-  site: [
-    { id: 'all', label: 'All', icon: 'i-carbon:grid' },
-    { id: 'resource', label: 'Resources', icon: 'i-carbon:book' },
-  ],
-  social: [
-    { id: 'all', label: 'All', icon: 'i-carbon:grid' },
-  ],
+  friendLinks: [],
+  linkCategories: {
+    friend: [],
+    site: [],
+    social: [],
+  },
+  linkApplicationInfo: {
+    description: 'Share a personal site, technical blog, or useful resource.',
+  },
 }
 ```
 
-Use category ids that match `friendLinks[].category`.
+## Curated Links
 
-## Link Applications
-
-`linkApplicationInfo` controls the contact buttons in the link exchange section:
-
-```typescript
-export const linkApplicationInfo = {
-  title: 'Apply for Link Exchange',
-  description: 'Send your site information through one of the contacts below.',
-  contacts: [
-    { label: 'Email', value: 'mailto:your.email@example.com', icon: 'i-carbon:email' },
-  ],
+```ts
+{
+  name: 'Astro',
+  url: 'https://astro.build',
+  avatar: 'https://astro.build/assets/press/astro-icon-light-gradient.svg',
+  description: 'Modern static site generator',
+  category: 'framework',
+  type: 'site',
+  featured: true,
 }
 ```
 
-## Your Site Card
+- `type` is `friend` or `site` for curated entries.
+- `category` must match the corresponding category id.
+- `featured` enables the featured filter.
+- `screenshot` optionally supplies a local/remote preview image.
+- Preview priority is `screenshot` -> Microlink -> enlarged avatar fallback. Requests start only when cards approach the viewport; set `previews.provider: 'none'` to disable remote screenshot requests.
 
-`mySiteInfo` is displayed in the application section:
+## Personal Social Section
 
-```typescript
-export const mySiteInfo = {
-  name: 'Your Site Name',
-  url: 'https://yourdomain.com',
-  avatar: '/images/profile/avatar.png',
-  description: 'Technical notes, project practice, and long-term learning logs',
-}
+The personal social section is built from:
+
+- `user.github.username`
+- `user.contact.additionalLinks`
+
+Configure those values once in `user.config.ts`. Do not add the owner's GitHub/social profiles to `friendLinks`.
+
+## Link Application Contacts
+
+The contact buttons use `getUserContactLinks()` and therefore reflect:
+
+- `user.contact.email`
+- `user.contact.website`
+- `user.github.username`
+- `user.contact.additionalLinks`
+
+The site card uses `user.name`, `user.avatar`, `user.contact.website`, and the current language's `userContent.description`. There are no `contacts` or `mySiteInfo` fields in `links.config.ts`.
+
+## Verification
+
+```bash
+npm run test:config
+npm run check
 ```
 
-## Notes
-
-- Keep placeholder contact values in the public template.
-- Do not put private contact methods or API keys in this file.
-- For app code, prefer `getLinksConfig()` from `src/data/site.config.ts`.
+Also visit `/links` and confirm that configured contact buttons and site-card values match Home, About, and Footer.

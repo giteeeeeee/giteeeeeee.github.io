@@ -1,549 +1,94 @@
-# Deployment Guide
+# 部署指南
 
-How to deploy your Astro Theme Reay site to production.
+Astro Theme Reay 输出纯静态站点，构建目录为 `dist/`。当前只支持根路径部署：自定义域名或 GitHub Pages 用户/组织站点；不支持 `/repository-name/` 形式的项目子路径。
 
-## Build Process
+## 发布前条件
 
-### Local Build
+1. `src/app/config/user.config.ts` 中的身份与文案已替换，`site.templateMode` 为 `false`。
+2. `SITE` 是真实 HTTPS origin，不含 path、query 或 hash。
+3. `BASE=/`。
+4. 外部 GitHub、评论、截图、媒体配置已经按隐私要求确认。
+5. 本地通过 `verify` 与 `audit`。
 
 ```bash
-# Build for production
-npm run build
-
-# Preview production build locally
-npm run preview
+npm ci
+SITE=https://your-production-origin.invalid npm run check:production
+SITE=https://your-production-origin.invalid npm run verify
+npm run audit
 ```
 
-Build output goes to `dist/` folder.
+命令中的 `.invalid` 地址用于提示替换，不能直接通过生产检查。
 
-### Build Configuration
+## 生产变量
 
-In `astro.config.mjs`:
+| 变量 | 必需 | 说明 |
+| --- | --- | --- |
+| `SITE` | 是 | canonical、OpenGraph、RSS、robots 与 Sitemap 的 origin |
+| `BASE` | 是 | 当前必须为 `/` |
+| `GITHUB_TOKEN` | 否 | 构建期 GitHub API；仅存入 Secret |
+| `GITHUB_CACHE_TTL_MS` | 否 | GitHub 缓存 TTL，单位毫秒 |
 
-```javascript
-export default defineConfig({
-  site: 'https://yourdomain.com',  // Your production URL
-  base: '/',                        // Base path (keep as '/' for root)
-})
+`PUBLIC_SITE_URL` 仅作为历史兼容回退；新部署统一使用 `SITE`。`SITE_URL` 和 `PUBLIC_GA_ID` 没有源码消费者，不应配置。
+
+## GitHub Pages
+
+仓库已提供 `.github/workflows/deploy.yml`：
+
+1. 仓库 `Settings → Pages` 的 Source 选择 `GitHub Actions`。
+2. 在 `Settings → Secrets and variables → Actions → Variables` 新建 `SITE`，值为真实站点 origin。
+3. 可选：在 Secrets 中提供 `GITHUB_TOKEN`；工作流默认也能使用 GitHub 自动令牌。
+4. 使用用户/组织站点仓库或绑定自定义域名，确保最终页面位于根路径。
+5. 推送到 `main` 或手动触发 Deploy workflow。
+
+工作流顺序：
+
+```text
+npm ci
+→ check:production
+→ verify
+→ audit
+→ upload-pages-artifact
+→ deploy-pages
 ```
 
-## Deployment Platforms
+部署权限只需要 `contents: read`、`pages: write` 与 `id-token: write`，不需要允许 Actions 修改仓库内容或创建 PR。
 
-### GitHub Pages (Built In)
+## 其他静态宿主
 
-The template includes `.github/workflows/deploy.yml`, so GitHub Pages is the default zero-extra-file deployment path.
+| 设置 | 值 |
+| --- | --- |
+| Node | `22` |
+| Install | `npm ci` |
+| Build | `npm run build` |
+| Output | `dist` |
+| Environment | `SITE=<真实 origin>`、`BASE=/` |
 
-**Steps:**
+Vercel、Netlify、Cloudflare Pages 等平台还应按各自文档配置：
 
-1. **Configure site URL**
+- SPA fallback 不应吞掉真实的 `404.html`。
+- `theme.css`、`markdown.css`、`pagefind/` 和带 hash 的 Astro 资产适合长期缓存。
+- HTML、RSS、robots 与 Sitemap 应允许及时刷新。
+- 若设置 CSP，应显式纳入已启用的评论 provider、Microlink、KaTeX CDN 或远程图片 origin。
 
-   For a user or organization site:
-   ```env
-   SITE=https://yourusername.github.io
-   BASE=/
-   ```
+## 部署后验收
 
-   For a project site:
-   ```env
-   SITE=https://yourusername.github.io
-   BASE=/repository-name
-   ```
+至少检查：
 
-2. **Enable Pages**
-   - Repository Settings → Pages
-   - Source: GitHub Actions
+- `/`、`/blog/`、`/archives/`、`/gallery/`、`/projects/`、`/search/`
+- `/404.html`、`/rss.xml`、`/robots.txt`、`/sitemap-index.xml`
+- `/pagefind/pagefind.js`、`/theme.css`、`/markdown.css`
+- HTML 的 canonical、OpenGraph 与 RSS URL 使用真实 `SITE`
+- 主题、语言、移动导航、搜索、详情页返回与图片灯箱
+- 已启用的 GitHub、评论、外链截图和媒体服务
 
-3. **Push to deploy**
-   ```bash
-   git push origin main
-   ```
+## 回滚
 
-4. **Check Actions**
-   - Open the Actions tab
-   - Confirm `Deploy to GitHub Pages` completed successfully
+- 保留上一个可用 commit 或宿主平台 artifact。
+- 外部 provider 故障时先关闭对应 `features.config.ts` / provider 配置，再重新构建。
+- 生产 origin 错误应阻止发布；不要等待搜索引擎自行纠正。
 
-### Vercel
+## 已知限制
 
-**Why Vercel:**
-- Zero configuration
-- Automatic deployments
-- Preview deployments
-- Edge network
-- Free tier
-
-**Steps:**
-
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Ready to deploy"
-   git push
-   ```
-
-2. **Import on Vercel**
-   - Go to [vercel.com](https://vercel.com)
-   - Click "New Project"
-   - Import your GitHub repository
-   - Vercel auto-detects Astro
-
-3. **Configure (if needed)**
-   - Framework: Astro
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-
-4. **Deploy**
-   - Click "Deploy"
-   - Wait ~1 minute
-   - Your site is live!
-
-**Environment Variables:**
-
-Add in Vercel dashboard:
-```
-GITHUB_TOKEN=your_token_here
-```
-
-**Custom Domain:**
-
-1. Vercel Dashboard → Settings → Domains
-2. Add your domain
-3. Update DNS records as shown
-4. Wait for SSL cert (~5 minutes)
-
-### Netlify
-
-**Steps:**
-
-1. **Build Settings**
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-
-2. **Deploy Options**
-
-   **Option A: Git Integration**
-   - Connect GitHub repository
-   - Auto-deploy on push
-
-   **Option B: Drag and Drop**
-   - Run `npm run build`
-   - Drag `dist/` folder to Netlify
-
-3. **Environment Variables**
-   - Site Settings → Environment
-   - Add `GITHUB_TOKEN`
-
-4. **Custom Domain**
-   - Domain Settings → Add custom domain
-   - Update DNS records
-
-### Cloudflare Pages
-
-**Steps:**
-
-1. **Connect Repository**
-   - Go to Cloudflare Pages
-   - Connect GitHub account
-   - Select repository
-
-2. **Build Settings**
-   - Framework: Astro
-   - Build command: `npm run build`
-   - Output directory: `dist`
-
-3. **Deploy**
-   - Click "Save and Deploy"
-   - Auto-deploys on git push
-
-4. **Environment Variables**
-   - Settings → Environment variables
-   - Add `GITHUB_TOKEN`
-
-### Railway
-
-**Steps:**
-
-1. **Connect Repository**
-   - Go to Railway.app
-   - New Project → Deploy from GitHub
-
-2. **Configure**
-   - Build command: `npm run build`
-   - Start command: `npx http-server dist`
-
-3. **Environment Variables**
-   - Add `GITHUB_TOKEN` in Variables tab
-
-### DigitalOcean App Platform
-
-**Steps:**
-
-1. **Create App**
-   - Apps → Create App
-   - Connect GitHub
-
-2. **Configure**
-   - Type: Static Site
-   - Build command: `npm run build`
-   - Output directory: `dist`
-
-3. **Deploy**
-   - Click "Create Resources"
-
-## Static Hosting
-
-### AWS S3 + CloudFront
-
-1. **Build site**
-   ```bash
-   npm run build
-   ```
-
-2. **Create S3 bucket**
-   - Enable static website hosting
-
-3. **Upload files**
-   ```bash
-   aws s3 sync dist/ s3://your-bucket-name
-   ```
-
-4. **Set up CloudFront**
-   - Create distribution
-   - Point to S3 bucket
-
-5. **Configure DNS**
-   - Add CNAME to CloudFront
-
-### Google Cloud Storage
-
-1. **Build site**
-   ```bash
-   npm run build
-   ```
-
-2. **Create bucket**
-   ```bash
-   gsutil mb gs://your-bucket-name
-   ```
-
-3. **Upload**
-   ```bash
-   gsutil -m rsync -r dist/ gs://your-bucket-name
-   ```
-
-4. **Enable website config**
-   ```bash
-   gsutil web set -m index.html -e 404.html gs://your-bucket-name
-   ```
-
-## Docker Deployment
-
-**Dockerfile:**
-
-```dockerfile
-FROM node:18-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-```
-
-**Build and run:**
-
-```bash
-docker build -t my-blog .
-docker run -p 80:80 my-blog
-```
-
-## Environment Variables
-
-### Required Variables
-
-```env
-# Production URL
-SITE_URL=https://yourdomain.com
-
-# GitHub token (optional, for higher API limits)
-GITHUB_TOKEN=<your-github-token>
-```
-
-### Platform-Specific Setup
-
-**Vercel:**
-- Project Settings → Environment Variables
-
-**Netlify:**
-- Site Settings → Environment → Environment variables
-
-**GitHub Actions:**
-- Repository Settings → Secrets → Actions
-
-**Cloudflare:**
-- Pages → Settings → Environment variables
-
-## Custom Domain
-
-### DNS Configuration
-
-**A Records** (for apex domain):
-```
-@ → Points to platform's IP
-```
-
-**CNAME Record** (for www):
-```
-www → Points to platform's domain
-```
-
-### SSL/HTTPS
-
-Most platforms provide free SSL:
-- Vercel: Automatic
-- Netlify: Automatic
-- Cloudflare: Automatic
-- GitHub Pages: Automatic for custom domains
-
-## Performance Optimization
-
-### Before Deployment
-
-1. **Optimize Images**
-   ```bash
-   # Use WebP format
-   # Compress images
-   # Use appropriate sizes
-   ```
-
-2. **Enable Compression**
-   - Automatic on most platforms
-   - Or configure in `astro.config.mjs`
-
-3. **Minify Assets**
-   ```javascript
-   export default defineConfig({
-     vite: {
-       build: {
-         minify: 'terser',
-       }
-     }
-   })
-   ```
-
-4. **Check Bundle Size**
-   ```bash
-   npm run build
-   # Check dist/ folder size
-   ```
-
-### After Deployment
-
-1. **Enable CDN**
-   - Automatic on Vercel, Netlify, Cloudflare
-
-2. **Set Cache Headers**
-   - Configure in platform settings
-
-3. **Use Compression**
-   - Gzip or Brotli
-
-4. **Monitor Performance**
-   - Google PageSpeed Insights
-   - Lighthouse
-   - Web Vitals
-
-## SEO Configuration
-
-### Before Deployment
-
-1. **Update site URL**
-   ```javascript
-   // astro.config.mjs
-   site: 'https://yourdomain.com'
-   ```
-
-2. **Add robots.txt**
-   ```txt
-   # public/robots.txt
-   User-agent: *
-   Allow: /
-   Sitemap: https://yourdomain.com/sitemap-index.xml
-   ```
-
-3. **Verify Sitemap**
-   - Add an Astro sitemap integration if your deployment needs a sitemap
-   - Check the generated sitemap URL after enabling it
-
-4. **Meta Tags**
-   - Verify page titles and descriptions in layouts and page props
-
-### After Deployment
-
-1. **Google Search Console**
-   - Add property
-   - Submit sitemap
-   - Verify ownership
-
-2. **Google Analytics** (optional)
-   - Add your analytics provider script in a layout or component
-   - Keep provider IDs in environment variables when needed
-
-3. **Bing Webmaster Tools**
-   - Add site
-   - Submit sitemap
-
-## Monitoring
-
-### Uptime Monitoring
-
-Free services:
-- UptimeRobot
-- StatusCake
-- Pingdom
-
-### Analytics
-
-Options:
-- Google Analytics
-- Plausible (privacy-friendly)
-- Umami (self-hosted)
-
-### Error Tracking
-
-Options:
-- Sentry
-- LogRocket
-- Rollbar
-
-## Continuous Deployment
-
-### GitHub Actions (any host)
-
-```yaml
-name: Deploy
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run build
-      # Upload to your hosting provider
-```
-
-### Automatic Deployments
-
-Most platforms auto-deploy on:
-- Git push to main branch
-- Pull request merge
-- Manual trigger
-
-### Preview Deployments
-
-Platforms with PR previews:
-- Vercel ✅
-- Netlify ✅
-- Cloudflare Pages ✅
-
-## Troubleshooting
-
-### Build Fails
-
-**Check:**
-- Node version (18+)
-- Dependencies installed
-- Build command correct
-- Environment variables set
-
-**Debug:**
-```bash
-# Local build
-npm run build
-
-# Check logs
-# Fix errors shown
-```
-
-### 404 Errors
-
-**Solutions:**
-- Verify `base` in config matches deployment path
-- Check routing configuration
-- Ensure build output is complete
-
-### Images Not Loading
-
-**Solutions:**
-- Check image paths start with `/`
-- Verify files in `public/` directory
-- Check case sensitivity
-- Use absolute URLs as fallback
-
-### Slow Performance
-
-**Solutions:**
-- Enable CDN
-- Optimize images
-- Check bundle size
-- Enable compression
-
-### Environment Variables Not Working
-
-**Solutions:**
-- Prefix with `PUBLIC_` if needed client-side
-- Rebuild after adding variables
-- Check platform-specific syntax
-
-## Rollback
-
-### Vercel
-
-- Deployments tab
-- Click "..." on previous deployment
-- "Promote to Production"
-
-### Netlify
-
-- Deploys tab
-- Find previous deploy
-- "Publish deploy"
-
-### GitHub Pages
-
-- Revert git commit
-- Push to trigger new deployment
-
-## Checklist
-
-Before deploying:
-
-- [ ] Build succeeds locally
-- [ ] All pages load correctly
-- [ ] Images display properly
-- [ ] Links work (internal and external)
-- [ ] Dark mode works
-- [ ] Mobile responsive
-- [ ] SEO tags present
-- [ ] Sitemap generated
-- [ ] robots.txt configured
-- [ ] Custom domain configured (if applicable)
-- [ ] SSL enabled
-- [ ] Environment variables set
-- [ ] Analytics configured (if desired)
-
-## Related Documentation
-
-- [User Configuration](./USER-CONFIG.md)
-- [Deployment Checklist](./DEPLOYMENT-CHECKLIST.md)
-- [Project Structure](./PROJECT-STRUCTURE.md)
+- 不支持 GitHub Pages 项目子路径。
+- 自动化测试不等价于全站链接 crawl、像素级视觉回归、人工无障碍或真实第三方 provider 测试。
+- 仓库不负责评论 SaaS、GitHub、Microlink、CDN 或远程媒体的可用性和数据政策。

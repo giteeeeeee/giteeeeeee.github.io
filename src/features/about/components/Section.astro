@@ -1,0 +1,233 @@
+---
+/** Configurable About section using the shared editorial split layout. */
+import { useI18n } from '@features/i18n/lib/i18n';
+import type { TranslationKey } from '@app/config/i18n.config';
+
+interface Item {
+  name: string;
+  description?: string;
+  url?: string;
+  icon?: string;
+  logo?: string;
+}
+
+interface Props {
+  id?: string;
+  title: string;
+  description?: string;
+  icon?: string;
+  items: Item[];
+  columns?: 2 | 3 | 4 | 5;
+  compact?: boolean;
+  colorTheme?: 'primary' | 'secondary' | 'tertiary' | 'accent';
+}
+
+const { id, title, description, icon, items, columns = 3, compact = false, colorTheme = 'primary' } = Astro.props;
+const { t } = useI18n();
+const isTitleKey = title.startsWith('about.') && title.includes('.title');
+const isDescriptionKey = Boolean(description?.startsWith('about.'));
+const displayTitle = isTitleKey ? t(title as TranslationKey) : title;
+const displayDescription = isDescriptionKey ? t(description as TranslationKey) : description;
+const visibleColumns = Math.min(columns, 3);
+const getItemText = (value?: string) => value?.startsWith('about.') ? t(value as TranslationKey) : value;
+const getItemKey = (value?: string) => value?.startsWith('about.') ? value : undefined;
+---
+
+<section
+  class:list={['content-section', `theme-${colorTheme}`, compact && 'is-compact']}
+  id={id}
+  style={`--section-columns: ${visibleColumns};`}
+>
+  <header class="section-header">
+    <p class="section-kicker">
+      {icon && <i class={icon} aria-hidden="true"></i>}
+      <span>{String(items.length).padStart(2, '0')}</span>
+    </p>
+    <h2 data-i18n={isTitleKey ? title : undefined}>{displayTitle}</h2>
+    {displayDescription && <p data-i18n={isDescriptionKey ? description : undefined}>{displayDescription}</p>}
+  </header>
+
+  <div class="items-grid">
+    {items.map((item) => (
+      <article class="item-row">
+        {item.url ? (
+          <a href={item.url} target="_blank" rel="noopener noreferrer">
+            {(item.logo || item.icon) && (
+              <span class="about-item-icon">
+                {item.logo ? <img src={item.logo} alt="" /> : <i class={item.icon}></i>}
+              </span>
+            )}
+            <span class="about-item-copy">
+              <strong data-i18n={getItemKey(item.name)}>{getItemText(item.name)}</strong>
+              {item.description && <span data-i18n={getItemKey(item.description)}>{getItemText(item.description)}</span>}
+            </span>
+            <i class="i-carbon:arrow-up-right item-arrow" aria-hidden="true"></i>
+          </a>
+        ) : (
+          <div class="item-static">
+            {(item.logo || item.icon) && (
+              <span class="about-item-icon">
+                {item.logo ? <img src={item.logo} alt="" /> : <i class={item.icon}></i>}
+              </span>
+            )}
+            <span class="about-item-copy">
+              <strong data-i18n={getItemKey(item.name)}>{getItemText(item.name)}</strong>
+              {item.description && <span data-i18n={getItemKey(item.description)}>{getItemText(item.description)}</span>}
+            </span>
+          </div>
+        )}
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .content-section {
+    --section-accent: var(--md-sys-color-primary);
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: clamp(1.25rem, 4vw, 2.75rem);
+    margin-bottom: 2.7rem;
+  }
+
+  .theme-secondary { --section-accent: var(--md-sys-color-secondary); }
+  .theme-tertiary { --section-accent: var(--md-sys-color-tertiary); }
+
+  .section-header {
+    padding-top: 0.2rem;
+  }
+
+  .section-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.42rem;
+    margin: 0 0 0.4rem;
+    color: var(--section-accent);
+    font-size: 0.68rem;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+  }
+
+  .section-kicker i {
+    font-size: 0.95rem;
+  }
+
+  .section-header h2 {
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 1.12rem;
+    font-weight: 860;
+    line-height: 1.25;
+  }
+
+  .section-header > p:last-child:not(.section-kicker) {
+    margin: 0.38rem 0 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.73rem;
+    line-height: 1.55;
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--section-columns), minmax(0, 1fr));
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.46);
+  }
+
+  .item-row {
+    min-width: 0;
+    border-right: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.34);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.4);
+  }
+
+  .item-row:nth-child(3n) {
+    border-right: 0;
+  }
+
+  .item-row > a,
+  .item-static {
+    display: flex;
+    align-items: center;
+    gap: 0.72rem;
+    min-height: 4.55rem;
+    padding: 0.72rem;
+    color: inherit;
+  }
+
+  .item-row > a:hover {
+    background: linear-gradient(110deg, rgba(var(--md-sys-color-primary-rgb), 0.08), transparent 70%);
+  }
+
+  .item-arrow {
+    flex: 0 0 auto;
+    color: var(--md-sys-color-primary);
+    font-size: 0.78rem;
+  }
+
+  .about-item-icon {
+    display: grid;
+    width: 2.15rem;
+    height: 2.15rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 0.72rem;
+    background: rgba(var(--md-sys-color-primary-container-rgb), 0.55);
+    color: var(--md-sys-color-primary);
+  }
+
+  .about-item-icon img {
+    width: 1.3rem;
+    height: 1.3rem;
+    object-fit: contain;
+  }
+
+  .about-item-copy {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .about-item-copy strong {
+    display: block;
+    overflow: hidden;
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .about-item-copy span {
+    display: -webkit-box;
+    margin-top: 0.18rem;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.67rem;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 900px) {
+    .items-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .item-row:nth-child(3n) { border-right: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.34); }
+    .item-row:nth-child(2n) { border-right: 0; }
+  }
+
+  @media (max-width: 660px) {
+    .content-section {
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+      margin-bottom: 2.2rem;
+    }
+
+    .items-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .item-row {
+      border-right: 0 !important;
+    }
+  }
+</style>

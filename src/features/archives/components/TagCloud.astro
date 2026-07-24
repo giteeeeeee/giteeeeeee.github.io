@@ -1,0 +1,157 @@
+---
+/** Deterministic tag map and compact alphabetical/count index. */
+import { getTagUrl } from '@features/blog/lib/blog';
+import { useI18n } from '@features/i18n/lib/i18n';
+
+interface Tag {
+  tag: string;
+  count: number;
+}
+
+interface Props {
+  tags: Tag[];
+  variant?: 'map' | 'index';
+}
+
+const { tags, variant = 'index' } = Astro.props;
+const { t } = useI18n();
+const sortedTags = [...tags].sort((left, right) =>
+  right.count - left.count || left.tag.localeCompare(right.tag)
+);
+const maxCount = Math.max(...sortedTags.map((item) => item.count), 1);
+const minCount = Math.min(...sortedTags.map((item) => item.count), maxCount);
+const getWeight = (count: number) => maxCount === minCount ? 0.5 : (count - minCount) / (maxCount - minCount);
+---
+
+{variant === 'map' ? (
+  <div class="tag-map" data-tag-map>
+    {sortedTags.map((item) => (
+      <a
+        href={getTagUrl(item.tag)}
+        style={`--tag-weight: ${getWeight(item.count).toFixed(3)};`}
+        data-astro-prefetch="hover"
+      >
+        <span>#{item.tag}</span><small>{item.count}</small>
+      </a>
+    ))}
+  </div>
+) : (
+  <div class="tag-index" data-tag-index>
+    {sortedTags.map((item, index) => (
+      <a href={getTagUrl(item.tag)} class="tag-index-item" data-astro-prefetch="hover">
+        <span class="tag-rank">{String(index + 1).padStart(2, '0')}</span>
+        <span class="tag-name">#{item.tag}</span>
+        <span class="tag-count">
+          {item.count} <span data-i18n="archives.postsCount">{t('archives.postsCount')}</span>
+        </span>
+        <i class="i-carbon:arrow-up-right" aria-hidden="true"></i>
+      </a>
+    ))}
+  </div>
+)}
+
+<style>
+  .tag-map {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 0.72rem;
+    align-items: baseline;
+    justify-content: center;
+    padding: clamp(1rem, 3vw, 1.55rem);
+    border-radius: 1rem;
+    background: linear-gradient(125deg, rgba(var(--md-sys-color-primary-rgb), 0.1), rgba(var(--md-sys-color-surface-container-rgb), 0.42));
+  }
+
+  .tag-map a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.28rem;
+    padding: 0.25rem 0;
+    color: color-mix(in srgb, var(--md-sys-color-on-surface) calc(72% + var(--tag-weight) * 28%), var(--md-sys-color-primary));
+    font-size: calc(0.76rem + var(--tag-weight) * 0.3rem);
+    font-weight: calc(620 + var(--tag-weight) * 100);
+    line-height: 1.2;
+  }
+
+  .tag-map a:hover {
+    color: var(--md-sys-color-primary);
+  }
+
+  .tag-map small {
+    color: var(--md-sys-color-on-surface-variant);
+    font-family: var(--reay-font-metadata);
+    font-size: 0.58rem;
+    font-weight: 650;
+  }
+
+  .tag-index {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.5);
+  }
+
+  .tag-index-item {
+    display: grid;
+    grid-template-columns: 2.2rem minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 0.82rem 0.65rem;
+    color: inherit;
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
+  }
+
+  .tag-index-item:nth-child(odd) {
+    padding-left: 0;
+    padding-right: 1.1rem;
+    border-right: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.42);
+  }
+
+  .tag-index-item:nth-child(even) {
+    padding-left: 1.1rem;
+    padding-right: 0;
+  }
+
+  .tag-index-item:hover {
+    color: var(--md-sys-color-primary);
+    background: rgba(var(--md-sys-color-primary-rgb), 0.055);
+  }
+
+  .tag-rank {
+    color: var(--md-sys-color-outline);
+    font-family: var(--reay-font-metadata);
+    font-size: 0.65rem;
+  }
+
+  .tag-name {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tag-count {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.67rem;
+    white-space: nowrap;
+  }
+
+  .tag-index-item > i {
+    color: var(--md-sys-color-primary);
+    font-size: 0.84rem;
+  }
+
+  @media (max-width: 680px) {
+    .tag-index {
+      grid-template-columns: 1fr;
+    }
+
+    .tag-index-item:nth-child(n) {
+      padding-right: 0;
+      padding-left: 0;
+      border-right: 0;
+    }
+  }
+</style>

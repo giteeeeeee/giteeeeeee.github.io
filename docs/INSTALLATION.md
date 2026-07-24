@@ -1,240 +1,104 @@
-# Installation Guide
+# 安装与本地环境
 
-Complete guide to installing and setting up Astro Theme Reay.
+## 要求
 
-## Prerequisites
+- Node.js `>=22.12.0`
+- npm `>=9.6.5`
+- Git
 
-Before you begin, ensure you have the following installed:
-
-- **Node.js** 18.0.0 or higher
-- **npm** 7.0.0+ or **pnpm** 6.0.0+
-- **Git** (for cloning the repository)
-
-Check your versions:
+仓库的 `.nvmrc` 固定 Node 22。使用 nvm 时：
 
 ```bash
-node --version  # Should be v18.0.0 or higher
-npm --version   # Should be 7.0.0 or higher
+nvm install
+nvm use
+node --version
+npm --version
 ```
 
-## Method 1: Use as Template (Recommended)
+## 安装依赖
 
-1. **Click "Use this template"** on GitHub
-
-   - Go to the repository page
-   - Click the green "Use this template" button
-   - Name your new repository
-   - Choose public or private
-2. **Clone your new repository**
-
-   ```bash
-   git clone https://github.com/WOOREWY/Astro-Theme-Reay.git
-   cd YOUR-REPO-NAME
-   ```
-3. **Install dependencies**
-
-   ```bash
-   npm install
-   # or
-   pnpm install
-   ```
-4. **Start the development server**
-
-   ```bash
-   npm run dev
-   # or
-   pnpm dev
-   ```
-5. **Open your browser**
-
-   - Navigate to `http://localhost:4321`
-   - You should see the theme running!
-
-## Method 2: Clone Directly
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/yourusername/Astro-Theme-Reay.git
-   cd Astro-Theme-Reay
-   ```
-2. **Remove existing Git history** (optional)
-
-   ```bash
-   rm -rf .git
-   git init
-   ```
-3. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-4. **Start development**
-
-   ```bash
-   npm run dev
-   ```
-
-## Verifying Installation
-
-After starting the dev server, you should see:
-
-```
-🚀 astro v4.x.x started in Xms
-
-  ┃ Local    http://localhost:4321/
-  ┃ Network  use --host to expose
-```
-
-Visit `http://localhost:4321` to see:
-
-- ✅ Homepage with hero section
-- ✅ Blog posts list
-- ✅ Projects showcase
-- ✅ About page
-- ✅ Theme switching works
-
-## Common Issues
-
-### Node Version Error
-
-```
-Error: Node.js version not supported
-```
-
-**Solution**: Upgrade to Node.js 18 or higher
+首次克隆或 CI 使用 lockfile 的确定性安装：
 
 ```bash
-# Using nvm
-nvm install 18
-nvm use 18
+npm ci
 ```
 
-### Port Already in Use
+只有在主动升级依赖并准备提交 `package-lock.json` 时才使用 `npm install`。
 
-```
-Error: Port 4321 is already in use
-```
-
-**Solution**: Use a different port
+## 本地开发
 
 ```bash
-npm run dev -- --port 3000
-```
-
-### Dependencies Installation Failed
-
-```
-Error: EACCES permission denied
-```
-
-**Solution**: Fix npm permissions or use pnpm
-
-```bash
-pnpm install
-```
-
-### Module Not Found
-
-```
-Error: Cannot find module 'X'
-```
-
-**Solution**: Clear cache and reinstall
-
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-## Project Structure After Installation
-
-```
-Astro-Theme-Reay/
-├── src/
-│   ├── components/      # UI components
-│   ├── content/         # Blog posts and content
-│   ├── data/           # Configuration files
-│   ├── layouts/        # Page layouts
-│   ├── pages/          # Route pages
-│   └── styles/         # Global styles
-├── public/             # Static assets
-├── docs/               # Documentation
-├── astro.config.mjs    # Astro configuration
-├── package.json        # Dependencies
-└── tsconfig.json       # TypeScript config
-```
-
-## Next Steps
-
-After successful installation:
-
-1. **Configure your site**: See [User Configuration](./USER-CONFIG.md)
-2. **Customize theme**: Check [Theme Configuration](./THEME-CONFIG.md)
-3. **Write your first post**: Follow [Blog System](./BLOG-SYSTEM.md)
-4. **Deploy**: Read [Deployment Guide](./DEPLOYMENT.md)
-
-## Development Commands
-
-```bash
-# Start development server
 npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Check for issues
-npm run check
-
-# Format code
-npm run format
 ```
 
-## Environment Setup (Optional)
+默认地址是 `http://localhost:4321`。开发服务器不会生成完整 Pagefind 索引；搜索生产行为应使用：
 
-Create a `.env` file for optional features:
+```bash
+npm run build
+npm run preview
+```
+
+## 环境变量
+
+```bash
+cp .env.example .env
+```
 
 ```env
-# GitHub API token (for higher rate limits)
-GITHUB_TOKEN=<your-github-token>
-
-# Site URL (for production)
-SITE_URL=https://yourdomain.com
+SITE=https://your-domain.example
+BASE=/
+GITHUB_TOKEN=
 ```
 
-## Editor Setup (Recommended)
+- `SITE`：生产 HTTPS origin；开发时可留作占位，但发布前必须替换。
+- `BASE`：必须保持 `/`。
+- `GITHUB_TOKEN`：可选，只放在本地 `.env` 或 CI Secret。
 
-### VS Code
+`npm run check:production` 会自动读取本地 `.env`；显式传入的环境变量仍可用于 CI。
 
-Install recommended extensions:
+## 安装浏览器测试依赖
 
-- Astro
-- ESLint
-- Prettier
-- Tailwind CSS IntelliSense
+首次运行 E2E：
 
-### Settings
+```bash
+npx playwright install chromium
+```
 
-The project includes `.vscode/settings.json` with optimal configuration.
+Linux CI 使用：
 
-## Troubleshooting
+```bash
+npx playwright install --with-deps chromium
+```
 
-If you encounter issues:
+## 验证安装
 
-1. Check [Common Issues](#common-issues) above
-2. Search [GitHub Issues](https://github.com/yourusername/Astro-Theme-Reay/issues)
-3. Create a new issue with:
-   - Node.js version
-   - npm/pnpm version
-   - Operating system
-   - Error messages
-   - Steps to reproduce
+```bash
+npm run lint
+npm run check
+npm run build
+```
 
-## Support
+完整门禁：
 
-- 📖 Read the [documentation](./README.md)
-- 🐛 Report bugs on [GitHub Issues](https://github.com/yourusername/Astro-Theme-Reay/issues)
-- 💬 Ask questions in [Discussions](https://github.com/yourusername/Astro-Theme-Reay/discussions)
+```bash
+npm run verify
+npm run audit
+```
+
+## 常见问题
+
+### Node 版本错误
+
+重新执行 `nvm use`，确认 `node --version` 为 22.12.0 或更高版本。
+
+### 依赖状态异常
+
+不要删除 lockfile。先删除本地 `node_modules` 后重新运行 `npm ci`。
+
+### 搜索页没有完整结果
+
+Pagefind 只在 `npm run build` 后写入 `dist/pagefind`。使用生产预览，不要把开发服务器结果当作最终搜索验证。
+
+### GitHub 项目为空
+
+模板默认的 `yourusername` 会主动跳过外部请求。请在 `user.config.ts` 填写真实公开用户名；需要更高 API 限额时再提供 `GITHUB_TOKEN`。

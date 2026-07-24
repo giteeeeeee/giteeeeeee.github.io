@@ -23,7 +23,7 @@
 打开项目中的配置文件：
 
 ```
-src/data/markdown-style.config.ts
+src/app/config/markdown-style.config.ts
 ```
 
 ### 第二步：修改配置
@@ -68,7 +68,7 @@ src/
 #### 方法一：直接修改（推荐）
 
 ```typescript
-// src/data/markdown-style.config.ts
+// src/app/config/markdown-style.config.ts
 
 // 在文件末尾修改
 export const currentMarkdownStyle = {
@@ -84,7 +84,7 @@ export const currentMarkdownStyle = {
 #### 方法二：创建新配置
 
 ```typescript
-// src/data/markdown-style.config.ts
+// src/app/config/markdown-style.config.ts
 
 // 创建自己的配置
 export const myCustomStyle: MarkdownStyleConfig = {
@@ -294,7 +294,7 @@ export const currentMarkdownStyle = {
 系统提供了 4 种预设样式，可以直接使用：
 
 ```typescript
-// src/data/markdown-style.config.ts
+// src/app/config/markdown-style.config.ts
 import { markdownStylePresets } from './markdown-style.config';
 
 // 选择一个预设
@@ -642,21 +642,21 @@ http://localhost:4321/blog/test-markdown
 **A:** 可以分文件管理：
 
 ```typescript
-// src/data/styles/my-typography.ts
+// src/app/config/styles/my-typography.ts
 export const myTypography = {
   fontSize: '16px',
   lineHeight: '1.8',
   // ...
 };
 
-// src/data/styles/my-headings.ts
+// src/app/config/styles/my-headings.ts
 export const myHeadings = {
   h2: { fontSize: '2em', ... },
   h3: { fontSize: '1.5em', ... },
   // ...
 };
 
-// src/data/markdown-style.config.ts
+// src/app/config/markdown-style.config.ts
 import { myTypography } from './styles/my-typography';
 import { myHeadings } from './styles/my-headings';
 
@@ -701,7 +701,7 @@ export const currentMarkdownStyle = {
 以下是一个完整的自定义配置示例，包含所有主要配置项：
 
 ```typescript
-// src/data/markdown-style.config.ts
+// src/app/config/markdown-style.config.ts
 
 export const myCompleteStyle: MarkdownStyleConfig = {
   // 基础排版
@@ -958,7 +958,7 @@ export const currentMarkdownStyle = myCompleteStyle;
 
 ### 关键步骤
 
-1. ✅ 打开 `src/data/markdown-style.config.ts`
+1. ✅ 打开 `src/app/config/markdown-style.config.ts`
 2. ✅ 修改 `currentMarkdownStyle` 配置
 3. ✅ 重启开发服务器 (`npm run dev`)
 4. ✅ 访问 `/blog/test-markdown` 查看效果

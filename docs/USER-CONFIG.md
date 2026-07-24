@@ -1,391 +1,153 @@
-# User Configuration Guide
+# 用户配置
 
-Complete reference for configuring your personal information and site settings.
+`src/app/config/user.config.ts` 是个人身份、公开联系方式、GitHub 账号、双语简介、About 内容和站点事实的唯一编辑源。应用通过 `src/app/config/site.config.ts` 读取规范化后的值。
 
-## Configuration Layers
+## 模板模式
 
-Editable settings are split by feature under `src/data/`. Application code reads those files through `src/data/site.config.ts`, which is the central read layer.
+仓库默认保留语义占位值：
 
-| File | Purpose |
-| --- | --- |
-| `src/data/user.config.ts` | Profile, social links, multilingual personal content, about page data |
-| `src/data/theme.config.ts` | Colors, typography, and background |
-| `src/data/projects.config.ts` | GitHub project fetching and display options |
-| `src/data/links.config.ts` | Friend links, resource links, and link application info |
-| `src/data/i18n.config.ts` | Default language and UI translations |
-| `src/data/site.config.ts` | Central app-facing access layer; usually do not edit |
+```ts
+export const site = {
+  templateMode: true,
+  // ...
+};
+```
 
-## Basic Information
+替换完 `YOUR_*`、`yourusername`、示例邮箱/域名和中文占位文案后，将 `templateMode` 改为 `false`。`npm run check:production` 会同时检查模板模式、常见占位值和生产 `SITE`，避免未初始化站点被发布。
 
-### User Profile (Language-Independent)
+## 身份与联系
 
-```typescript
+```ts
 export const user = {
-  name: 'Your Name',
+  name: 'YOUR_NAME',
   avatar: '/images/profile/avatar.png',
-  location: 'Your Location',
-  socials: [
-    { icon: 'i-carbon:logo-github', label: 'GitHub', url: 'https://github.com/yourusername' },
-    { icon: 'i-carbon:logo-twitter', label: 'Twitter', url: 'https://twitter.com/yourusername' },
-    { icon: 'i-carbon:email', label: 'Email', url: 'mailto:your.email@example.com' },
-  ],
-  github: {
-    username: 'yourusername',
-    token: '', // Use environment variables instead
-  },
-}
-```
+  location: 'YOUR_LOCATION',
 
-### Multilingual User Content (Single Source of Truth)
-
-**Important**: This is the **only place** to define your personal content. All pages (home, about, etc.) will read from here.
-
-```typescript
-export const userContent = {
-  en: {
-    tagline: 'Software Developer · Technical Notes · Project Practice',
-    bio: 'Write a short intro about your engineering focus, current projects, and the technical problems you like to explore.',
-    greeting: 'Hello, I am',
-    description: 'A personal technology blog for notes, projects, and long-term learning.',
-  },
-  zh: {
-    tagline: '软件开发者 · 技术笔记 · 项目实践',
-    bio: '在这里写下你的工程方向、正在打磨的项目，以及你持续探索的技术问题。',
-    greeting: '你好，我是',
-    description: '一个记录技术笔记、项目实践与长期学习的个人博客。',
-  },
-}
-```
-
-**Fields**:
-- **tagline**: Short professional tagline (shown on home page and about page)
-- **bio**: Brief personal introduction (shown on home page and about page intro)
-- **greeting**: Greeting text for about page (e.g., "Hello, I am" or "你好，我是")
-- **description**: Site-level intro sentence used by layouts and meta information
-
-**Why Single Source?**
-- ✅ Define once, use everywhere
-- ✅ Automatic language switching
-- ✅ Easy maintenance
-- ✅ No content duplication
-
-### Usage in Components
-
-```typescript
-import { getLocalizedUserContent, getUserProfile } from '../../data/site.config';
-import { useI18n } from '../../utils/i18n';
-
-const { currentLang } = useI18n();
-const user = getUserProfile();
-const content = getLocalizedUserContent(currentLang);
-
-// Now use: user.name, user.avatar, content.tagline, content.bio, content.greeting
-```
-
-### Fields
-
-- **name**: Your display name (shown in all pages)
-- **avatar**: Path to avatar image (store in `public/`)
-- **location**: Where you're based
-- **socials**: Array of social links with icons
-- **github.username**: For fetching repository stats
-- **github.token**: Optional, use environment variables for higher API limits
-
-## Social Links
-
-Social links are defined in the `user.socials` array:
-
-```typescript
-export const user = {
-  socials: [
-    { 
-      icon: 'i-carbon:logo-github',  // UnoCSS icon class
-      label: 'GitHub',                // Platform name
-      url: 'https://github.com/yourusername'  // Profile URL
-    },
-    { 
-      icon: 'i-carbon:logo-twitter', 
-      label: 'Twitter', 
-      url: 'https://twitter.com/yourusername' 
-    },
-    { 
-      icon: 'i-carbon:email', 
-      label: 'Email', 
-      url: 'mailto:your.email@example.com' 
-    },
-  ],
-}
-```
-
-### Supported Icons (UnoCSS Carbon Icons)
-
-| Platform | Icon Class | Example URL |
-|----------|------------|-------------|
-| GitHub | `i-carbon:logo-github` | `https://github.com/username` |
-| Twitter/X | `i-carbon:logo-twitter` | `https://twitter.com/username` |
-| LinkedIn | `i-carbon:logo-linkedin` | `https://linkedin.com/in/username` |
-| Email | `i-carbon:email` | `mailto:your@email.com` |
-| Instagram | `i-carbon:logo-instagram` | `https://instagram.com/username` |
-| YouTube | `i-carbon:logo-youtube` | `https://youtube.com/@username` |
-| Discord | `i-carbon:logo-discord` | `https://discord.gg/invite` |
-
-For more icons, see [Icônes](https://icones.js.org/collection/carbon)
-
-## GitHub Configuration
-
-```typescript
-export const user = {
-  github: {
-    username: 'yourusername',
-    token: '', // Keep tokens in environment variables instead
-  }
-}
-```
-
-### Why GitHub Token?
-
-- **Without token**: 60 API requests/hour
-- **With token**: 5,000 requests/hour
-
-### Creating a Token
-
-1. Go to GitHub → Settings → Developer settings → Personal access tokens
-2. Generate new token (classic)
-3. Select scopes: `public_repo` (read-only)
-4. Copy the token
-5. Create `.env` file:
-   ```env
-   GITHUB_TOKEN=<your-github-token>
-   ```
-
-Do not commit `.env` or hard-code tokens in `user.config.ts`.
-
-## About Site Information
-
-```typescript
-export const aboutConfig = {
-  site: {
-    name: 'Your Site Name',
-    description: 'A personal technology blog for notes, projects, and long-term learning.',
-    builtWith: 'Built with Astro, UnoCSS, and TypeScript',
-    since: '2024',
-    stats: {
-      posts: 0,
-      words: 0,
-      visitors: 0,
-    },
-    techStack: [
-      { name: 'Astro', description: 'Modern static site generator', url: 'https://astro.build/', icon: 'i-carbon:rocket' },
+  contact: {
+    email: 'your.email@example.com',
+    twitter: 'https://x.com/yourusername',
+    website: 'https://yourusername.github.io',
+    additionalLinks: [
+      {
+        id: 'mastodon',
+        label: 'Mastodon',
+        url: 'https://social.example/@yourusername',
+        displayValue: '@yourusername',
+        icon: 'i-simple-icons:mastodon',
+      },
     ],
   },
-}
+
+  github: {
+    username: 'yourusername',
+    token: '',
+  },
+};
 ```
 
-### Fields
+- 空的可选字段会在所有消费页面隐藏。
+- GitHub URL 由 `github.username` 自动生成，不要再放入 `additionalLinks`。
+- `additionalLinks[].id` 应稳定且唯一；`icon` 使用 UnoCSS/Iconify 类名。
+- `github.token` 在提交代码中保持空字符串。真实 token 只放 `.env` 或 CI Secret。
 
-- **name**: Site name displayed on the about/site section
-- **description**: Short site description
-- **builtWith**: Technology summary
-- **since**: Start year
-- **stats**: Initial stats; some page stats are calculated at build time
-- **techStack**: Technologies displayed in the site info section
+## 单一来源传播
 
-## About Page Configuration
+| 值 | 全站消费者 |
+| --- | --- |
+| `user.name` / `avatar` | Header、Hero、About、Links 站点卡、Footer、RSS |
+| `user.location` | Home / About 个人摘要 |
+| `contact.email` / `twitter` / `website` | Hero、Home、About、Links、Guestbook、Footer |
+| `github.username` | Hero、Home、Projects、About、Links、Footer、评论默认仓库 |
+| `userContent.<lang>.description` | Home、About、Links、RSS 与 SEO |
 
-```typescript
-export const aboutConfig = {
-  sections: [
+不要在 `links.config.ts`、`projects.config.ts`、About 数据或页面组件中复制这些值。
+
+## 双语简介
+
+```ts
+export const userContent = {
+  en: {
+    role: 'YOUR_ROLE',
+    tagline: 'YOUR_TAGLINE',
+    bio: 'YOUR_SHORT_BIO',
+    status: 'YOUR_CURRENT_STATUS',
+    focus: ['YOUR_FOCUS_1', 'YOUR_FOCUS_2'],
+    story: {
+      title: 'YOUR_STORY_TITLE',
+      lead: 'YOUR_STORY_LEAD',
+      body: ['YOUR_STORY_PARAGRAPH_1'],
+      principles: ['YOUR_PRINCIPLE_1'],
+    },
+    greeting: 'YOUR_GREETING',
+    description: 'YOUR_SITE_DESCRIPTION',
+  },
+  zh: {
+    // 填写对应中文内容，字段结构必须一致
+  },
+};
+```
+
+`description` 同时是本语言的站点描述，不再维护第二份 SEO/site description。
+
+## 站点事实
+
+```ts
+export const site = {
+  templateMode: true,
+  builtWith: 'site.tech.description',
+  since: 'YYYY',
+  techStack: [
     {
-      id: 'dev-tools',
-      title: 'about.dev-tools.title',
-      description: 'about.dev-tools.subtitle',
-      icon: 'i-carbon:development',
-      columns: 3,
-      compact: false,
-      colorTheme: 'primary',
-      items: [
-        { name: 'VS Code', description: 'Code editor', url: 'https://code.visualstudio.com/', icon: 'i-carbon:code' },
-      ],
+      name: 'Astro',
+      description: 'about.tool.astro',
+      url: 'https://astro.build/',
+      icon: 'i-carbon:rocket',
     },
   ],
-  socialNetworks: [],
+};
+```
+
+文章、标签、字数和写作年份由内容集合在构建期计算，不在 config 中手填。`builtWith` 和技术说明可以使用 `site.*` / `about.*` i18n key，也可以写普通自定义字符串。
+
+## About 内容
+
+`aboutConfig` 只保存 About 专属集合：
+
+```ts
+export const aboutConfig = {
+  sections: [],
   education: [],
   experience: [],
   timeline: [],
-  site: {
-    name: 'Your Site Name',
-    description: 'A personal technology blog for notes, projects, and long-term learning.',
-    builtWith: 'Built with Astro, UnoCSS, and TypeScript',
-    since: '2024',
-    stats: { posts: 0, words: 0, visitors: 0 },
-    techStack: [],
-  },
-}
+};
 ```
 
-## Statistics Configuration
+联系方式和站点身份刻意不在其中。教育、经历和时间线为空时，对应区块自动隐藏。
 
-```typescript
-export const aboutConfig = {
-  // ...
-  site: {
-    since: '2024',
-    stats: {
-      posts: 0,
-      words: 0,
-      visitors: 0,
-    },
-    techStack: [
-      { name: 'Astro', description: 'Modern static site generator', url: 'https://astro.build/', icon: 'i-carbon:rocket' },
-    ],
-  },
-}
+## 应用读取入口
+
+业务代码从 `@app/config/site.config` 导入：
+
+```ts
+const user = getUserProfile();
+const contactLinks = getUserContactLinks();
+const socialLinks = getUserSocialLinks();
+const content = getLocalizedUserContent(currentLang);
+const siteProfile = getSiteProfile(currentLang);
+const github = getGitHubConfig();
 ```
 
-## Navigation Menu
+- `getUserContactLinks()` 规范化 email、Twitter/X、website、GitHub 和 additional links，并按 URL 去重。
+- `getUserSocialLinks()` 返回社交类入口。
+- `getSiteProfile()` 从 user/contact/userContent 派生站点名、头像、URL 与描述。
+- `getGitHubConfig()` 将唯一 GitHub 身份与项目过滤选项组合。
 
-Configure site navigation in `src/data/i18n.config.ts`:
+## 验证
 
-```typescript
-export const translations = {
-  en: {
-    'nav.home': 'Home',
-    'nav.blog': 'Blog',
-    'nav.projects': 'Projects',
-    'nav.about': 'About',
-    'nav.archives': 'Archives',
-  },
-  zh: {
-    'nav.home': '首页',
-    'nav.blog': '博客',
-    'nav.projects': '项目',
-    'nav.about': '关于',
-    'nav.archives': '归档',
-  }
-}
+```bash
+npm run test:config
+npm run check
+npm run verify
 ```
 
-Routes are currently declared in `src/components/common/Header.astro`; add matching translation keys when adding navigation items.
-
-## Language Configuration
-
-```typescript
-export const defaultLang = 'zh' as const;
-
-export const languages = {
-  en: 'English',
-  zh: '中文',
-} as const;
-```
-
-## Examples
-
-### Personal Blog
-```typescript
-export const user = {
-  name: 'Jane Doe',
-  avatar: '/images/jane.jpg',
-  location: 'Your City',
-  socials: [
-    { icon: 'i-carbon:logo-github', label: 'GitHub', url: 'https://github.com/janedoe' },
-    { icon: 'i-carbon:logo-linkedin', label: 'LinkedIn', url: 'https://linkedin.com/in/janedoe' },
-  ],
-  github: {
-    username: 'janedoe',
-    token: '',
-  },
-}
-
-export const userContent = {
-  en: {
-    tagline: 'Full-stack developer · Tech writer',
-    bio: 'Full-stack developer and tech writer.',
-    greeting: 'Hello, I am',
-    description: 'Notes on web development and product building.',
-  },
-  zh: {
-    tagline: '全栈开发者 · 技术作者',
-    bio: '全栈开发者与技术作者。',
-    greeting: '你好,我是',
-    description: '记录 Web 开发和产品实践。',
-  },
-}
-```
-
-### Developer Portfolio
-```typescript
-export const user = {
-  name: 'John Smith',
-  avatar: '/images/profile/avatar.png',
-  location: 'Remote',
-  socials: [
-    { icon: 'i-carbon:logo-github', label: 'GitHub', url: 'https://github.com/johnsmith' },
-    { icon: 'i-carbon:email', label: 'Email', url: 'mailto:john@example.com' },
-  ],
-  github: {
-    username: 'johnsmith',
-    token: '',
-  },
-}
-```
-
-### Chinese Blog
-```typescript
-export const user = {
-  name: '张三',
-  avatar: '/images/profile/avatar.png',
-  location: '北京，中国',
-  socials: [
-    { icon: 'i-carbon:logo-github', label: 'GitHub', url: 'https://github.com/zhangsan' },
-    { icon: 'i-carbon:email', label: 'Email', url: 'mailto:zhangsan@example.com' },
-  ],
-  github: {
-    username: 'zhangsan',
-    token: '',
-  },
-}
-```
-
-## Best Practices
-
-1. **Avatar Image**: Use square image, at least 400x400px
-2. **Bio**: Keep it under 200 characters
-3. **Social Links**: Only add platforms you actively use
-4. **Site URL**: Use production URL, not localhost
-5. **GitHub Token**: Keep it secret, never commit to Git
-6. **SEO**: Fill all meta fields for better search visibility
-
-## Testing Your Configuration
-
-After making changes:
-
-1. Restart dev server: `npm run dev`
-2. Check homepage for updated info
-3. Visit About page to verify details
-4. Test social links work correctly
-5. Check browser tab title
-6. Verify dark/light mode displays correctly
-
-## Troubleshooting
-
-### Avatar not showing
-- Check file exists in `public/images/`
-- Verify path starts with `/`
-- Try absolute URL as fallback
-
-### Social links not appearing
-- Ensure field name matches supported platforms
-- Check value is not empty string
-- Verify icon name is correct
-
-### GitHub API rate limit
-- Add GitHub token to `.env`
-- Check token has correct permissions
-- Verify token is not expired
-
-## Related Documentation
-
-- [Theme Configuration](./THEME-CONFIG.md)
-- [Blog System](./BLOG-SYSTEM.md)
-- [Projects Configuration](./PROJECTS.md)
-- [Deployment](./DEPLOYMENT.md)
+生产前再使用真实 `SITE` 运行 `npm run check:production`。

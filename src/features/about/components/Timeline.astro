@@ -1,0 +1,106 @@
+---
+import { useI18n } from '@features/i18n/lib/i18n';
+import type { TranslationKey } from '@app/config/i18n.config';
+
+interface TimelineEvent { year: string; event: string; description?: string; }
+interface Props { events: TimelineEvent[]; }
+
+const { events } = Astro.props;
+const { t } = useI18n();
+const getEventText = (value?: string) => value?.startsWith('about.') ? t(value as TranslationKey) : value;
+const getEventKey = (value?: string) => value?.startsWith('about.') ? value : undefined;
+---
+
+<section class="timeline-section">
+  <header>
+    <p><i class="i-carbon:time" aria-hidden="true"></i>{String(events.length).padStart(2, '0')}</p>
+    <h2 data-i18n="about.timeline.title">{t('about.timeline.title')}</h2>
+    <span data-i18n="about.timeline.description">{t('about.timeline.description')}</span>
+  </header>
+  <ol>
+    {events.map((event) => (
+      <li>
+        <time>{event.year}</time>
+        <div>
+          <h3 data-i18n={getEventKey(event.event)}>{getEventText(event.event)}</h3>
+          {event.description && (
+            <p data-i18n={getEventKey(event.description)}>{getEventText(event.description)}</p>
+          )}
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .timeline-section {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: clamp(1.25rem, 4vw, 2.75rem);
+    margin-bottom: 2.7rem;
+  }
+
+  header > p {
+    display: flex;
+    align-items: center;
+    gap: 0.42rem;
+    margin: 0 0 0.4rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.68rem;
+    font-weight: 850;
+  }
+
+  header h2 {
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 1.12rem;
+    font-weight: 860;
+  }
+
+  header > span {
+    display: block;
+    margin-top: 0.38rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.73rem;
+    line-height: 1.55;
+  }
+
+  ol {
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.46);
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 0.9rem 0.65rem;
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.4);
+  }
+
+  time {
+    color: var(--md-sys-color-primary);
+    font-size: 0.76rem;
+    font-weight: 850;
+  }
+
+  h3 {
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.84rem;
+    font-weight: 820;
+  }
+
+  li p {
+    margin: 0.22rem 0 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.7rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 660px) {
+    .timeline-section { grid-template-columns: 1fr; gap: 0.8rem; }
+  }
+</style>

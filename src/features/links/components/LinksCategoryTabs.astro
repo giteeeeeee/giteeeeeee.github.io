@@ -1,0 +1,75 @@
+---
+import { useI18n } from '@features/i18n/lib/i18n';
+
+interface Props {
+  categories: Array<{ id: string; label: string; icon: string }>;
+  linkCounts: Record<string, number>;
+  currentCategory?: string;
+  groupId?: string;
+}
+
+const { categories, linkCounts, currentCategory = 'all', groupId = '' } = Astro.props;
+const { t } = useI18n();
+const getCategoryKey = (id: string) => `links.category.${id}` as keyof typeof import('@app/config/i18n.config').translations.en;
+---
+
+<div class="category-tabs" data-group={groupId}>
+  {categories.map((category) => (
+    <button
+      class:list={['category-tab', category.id === currentCategory && 'active']}
+      data-category={category.id}
+      data-group={groupId}
+    >
+      <i class={category.icon} aria-hidden="true"></i>
+      <span data-i18n={getCategoryKey(category.id)}>{t(getCategoryKey(category.id)) || category.label}</span>
+      <small>{linkCounts[category.id] || 0}</small>
+    </button>
+  ))}
+</div>
+
+<style>
+  .category-tabs {
+    display: flex;
+    gap: 1.15rem;
+    margin-bottom: 0.15rem;
+    padding-bottom: 0.65rem;
+    overflow-x: auto;
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+    scrollbar-width: thin;
+  }
+
+  .category-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.38rem;
+    flex: 0 0 auto;
+    padding: 0.3rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--md-sys-color-on-surface-variant);
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 730;
+    cursor: pointer;
+  }
+
+  .category-tab::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -0.7rem;
+    left: 0;
+    height: 2px;
+    background: var(--md-sys-color-primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s ease;
+  }
+
+  .category-tab i { font-size: 0.86rem; }
+  .category-tab small { color: inherit; font-size: 0.63rem; font-weight: 820; }
+  .category-tab:hover,
+  .category-tab.active { color: var(--md-sys-color-primary); }
+  .category-tab.active::after { transform: scaleX(1); }
+</style>

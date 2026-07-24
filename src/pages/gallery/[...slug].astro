@@ -3,22 +3,30 @@
  * Plog Album Detail Page
  * Shows every photo in one plog collection with metadata and download links.
  */
-import DefaultLayout from '../../layouts/base/DefaultLayout.astro';
-import { getPlogAlbums } from '../../utils/plog';
-import { useI18n } from '../../utils/i18n';
+import DefaultLayout from '@app/layouts/base/DefaultLayout.astro';
+import { createPlogAlbum, getAllPlogEntries, getPlogSlug } from '@features/gallery/lib/plog';
+import { useI18n } from '@features/i18n/lib/i18n';
+import { render, type CollectionEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
 
 export async function getStaticPaths() {
-  const albums = await getPlogAlbums();
+  const entries = await getAllPlogEntries();
 
-  return albums.map(album => ({
-    params: { slug: album.slug },
-    props: { album },
+  return entries.map(entry => ({
+    params: { slug: getPlogSlug(entry) },
+    props: { entry, album: createPlogAlbum(entry) },
   }));
 }
 
 const { t } = useI18n();
-const { album: sourceAlbum } = Astro.props;
+const { album: sourceAlbum, entry } = Astro.props as {
+  album: ReturnType<typeof createPlogAlbum>;
+  entry: CollectionEntry<'plog'>;
+};
+const { Content } = await render(entry);
+const baseUrl = import.meta.env.BASE_URL.endsWith('/')
+  ? import.meta.env.BASE_URL
+  : `${import.meta.env.BASE_URL}/`;
 
 const optimizedImageCache = new Map<string, Promise<string>>();
 
@@ -61,93 +69,87 @@ const album = {
 };
 const featuredPhoto = album.photos.find(photo => photo.featured) ?? album.photos[0];
 const heroCover = album.cover || featuredPhoto?.image;
-const heroPhotos = album.photos.slice(0, 6);
-const ratioPattern = ['4 / 5', '1 / 1', '3 / 2', '5 / 4', '2 / 3'];
-const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailImage, previewImage, ...photo }) => ({
+const photoPayload = JSON.stringify(album.photos.map(({ imageAsset: _imageAsset, thumbnailImage: _thumbnailImage, previewImage, ...photo }) => ({
   ...photo,
   image: previewImage || photo.image,
 }))).replace(/</g, '\\u003c');
 ---
 
 <DefaultLayout title={`${album.title} | ${t('page.title.gallery')}`} description={album.description}>
+  <Fragment slot="head">
+    <link rel="stylesheet" href={`${baseUrl}markdown.css`} />
+  </Fragment>
+
   <div class="album-page">
-    <a class="back-link" href="/gallery">
+    <a class="back-link" href="/gallery" data-history-back>
       <i class="i-carbon:arrow-left"></i>
-      <span data-i18n="gallery.backToAlbums">{t('gallery.backToAlbums')}</span>
+      <span data-i18n="navigation.back">{t('navigation.back')}</span>
     </a>
 
-    <section class="album-hero" style={`--album-accent: ${album.accent};`}>
-      <div class="hero-cover" aria-hidden="true">
+    <header class="moment-header" style={`--album-accent: ${album.accent};`}>
+      <button
+        class="moment-cover"
+        type="button"
+        data-photo-id={featuredPhoto?.id}
+        aria-label={`${t('gallery.viewPhoto')}: ${featuredPhoto?.title ?? album.title}`}
+      >
         {heroCover ? (
-          <img
-            src={heroCover}
-            alt=""
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-            sizes="100vw"
-          />
+          <img src={heroCover} alt="" loading="eager" decoding="async" fetchpriority="high" sizes="(max-width: 760px) 100vw, 58vw" />
         ) : (
           <span class="image-fallback" style={`--fallback-bg: ${album.gradient};`}></span>
         )}
-      </div>
+        <span class="cover-open"><i class="i-carbon:maximize" aria-hidden="true"></i></span>
+      </button>
 
-      <div class="hero-copy">
+      <div class="moment-copy">
         <span class="page-eyebrow">
           <i class={album.icon}></i>
-          <span data-i18n="gallery.collection">{t('gallery.collection')}</span>
+          <span data-i18n="gallery.moment">{t('gallery.moment')}</span>
         </span>
         <h1>{album.title}</h1>
         <p>{album.description}</p>
         <div class="album-meta">
           <span><i class="i-carbon:image"></i>{album.photoCount} {t('gallery.stats.photos')}</span>
           <span><i class="i-carbon:calendar"></i>{album.date}</span>
-          <span><i class="i-carbon:location"></i>{album.location}</span>
+          {album.location && <span><i class="i-carbon:location"></i>{album.location}</span>}
+          {album.camera && <span><i class="i-carbon:camera"></i>{album.camera}</span>}
         </div>
         <div class="tag-row">
           {album.tags.map(tag => <span>{tag}</span>)}
         </div>
+        <div class="collection-note">
+          <span data-i18n="gallery.collection">{t('gallery.collection')}</span>
+          <strong>{album.collectionTitle}</strong>
+          {album.collectionDescription && <small>{album.collectionDescription}</small>}
+        </div>
       </div>
+    </header>
 
-      <div class="hero-preview" aria-hidden="true">
-        {heroPhotos.map((photo, index) => (
-          <span class:list={['preview-frame', index === 0 && 'is-large']}>
-            {photo.thumbnailImage || photo.image ? (
-              <img
-                src={photo.thumbnailImage || photo.image}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                sizes="180px"
-              />
-            ) : (
-              <span class="image-fallback" style={`--fallback-bg: ${photo.gradient};`}></span>
-            )}
-          </span>
-        ))}
-      </div>
-    </section>
+    {entry.body?.trim() && (
+      <section class="moment-narrative prose" aria-label={album.title} data-plog-prose>
+        <Content />
+      </section>
+    )}
 
     <section class="photo-section">
       <div class="section-heading">
         <h2>
           <i class="i-carbon:view"></i>
-          <span data-i18n="gallery.photos">{t('gallery.photos')}</span>
+          <span data-i18n="gallery.moments">{t('gallery.moments')}</span>
         </h2>
       </div>
 
-      <div class="photo-wall" aria-label={t('gallery.photos')}>
+      <ol class="photo-journal" aria-label={t('gallery.photos')}>
         {album.photos.map((photo, index) => {
-          const ratio = ratioPattern[index % ratioPattern.length];
-
           return (
-            <article class="photo-card" style={`--photo-accent: ${photo.accent}; --photo-ratio: ${ratio};`}>
+            <li class="journal-entry" style={`--photo-accent: ${photo.accent};`}>
               <button
                 class="photo-open"
                 type="button"
                 data-photo-id={photo.id}
+                aria-label={`${t('gallery.viewPhoto')}: ${photo.title}`}
               >
-                <span class="photo-card-visual" aria-hidden="true">
+                <span class="photo-visual" aria-hidden="true">
                   {photo.thumbnailImage || photo.image ? (
                     <img
                       src={photo.thumbnailImage || photo.image}
@@ -160,13 +162,15 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
                     <span class="image-fallback" style={`--fallback-bg: ${photo.gradient};`}></span>
                   )}
                 </span>
+                <span class="photo-number">{String(index + 1).padStart(2, '0')}</span>
                 <span class="photo-overlay">
-                  <i class="i-carbon:view"></i>
+                  <i class="i-carbon:maximize"></i>
                 </span>
               </button>
-              <div class="photo-card-body">
+              <div class="photo-note">
+                <span class="photo-kicker">{photo.date}{photo.location ? ` · ${photo.location}` : ''}</span>
                 <div class="photo-heading">
-                  <span class="photo-title">{photo.title}</span>
+                  <h3>{photo.title}</h3>
                   {photo.downloadUrl && (
                     <a
                       class="photo-download"
@@ -178,13 +182,16 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
                     </a>
                   )}
                 </div>
-                <span class="photo-file">{photo.fileName || photo.downloadName}</span>
                 <p>{photo.caption}</p>
+                <div class="photo-footnote">
+                  {photo.camera && <span><i class="i-carbon:camera"></i>{photo.camera}</span>}
+                  <span><i class="i-carbon:document"></i>{photo.fileName || photo.downloadName}</span>
+                </div>
               </div>
-            </article>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </section>
   </div>
 
@@ -198,9 +205,10 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
       </button>
       <figure class="lightbox-visual">
         <img alt="" loading="lazy" decoding="async" data-lightbox-image />
+        <span class="image-fallback lightbox-fallback" data-lightbox-fallback hidden></span>
       </figure>
       <div class="lightbox-content">
-        <span class="lightbox-album">{album.title}</span>
+        <span class="lightbox-album">{album.collectionTitle}</span>
         <h2 id="lightbox-title" data-lightbox-title></h2>
         <p data-lightbox-caption></p>
         <p class="lightbox-signature" data-lightbox-signature></p>
@@ -225,7 +233,7 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
 
 <style>
   .album-page {
-    padding: 2rem 0 4rem;
+    padding: 1.65rem 0 4.5rem;
   }
 
   .back-link {
@@ -234,79 +242,70 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
     gap: 0.45rem;
     margin-bottom: 1rem;
     color: var(--md-sys-color-primary);
-    font-size: 0.9rem;
-    font-weight: 850;
+    font-size: 0.74rem;
+    font-weight: 780;
     text-decoration: none;
   }
 
-  .album-hero {
-    position: relative;
-    min-height: 34rem;
+  .moment-header {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.62fr);
-    align-items: end;
-    gap: 1rem;
+    grid-template-columns: minmax(0, 1.18fr) minmax(17rem, 0.82fr);
+    gap: clamp(1.5rem, 5vw, 4rem);
+    align-items: center;
+  }
+
+  .moment-cover {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
-    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.34);
-    border-radius: 1.35rem;
+    padding: 0;
+    border: 0;
+    border-radius: 1.2rem;
     background: var(--md-sys-color-surface-container);
-    box-shadow: 0 30px 90px -54px rgba(var(--md-sys-color-shadow-rgb), 0.72);
-    isolation: isolate;
-    contain: layout paint;
+    cursor: zoom-in;
   }
 
-  .album-hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background:
-      linear-gradient(90deg, rgba(var(--md-sys-color-shadow-rgb), 0.74) 0%, rgba(var(--md-sys-color-shadow-rgb), 0.44) 44%, rgba(var(--md-sys-color-shadow-rgb), 0.18) 100%),
-      radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--album-accent) 42%, transparent), transparent 34%);
-    pointer-events: none;
-  }
-
-  .hero-cover {
-    position: absolute;
-    inset: 0;
-    transform: scale(1.02);
-  }
-
-  .hero-cover img,
-  .preview-frame img,
-  .photo-card-visual img,
+  .moment-cover img,
+  .photo-visual img,
   .image-fallback {
     display: block;
     width: 100%;
     height: 100%;
-  }
-
-  .hero-cover img,
-  .preview-frame img,
-  .photo-card-visual img {
     object-fit: cover;
   }
 
   .image-fallback {
+    position: relative;
     background: var(--fallback-bg);
   }
 
-  .hero-cover::after {
+  .image-fallback::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(var(--md-sys-color-shadow-rgb), 0.12);
+    background: radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.28), transparent 35%);
   }
 
-  .hero-copy {
-    position: relative;
-    z-index: 2;
+  .cover-open {
+    position: absolute;
+    right: 0.8rem;
+    bottom: 0.8rem;
+    display: grid;
+    width: 2.35rem;
+    height: 2.35rem;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: 999px;
+    background: rgba(var(--md-sys-color-shadow-rgb), 0.3);
+    color: white;
+  }
+
+  .moment-copy {
     display: grid;
     gap: 0.75rem;
-    align-self: end;
-    max-width: 44rem;
-    padding: clamp(1.35rem, 4vw, 2.6rem);
-    color: white;
+    min-width: 0;
   }
 
   .page-eyebrow,
@@ -321,34 +320,36 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
 
   .page-eyebrow {
     width: fit-content;
-    padding: 0.35rem 0.7rem;
-    border: 1px solid rgba(var(--md-sys-color-surface-bright-rgb), 0.3);
-    border-radius: 999px;
-    background: rgba(var(--md-sys-color-surface-bright-rgb), 0.14);
-    font-size: 0.78rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.68rem;
     font-weight: 850;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
   }
 
-  .album-hero h1 {
+  .moment-header h1 {
     margin: 0;
-    font-size: clamp(2.7rem, 8vw, 5.6rem);
-    line-height: 0.92;
-    font-weight: 950;
-    letter-spacing: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: clamp(1.8rem, 4vw, 2.65rem);
+    line-height: 1.06;
+    font-weight: 920;
+    letter-spacing: -0.025em;
   }
 
-  .album-hero p {
+  .moment-copy > p {
     max-width: 37rem;
     margin: 0;
-    color: rgba(var(--md-sys-color-surface-bright-rgb), 0.84);
-    line-height: 1.75;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    font-family: var(--reay-font-prose);
   }
 
   .album-meta {
     flex-wrap: wrap;
     gap: 0.8rem;
-    color: rgba(var(--md-sys-color-surface-bright-rgb), 0.82);
-    font-size: 0.86rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.7rem;
     font-weight: 750;
   }
 
@@ -363,87 +364,83 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
   .lightbox-tags span {
     padding: 0.22rem 0.48rem;
     border-radius: 999px;
-    background: rgba(var(--md-sys-color-surface-bright-rgb), 0.14);
-    color: rgba(var(--md-sys-color-surface-bright-rgb), 0.84);
-    font-size: 0.72rem;
+    background: rgba(var(--md-sys-color-primary-rgb), 0.1);
+    color: var(--md-sys-color-primary);
+    font-size: 0.64rem;
     font-weight: 750;
   }
 
-  .hero-preview {
-    position: relative;
-    z-index: 2;
-    align-self: stretch;
+  .collection-note {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: minmax(5rem, 1fr);
-    gap: 0.55rem;
-    padding: 1rem;
+    gap: 0.18rem;
+    margin-top: 0.25rem;
+    padding: 0.8rem 0;
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
   }
 
-  .preview-frame {
-    display: block;
-    min-height: 5rem;
-    overflow: hidden;
-    border: 2px solid rgba(var(--md-sys-color-surface-bright-rgb), 0.34);
-    border-radius: 0.9rem;
-    box-shadow: 0 18px 48px -28px rgba(var(--md-sys-color-shadow-rgb), 0.82);
-  }
-
-  .preview-frame.is-large {
-    grid-row: span 2;
-  }
+  .collection-note > span { color: var(--md-sys-color-primary); font-size: 0.58rem; font-weight: 800; text-transform: uppercase; }
+  .collection-note strong { color: var(--md-sys-color-on-surface); font-size: 0.76rem; }
+  .collection-note small { color: var(--md-sys-color-on-surface-variant); font-size: 0.65rem; line-height: 1.45; }
 
   .photo-section {
-    margin-top: 2rem;
+    margin-top: clamp(3.5rem, 8vw, 6rem);
     content-visibility: auto;
     contain-intrinsic-size: auto 80rem;
+  }
+
+  :global(.moment-narrative) {
+    width: min(100%, 48rem);
+    margin: clamp(2rem, 5vw, 3.5rem) auto 0;
+    padding: clamp(1rem, 3vw, 1.6rem) 0;
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+    font-family: var(--reay-font-prose);
   }
 
   .section-heading h2 {
     display: flex;
     align-items: center;
     gap: 0.55rem;
-    margin: 0 0 1rem;
+    margin: 0 0 1.25rem;
     color: var(--md-sys-color-on-surface);
-    font-size: 1.35rem;
+    font-size: 1.15rem;
     line-height: 1.2;
   }
 
-  .photo-wall {
-    columns: 3 16rem;
-    column-gap: 1rem;
+  .photo-journal {
+    display: grid;
+    gap: clamp(3rem, 8vw, 6rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .photo-card {
-    display: inline-block;
-    width: 100%;
-    margin: 0 0 1rem;
-    overflow: hidden;
-    border: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.34);
-    border-radius: 1rem;
-    background: rgba(var(--md-sys-color-surface-container-rgb), 0.7);
-    box-shadow: 0 18px 54px -44px rgba(var(--md-sys-color-shadow-rgb), 0.62);
-    break-inside: avoid;
-    contain: layout paint style;
+  .journal-entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1.22fr) minmax(15rem, 0.78fr);
+    gap: clamp(1.25rem, 4vw, 3rem);
+    align-items: center;
     content-visibility: auto;
-    contain-intrinsic-size: auto 360px;
-    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    contain-intrinsic-size: auto 520px;
   }
 
-  .photo-card:hover {
-    transform: translateY(-3px);
-    border-color: color-mix(in srgb, var(--photo-accent) 55%, transparent);
-    box-shadow: 0 28px 74px -42px rgba(var(--md-sys-color-shadow-rgb), 0.7);
+  .journal-entry:nth-child(even) .photo-open { order: 2; }
+  .journal-entry:nth-child(even) .photo-note { order: 1; padding-left: clamp(0rem, 4vw, 2rem); }
+
+  .photo-note {
+    min-width: 0;
   }
 
   .photo-open {
     position: relative;
     display: block;
     width: 100%;
-    aspect-ratio: var(--photo-ratio);
+    aspect-ratio: 4 / 3;
     border: 0;
     padding: 0;
     overflow: hidden;
+    border-radius: 1.05rem;
     background: transparent;
     color: inherit;
     font: inherit;
@@ -451,7 +448,7 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
     cursor: zoom-in;
   }
 
-  .photo-card-visual {
+  .photo-visual {
     position: absolute;
     inset: 0;
     transition: transform 0.46s ease;
@@ -468,12 +465,12 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
     transition: opacity 0.28s ease;
   }
 
-  .photo-card:hover .photo-card-visual {
+  .journal-entry:hover .photo-visual {
     transform: scale(1.055);
   }
 
-  .photo-card:hover .photo-open::after,
-  .photo-card:hover .photo-overlay {
+  .journal-entry:hover .photo-open::after,
+  .journal-entry:hover .photo-overlay {
     opacity: 1;
   }
 
@@ -489,6 +486,16 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
     transition: opacity 0.28s ease;
   }
 
+  .photo-number {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.8rem;
+    z-index: 2;
+    color: white;
+    font-family: var(--reay-font-metadata);
+    font-size: 0.62rem;
+  }
+
   .photo-overlay i {
     display: grid;
     place-items: center;
@@ -499,10 +506,12 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
     background: rgba(var(--md-sys-color-shadow-rgb), 0.34);
   }
 
-  .photo-card-body {
-    display: grid;
-    gap: 0.42rem;
-    padding: 0.9rem;
+  .photo-kicker {
+    display: block;
+    margin-bottom: 0.38rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.63rem;
+    font-weight: 780;
   }
 
   .photo-heading {
@@ -510,29 +519,24 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
     gap: 0.75rem;
   }
 
-  .photo-title {
+  .photo-heading h3 {
+    margin: 0;
     color: var(--md-sys-color-on-surface);
-    font-size: 1rem;
+    font-size: 1.15rem;
     line-height: 1.25;
     font-weight: 850;
   }
 
-  .photo-file {
-    color: var(--md-sys-color-primary);
-    font-size: 0.74rem;
-    font-weight: 800;
+  .photo-note > p {
+    margin: 0.65rem 0 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.76rem;
+    line-height: 1.7;
+    font-family: var(--reay-font-prose);
   }
 
-  .photo-card-body p {
-    display: -webkit-box;
-    margin: 0;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    color: var(--md-sys-color-on-surface-variant);
-    font-size: 0.82rem;
-    line-height: 1.55;
-  }
+  .photo-footnote { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.8rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.61rem; }
+  .photo-footnote span { display: inline-flex; align-items: center; gap: 0.3rem; }
 
   .photo-download {
     flex: 0 0 auto;
@@ -597,6 +601,18 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
     object-fit: contain;
   }
 
+  .lightbox-fallback {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    background: var(--fallback-bg, linear-gradient(135deg, #46646d, #6d556f));
+  }
+
+  .lightbox-fallback[hidden] {
+    display: none;
+  }
+
   .lightbox-content {
     display: flex;
     flex-direction: column;
@@ -625,6 +641,7 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
   .lightbox-content p {
     margin: 0;
     color: var(--md-sys-color-on-surface-variant);
+    font-family: var(--reay-font-prose);
     line-height: 1.7;
   }
 
@@ -701,33 +718,16 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
   }
 
   @media (max-width: 920px) {
-    .album-hero,
+    .moment-header,
+    .journal-entry,
     .lightbox-panel {
       grid-template-columns: 1fr;
     }
 
-    .album-hero {
-      min-height: auto;
-    }
-
-    .album-hero::after {
-      background:
-        linear-gradient(180deg, rgba(var(--md-sys-color-shadow-rgb), 0.32) 0%, rgba(var(--md-sys-color-shadow-rgb), 0.78) 100%),
-        radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--album-accent) 42%, transparent), transparent 34%);
-    }
-
-    .hero-copy {
-      min-height: 23rem;
-    }
-
-    .hero-preview {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      padding-top: 0;
-    }
-
-    .preview-frame.is-large {
-      grid-row: span 1;
-    }
+    .moment-cover { aspect-ratio: 16 / 10; }
+    .journal-entry:nth-child(even) .photo-open,
+    .journal-entry:nth-child(even) .photo-note { order: initial; }
+    .journal-entry:nth-child(even) .photo-note { padding-left: 0; }
 
     .lightbox-visual {
       min-height: 24rem;
@@ -739,27 +739,8 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
       padding: 1.25rem 0 3rem;
     }
 
-    .hero-copy {
-      min-height: 21rem;
-    }
-
-    .album-hero h1 {
-      font-size: clamp(2.4rem, 16vw, 4rem);
-    }
-
-    .hero-preview {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.4rem;
-      padding: 0 0.75rem 0.75rem;
-    }
-
-    .preview-frame {
-      border-radius: 0.7rem;
-    }
-
-    .photo-wall {
-      columns: 1;
-    }
+    .moment-header h1 { font-size: clamp(1.75rem, 9vw, 2.4rem); }
+    .moment-cover, .photo-open { border-radius: 0.9rem; }
 
     .gallery-lightbox {
       padding: 0.75rem;
@@ -780,91 +761,4 @@ const photoPayload = JSON.stringify(album.photos.map(({ imageAsset, thumbnailIma
   }
 </style>
 
-<script is:inline define:vars={{ photoPayload }}>
-  (function() {
-    var photos = JSON.parse(photoPayload);
-    var currentIndex = 0;
-    var lightbox = document.getElementById('gallery-lightbox');
-    if (!lightbox || !photos.length) return;
-
-    var image = lightbox.querySelector('[data-lightbox-image]');
-    var title = lightbox.querySelector('[data-lightbox-title]');
-    var caption = lightbox.querySelector('[data-lightbox-caption]');
-    var signature = lightbox.querySelector('[data-lightbox-signature]');
-    var file = lightbox.querySelector('[data-lightbox-file]');
-    var date = lightbox.querySelector('[data-lightbox-date]');
-    var location = lightbox.querySelector('[data-lightbox-location]');
-    var camera = lightbox.querySelector('[data-lightbox-camera]');
-    var tags = lightbox.querySelector('[data-lightbox-tags]');
-    var download = lightbox.querySelector('[data-lightbox-download]');
-    var cards = Array.from(document.querySelectorAll('[data-photo-id]'));
-
-    function renderPhoto(photo) {
-      if (!photo || !image || !title || !caption || !signature || !file || !date || !location || !camera || !tags || !download) return;
-      image.src = photo.image;
-      image.alt = photo.imageAlt || photo.title;
-      title.textContent = photo.title;
-      caption.textContent = photo.caption || '';
-      signature.textContent = photo.signature || '';
-      signature.hidden = !photo.signature;
-      file.textContent = photo.fileName || photo.downloadName || '';
-      date.textContent = photo.date;
-      location.textContent = photo.location;
-      camera.textContent = photo.camera;
-      tags.innerHTML = '';
-      photo.tags.forEach(function(tag) {
-        var span = document.createElement('span');
-        span.textContent = tag;
-        tags.appendChild(span);
-      });
-      if (photo.downloadUrl) {
-        download.href = photo.downloadUrl;
-        download.setAttribute('download', photo.downloadName || photo.fileName || '');
-        download.hidden = false;
-      } else {
-        download.hidden = true;
-      }
-    }
-
-    function openPhoto(photoId) {
-      var nextIndex = photos.findIndex(function(photo) { return photo.id === photoId; });
-      currentIndex = Math.max(0, nextIndex);
-      renderPhoto(photos[currentIndex]);
-      lightbox.classList.add('is-open');
-      lightbox.setAttribute('aria-hidden', 'false');
-      document.documentElement.style.overflow = 'hidden';
-    }
-
-    function closePhoto() {
-      lightbox.classList.remove('is-open');
-      lightbox.setAttribute('aria-hidden', 'true');
-      document.documentElement.style.overflow = '';
-      if (image) image.removeAttribute('src');
-    }
-
-    function stepPhoto(direction) {
-      currentIndex = (currentIndex + direction + photos.length) % photos.length;
-      renderPhoto(photos[currentIndex]);
-    }
-
-    cards.forEach(function(card) {
-      card.addEventListener('click', function() {
-        openPhoto(card.getAttribute('data-photo-id'));
-      });
-    });
-
-    lightbox.querySelector('[data-lightbox-close]')?.addEventListener('click', closePhoto);
-    lightbox.querySelector('[data-lightbox-prev]')?.addEventListener('click', function() { stepPhoto(-1); });
-    lightbox.querySelector('[data-lightbox-next]')?.addEventListener('click', function() { stepPhoto(1); });
-    lightbox.addEventListener('click', function(event) {
-      if (event.target === lightbox) closePhoto();
-    });
-
-    window.addEventListener('keydown', function(event) {
-      if (!lightbox.classList.contains('is-open')) return;
-      if (event.key === 'Escape') closePhoto();
-      if (event.key === 'ArrowLeft') stepPhoto(-1);
-      if (event.key === 'ArrowRight') stepPhoto(1);
-    });
-  })();
-</script>
+<script is:inline type="application/json" data-gallery-lightbox-config set:html={photoPayload}></script>

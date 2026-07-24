@@ -1,16 +1,15 @@
 ---
-/**
- * Series Index Page
- * Display all article series
- */
-import ArchiveLayout from '../../../layouts/archives/ArchiveLayout.astro';
-import SeriesCard from '../../../components/archives/SeriesCard.astro';
-import { getAllSeries } from '../../../utils/blog';
-import { useI18n } from '../../../utils/i18n';
+import ArchiveLayout from '@app/layouts/archives/ArchiveLayout.astro';
+import SeriesCard from '@features/archives/components/SeriesCard.astro';
+import { getAllSeries } from '@features/blog/lib/blog';
+import { useI18n } from '@features/i18n/lib/i18n';
 
-// Data layer: Get all series
 const allSeries = await getAllSeries();
 const { t } = useI18n();
+const headerStats = [
+  { icon: 'i-carbon:folder', labelKey: 'archives.series.total', label: t('archives.series.total'), value: allSeries.length },
+  { icon: 'i-carbon:document', labelKey: 'archives.timeline.totalPosts', label: t('archives.timeline.totalPosts'), value: allSeries.reduce((sum, series) => sum + series.count, 0) },
+];
 ---
 
 <ArchiveLayout
@@ -18,118 +17,24 @@ const { t } = useI18n();
   description={t('archives.series.subtitle')}
   titleKey="archives.series.title"
   descriptionKey="archives.series.subtitle"
-  showBackButton={true}
-  backUrl="/archives"
+  stats={headerStats}
 >
-  <!-- Series statistics -->
-  <div class="series-summary">
-    <div class="summary-item reay-card">
-      <span class="summary-label" data-i18n="archives.series.total">{t('archives.series.total')}</span>
-      <span class="summary-value">{allSeries.length}</span>
-    </div>
-    <div class="summary-item reay-card">
-      <span class="summary-label" data-i18n="archives.timeline.totalPosts">{t('archives.timeline.totalPosts')}</span>
-      <span class="summary-value">
-        {allSeries.reduce((sum, s) => sum + s.count, 0)}
-      </span>
-    </div>
-  </div>
-
-  <!-- Series list -->
   {allSeries.length > 0 ? (
-    <div class="series-grid">
-      {allSeries.map(item => (
-        <SeriesCard 
-          series={item.series}
-          count={item.count}
-          posts={item.posts}
-        />
-      ))}
-    </div>
+    <div class="series-index" data-series-index>{allSeries.map((item) => <SeriesCard {...item} />)}</div>
   ) : (
-    <div class="empty-state">
-      <i class="i-carbon:folder-off"></i>
-      <h3 data-i18n="archives.empty.series.title">{t('archives.empty.series.title')}</h3>
+    <div class="archive-empty">
+      <i class="i-carbon:folder-off" aria-hidden="true"></i>
+      <h2 data-i18n="archives.empty.series.title">{t('archives.empty.series.title')}</h2>
       <p data-i18n="archives.empty.series.description">{t('archives.empty.series.description')}</p>
     </div>
   )}
 </ArchiveLayout>
 
 <style>
-  .series-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
-
-  .summary-item {
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem;
-    background: var(--reay-surface-bg);
-    border: 1px solid var(--reay-surface-border);
-    border-radius: 1.1rem;
-    box-shadow: var(--reay-surface-shadow);
-    text-align: center;
-  }
-
-  .summary-label {
-    font-size: 0.875rem;
-    color: var(--md-sys-color-on-surface-variant);
-    margin-bottom: 0.5rem;
-  }
-
-  .summary-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--md-sys-color-primary);
-  }
-
-  .series-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 2rem;
-    text-align: center;
-    background: var(--md-sys-color-surface-container-lowest);
-    border-radius: 16px;
-    border: 1px dashed var(--md-sys-color-outline-variant);
-  }
-
-  .empty-state i {
-    font-size: 4rem;
-    color: var(--md-sys-color-outline);
-    margin-bottom: 1rem;
-  }
-
-  .empty-state h3 {
-    font-size: 1.5rem;
-    color: var(--md-sys-color-on-surface);
-    margin: 0 0 0.5rem 0;
-  }
-
-  .empty-state p {
-    color: var(--md-sys-color-on-surface-variant);
-    margin: 0;
-  }
-
-  @media (max-width: 768px) {
-    .series-summary {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-
-    .series-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
-  }
+  .series-index { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: min(100%, 70rem); margin-inline: auto; column-gap: clamp(1.2rem, 3vw, 2.2rem); }
+  @media (max-width: 720px) { .series-index { grid-template-columns: 1fr; } }
+  .archive-empty { padding: 3rem 0; text-align: center; color: var(--md-sys-color-on-surface-variant); }
+  .archive-empty i { color: var(--md-sys-color-outline); font-size: 2rem; }
+  .archive-empty h2 { margin: 0.7rem 0 0.35rem; color: var(--md-sys-color-on-surface); font-size: 1rem; }
+  .archive-empty p { margin: 0; font-size: 0.78rem; }
 </style>

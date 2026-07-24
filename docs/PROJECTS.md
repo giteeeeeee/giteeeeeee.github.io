@@ -1,480 +1,131 @@
-# Projects Showcase
+# 项目展示
 
-Configure and display your GitHub projects on the site.
+Projects 领域在构建期读取公开 GitHub 仓库，生成项目目录和 README 详情页。GitHub 身份只在 `user.config.ts` 设置；`projects.config.ts` 只负责过滤、分类、展示选项与精选仓库。
 
-## Overview
+## 1. 设置 GitHub 身份
 
-The projects page automatically fetches and displays your GitHub repositories with:
-- Repository metadata
-- README rendering
-- Star and fork counts
-- Language detection
-- Live previews
-- Caching for performance
+```ts
+// src/app/config/user.config.ts
+export const user = {
+  github: {
+    username: 'yourusername',
+    token: '',
+  },
+};
+```
 
-## Configuration File
+模板占位值 `yourusername` 会主动跳过外部请求并显示空状态。替换为真实公开用户名后，目录会自动读取该账号的公开仓库。
 
-Edit `src/data/projects.config.ts`
+不要把 token 写入 config：
 
-## Basic Configuration
+```env
+GITHUB_TOKEN=<YOUR_GITHUB_TOKEN>
+```
 
-```typescript
-export const projects = [
+无 token 也能构建，但 GitHub 公共 API 限额更低。无效 token 会自动重试匿名请求。
+
+## 2. 项目配置
+
+```ts
+// src/app/config/projects.config.ts
+export const projectsConfig = {
+  source: {
+    excludeRepos: ['private-mirror', 'yourusername/archived-demo'],
+    includeForked: false,
+  },
+  displaySettings: {
+    showLanguages: true,
+    showStars: true,
+    showForks: true,
+    showLastUpdate: true,
+    defaultSort: 'updated',
+  },
+  categories: [],
+  featuredRepos: [],
+};
+```
+
+### source
+
+- `excludeRepos`：可写仓库名或 `owner/repo`，比较时忽略大小写。
+- `includeForked`：是否展示 fork；归档仓库始终隐藏。
+
+### displaySettings
+
+- `defaultSort`：`stars | updated | created | name`。
+- 其余字段控制卡片元数据是否显示。
+
+### categories
+
+```ts
+{
+  id: 'frontend',
+  name: 'Frontend',
+  description: 'Interfaces and web experiences',
+  icon: 'i-carbon:code',
+}
+```
+
+分类 `id` 用于筛选和精选仓库映射。保留 `all` 与 `featured` 可提供完整目录和精选入口。
+
+## 3. 精选与外部仓库
+
+```ts
+featuredRepos: [
   {
-    id: 'project-name',
     owner: 'yourusername',
-    repo: 'repository-name',
-    category: 'Web Development',
+    repo: 'your-project',
+    category: 'frontend',
     featured: true,
-  }
-]
-```
-
-## Adding Projects
-
-### Simple Project
-
-```typescript
-{
-  id: 'my-app',           // Unique ID (URL slug)
-  owner: 'yourusername',  // GitHub username
-  repo: 'my-app',         // Repository name
-}
-```
-
-This creates a project page at `/projects/my-app`
-
-### Full Configuration
-
-```typescript
-{
-  id: 'astro-blog',
-  owner: 'yourusername',
-  repo: 'astro-blog-theme',
-  
-  // Category for filtering
-  category: 'Web Development',
-  
-  // Show on homepage
-  featured: true,
-  
-  // Override auto-fetched data
-  title: 'Custom Title',
-  description: 'Custom description',
-  
-  // Custom image
-  image: '/images/projects/astro-blog.jpg',
-  
-  // External links
-  demo: 'https://demo.example.com',
-  
-  // Tags (in addition to auto-detected)
-  tags: ['featured', 'typescript'],
-  
-  // Sort order
-  order: 1,
-}
-```
-
-## Project Fields
-
-### Required
-
-- **id**: Unique identifier (becomes URL slug)
-- **owner**: GitHub username or organization
-- **repo**: Repository name
-
-### Optional
-
-- **category**: Group projects (e.g., "Web Development", "Tools")
-- **featured**: Show on homepage (true/false)
-- **title**: Override repository name
-- **description**: Override repository description
-- **image**: Custom preview image
-- **demo**: Live demo URL
-- **tags**: Additional tags beyond GitHub topics
-- **order**: Sort order (lower numbers first)
-
-## Categories
-
-Organize projects into categories:
-
-```typescript
-export const categories = [
-  'All',              // Special: shows all projects
-  'Web Development',
-  'Mobile Apps',
-  'Tools',
-  'Libraries',
-  'Open Source',
-]
-
-export const projects = [
-  {
-    id: 'web-app',
-    category: 'Web Development',
-    // ...
+    customDescription: 'YOUR_PROJECT_DESCRIPTION',
+    tags: ['Astro', 'TypeScript'],
   },
-  {
-    id: 'cli-tool',
-    category: 'Tools',
-    // ...
-  }
-]
+],
 ```
 
-**Note:** "All" category is automatic - don't assign it to projects.
+- 同一账号仓库：覆盖 category、featured、描述与自定义 tags。
+- 外部 owner：构建期额外请求该仓库，再合并进目录。
+- API 返回 404 或不可用时，外部仓库不会生成虚构详情页。
 
-## Featured Projects
+首页 Project 橱窗数量由 `features.config.ts` 的 `home.showcase.projects` 控制，优先显示 `featured: true`。
 
-Show projects on homepage:
+## 4. 构建期缓存
 
-```typescript
-{
-  id: 'best-project',
-  featured: true,  // Appears on homepage
-  order: 1,        // First in list
+缓存位于 `.cache/github/`，不提交到 Git：
+
+- 内存 + 磁盘双层缓存。
+- ETag 条件请求。
+- 默认 TTL 六小时，可用 `GITHUB_CACHE_TTL_MS` 覆盖。
+- 网络失败时可读取过期缓存；页面可能暂时显示旧数据。
+
+GitHub Actions 会恢复该目录以减少 API 请求。
+
+## 5. README 安全边界
+
+项目详情通过 `marked` 渲染远程 README，并使用 `rehype-sanitize` 白名单净化。仍需注意：
+
+- README 内容来自外部仓库，不等同于项目自身可信内容。
+- 远程图片、链接和徽章可能连接第三方 origin。
+- `npm audit` 不覆盖远程内容或 GitHub 服务策略。
+
+## 6. 功能开关
+
+```ts
+// src/app/config/features.config.ts
+integrations: {
+  githubProjects: true,
 }
 ```
 
-## Custom Images
+关闭后 Projects/Home 不进行配置化 GitHub 目录取数，但路由与静态结构仍由源码决定。
 
-Override auto-generated thumbnails:
+## 7. 验证
 
-```typescript
-{
-  id: 'my-project',
-  image: '/images/projects/my-project.jpg',
-}
-```
-
-**Image Guidelines:**
-- Store in `public/images/projects/`
-- Recommended size: 1200x630px
-- Format: JPG, PNG, or WebP
-- Optimize before adding
-
-## Demo Links
-
-Add live demo URLs:
-
-```typescript
-{
-  id: 'my-app',
-  demo: 'https://my-app.example.com',
-}
-```
-
-Shows a "Live Demo" button on the project page.
-
-## Sorting
-
-Control project order:
-
-```typescript
-export const projects = [
-  { id: 'first', order: 1 },
-  { id: 'second', order: 2 },
-  { id: 'third', order: 3 },
-]
-```
-
-Projects without `order` are sorted by:
-1. Stars (more stars first)
-2. Last updated (recent first)
-
-## GitHub Integration
-
-### How It Works
-
-1. Fetches repository data from GitHub API
-2. Caches responses for 24 hours
-3. Renders README.md on project page
-4. Updates stars, forks, language info
-
-### GitHub Token
-
-For higher API rate limits:
-
-1. **Create Token**
-   - GitHub Settings → Developer settings → Personal access tokens
-   - Generate new token (classic)
-   - Scopes: `public_repo` (read-only)
-
-2. **Add to Environment**
-   ```env
-   # .env
-   GITHUB_TOKEN=<your-github-token>
-   ```
-
-3. **Configure**
-   ```typescript
-   // src/data/user.config.ts
-   export const user = {
-     github: {
-       username: 'yourusername',
-       token: '',
-     }
-   }
-   ```
-
-   `src/utils/github.ts` also reads `GITHUB_TOKEN` from the environment at build time. Keep real tokens in `.env` or deployment secrets, not in `user.config.ts`.
-
-### Rate Limits
-
-- **Without token**: 60 requests/hour
-- **With token**: 5,000 requests/hour
-
-### Caching
-
-- Repository data cached for 24 hours
-- README cached for 24 hours
-- Manual refresh: delete `.cache/` folder
-
-## README Rendering
-
-Project READMEs are automatically rendered on detail pages.
-
-### Supported Markdown
-
-- All standard Markdown
-- GitHub Flavored Markdown (GFM)
-- Code syntax highlighting
-- Tables
-- Task lists
-- Footnotes
-
-### Styling
-
-READMEs use the same styles as blog posts.
-
-Customize in `src/data/markdown-style.config.ts`
-
-## Examples
-
-### Portfolio Website
-
-```typescript
-export const projects = [
-  {
-    id: 'portfolio',
-    owner: 'yourusername',
-    repo: 'portfolio-2024',
-    category: 'Web Development',
-    featured: true,
-    demo: 'https://yourname.com',
-    order: 1,
-  }
-]
-```
-
-### Open Source Libraries
-
-```typescript
-{
-  id: 'my-library',
-  owner: 'yourusername',
-  repo: 'awesome-library',
-  category: 'Libraries',
-  featured: true,
-  tags: ['npm', 'typescript', 'open-source'],
-}
-```
-
-### Multiple Categories
-
-```typescript
-export const categories = [
-  'All',
-  'Web Apps',
-  'CLI Tools',
-  'Experiments',
-]
-
-export const projects = [
-  {
-    id: 'web-app',
-    category: 'Web Apps',
-    // ...
-  },
-  {
-    id: 'cli-tool',
-    category: 'CLI Tools',
-    // ...
-  },
-  {
-    id: 'demo',
-    category: 'Experiments',
-    // ...
-  }
-]
-```
-
-## Display Options
-
-### Grid Layout
-
-Default 3-column grid (responsive):
-- Desktop: 3 columns
-- Tablet: 2 columns
-- Mobile: 1 column
-
-### Card Content
-
-Each card shows:
-- Repository name (or custom title)
-- Description
-- Language
-- Stars and forks
-- Last updated
-- Topics/tags
-
-### Detail Page
-
-Project detail pages show:
-- Full repository info
-- README content
-- Repository link
-- Demo link (if provided)
-- Statistics
-
-## Customization
-
-### Card Style
-
-Edit `src/components/projects/ProjectCard.astro`
-
-### Detail Page Layout
-
-Edit `src/layouts/projects/ProjectDetailLayout.astro`
-
-### README Styles
-
-Edit `src/data/markdown-style.config.ts`
-
-## Private Repositories
-
-**Not supported** - only public repositories can be displayed.
-
-Workaround:
-1. Make repository public, or
-2. Use custom fields (no auto-fetch):
-   ```typescript
-   {
-     id: 'private-project',
-     owner: 'yourusername',
-     repo: '', // Leave empty
-     title: 'Private Project',
-     description: 'Manual description',
-     image: '/images/projects/private.jpg',
-     // No GitHub integration
-   }
-   ```
-
-## Troubleshooting
-
-### Repository not showing
-
-**Check:**
-- Repository is public
-- Owner and repo names correct
-- GitHub API accessible
-- Check browser console for errors
-
-### README not rendering
-
-**Check:**
-- README.md exists in repository
-- README is not too large (>1MB)
-- Markdown is valid
-- Check network tab for API errors
-
-### Images not loading
-
-**Check:**
-- Image paths in README
-- Relative vs absolute URLs
-- CORS headers
-- GitHub CDN accessibility
-
-### Rate limit exceeded
-
-**Solutions:**
-- Add GitHub token
-- Reduce project count
-- Wait for rate limit reset
-- Use caching
-
-### Data not updating
-
-**Solutions:**
-- Clear cache: delete `.cache/` folder
-- Force rebuild: `npm run build`
-- Check cache duration in code
-
-## Advanced Features
-
-### Language Colors
-
-Automatically uses GitHub's language colors:
-- JavaScript: Yellow
-- TypeScript: Blue
-- Python: Blue
-- etc.
-
-Customize in `src/utils/github.ts`
-
-### Auto-Generated Thumbnails
-
-If no custom image, uses:
-1. Repository social preview image
-2. Language icon
-3. Default gradient
-
-### Search and Filter
-
-Built-in filtering by:
-- Category tabs
-- Language
-- Tags
-
-## Performance
-
-### Build Time
-
-Projects are fetched at build time:
-- One API call per project
-- Cached after first fetch
-- Rebuilds use cache
-
-### Loading Speed
-
-- Pre-rendered HTML (no client-side fetch)
-- Optimized images
-- Lazy loading for READMEs
-
-### Cache Management
-
-Cache stored in `.cache/github/`
-
-**Clear cache:**
 ```bash
-rm -rf .cache
+npm run check
 npm run build
+npm run test:security
+npm run test:e2e:dist
 ```
 
-## Best Practices
-
-1. **Limit Projects**: Show 10-20 most important
-2. **Use Categories**: Organize logically
-3. **Feature Best**: Mark top projects as featured
-4. **Add Demos**: Link to live examples
-5. **Custom Images**: Better visual appeal
-6. **Update Regularly**: Sync with GitHub changes
-7. **Use Token**: Avoid rate limits
-
-## Related Documentation
-
-- [User Configuration](./USER-CONFIG.md)
-- [Markdown Styles](./MARKDOWN-CUSTOM-GUIDE.md)
-- [Deployment](./DEPLOYMENT.md)
+构建日志中的匿名限额、404 或 stale cache 提示应结合配置判断；不要通过提交 token 来消除提示。

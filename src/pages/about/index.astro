@@ -3,33 +3,34 @@
  * /about/index.astro
  * About page - fully customizable category display system
  */
-import DefaultLayout from '../../layouts/base/DefaultLayout.astro';
-import AboutHeader from '../../components/about/AboutHeader.astro';
-import AboutIntro from '../../components/about/AboutIntro.astro';
-import Section from '../../components/about/Section.astro';
-import Timeline from '../../components/about/Timeline.astro';
-import SocialNetworks from '../../components/about/SocialNetworks.astro';
-import EducationTimeline from '../../components/about/EducationTimeline.astro';
-import ExperienceTimeline from '../../components/about/ExperienceTimeline.astro';
-import SiteInfo from '../../components/about/SiteInfo.astro';
-import { getAboutConfig } from '../../data/site.config';
-import { useI18n } from '../../utils/i18n';
-import { getAllPosts } from '../../utils/blog';
+import EditorialPageLayout from '@app/layouts/base/EditorialPageLayout.astro';
+import AboutIntro from '@features/about/components/AboutIntro.astro';
+import AboutNarrative from '@features/about/components/AboutNarrative.astro';
+import Section from '@features/about/components/Section.astro';
+import Timeline from '@features/about/components/Timeline.astro';
+import SocialNetworks from '@features/about/components/SocialNetworks.astro';
+import EducationTimeline from '@features/about/components/EducationTimeline.astro';
+import ExperienceTimeline from '@features/about/components/ExperienceTimeline.astro';
+import SiteInfo from '@features/about/components/SiteInfo.astro';
+import { getAboutConfig, getSiteProfile, getUserContactLinks } from '@app/config/site.config';
+import { useI18n } from '@features/i18n/lib/i18n';
+import { getAllPosts, getArchiveStats } from '@features/blog/lib/blog';
+import EditorialPageHeader from '@shared/components/EditorialPageHeader.astro';
 
-const { t } = useI18n();
+const { t, currentLang } = useI18n();
 const aboutConfig = getAboutConfig();
+const contactLinks = getUserContactLinks();
+const site = getSiteProfile(currentLang);
 
-const { 
+const {
   sections,
   timeline,
-  socialNetworks, 
-  education, 
+  education,
   experience,
-  site,
 } = aboutConfig;
 
 // Calculate actual site statistics
-const allPosts = await getAllPosts();
+const [allPosts, archiveStats] = await Promise.all([getAllPosts(), getArchiveStats()]);
 const totalWords = allPosts.reduce((sum, post) => sum + (post.body?.length || 0), 0);
 
 // Update site stats with real data
@@ -38,22 +39,56 @@ const siteWithStats = {
   stats: {
     posts: allPosts.length,
     words: totalWords,
-    visitors: site.stats.visitors, // This should be fetched from analytics if available
+    tags: archiveStats.totalTags,
+    years: archiveStats.totalYears,
   },
 };
+const headerStats = [
+  { icon: 'i-carbon:document', labelKey: 'about.site.stats.posts', label: t('about.site.stats.posts'), value: allPosts.length },
+  { icon: 'i-carbon:pen', labelKey: 'about.site.stats.words', label: t('about.site.stats.words'), value: new Intl.NumberFormat('zh-CN', { notation: 'compact' }).format(totalWords) },
+  { icon: 'i-carbon:calendar', labelKey: 'about.site.stats.years', label: t('about.site.stats.years'), value: archiveStats.totalYears },
+  { icon: 'i-carbon:share', labelKey: 'about.social.title', label: t('about.social.title'), value: contactLinks.length },
+];
+const workflowItems = [
+  { name: 'about.workflow.think.title', description: 'about.workflow.think.desc', icon: 'i-carbon:idea' },
+  { name: 'about.workflow.build.title', description: 'about.workflow.build.desc', icon: 'i-carbon:tools' },
+  { name: 'about.workflow.share.title', description: 'about.workflow.share.desc', icon: 'i-carbon:share-knowledge' },
+];
 ---
 
-<DefaultLayout title={`${t('aboutPage.title')} | Astro Theme Reay`} description={t('aboutPage.subtitle')}>
+<EditorialPageLayout title={`${t('aboutPage.title')} | Astro Theme Reay`} description={t('aboutPage.subtitle')} pageClass="about-editorial-page">
   <div class="about-page">
-    <!-- Page header -->
-    <AboutHeader title={t('aboutPage.title')} description={t('aboutPage.subtitle')} />
+    <EditorialPageHeader
+      title={t('aboutPage.title')}
+      description={t('aboutPage.subtitle')}
+      titleKey="aboutPage.title"
+      descriptionKey="aboutPage.subtitle"
+      eyebrow={t('aboutPage.overview.eyebrow')}
+      eyebrowKey="aboutPage.overview.eyebrow"
+      icon="i-carbon:user-avatar"
+      stats={headerStats}
+    />
 
     <!-- Personal introduction -->
     <AboutIntro />
 
+    <!-- Why this site exists -->
+    <AboutNarrative />
+
+    <Section
+      id="workflow"
+      title="about.workflow.title"
+      description="about.workflow.subtitle"
+      icon="i-carbon:flow"
+      items={workflowItems}
+      columns={3}
+      compact={false}
+      colorTheme="primary"
+    />
+
     <!-- Dynamically render all custom categories -->
     {sections.map((section) => (
-      <Section 
+      <Section
         id={section.id}
         title={section.title}
         description={section.description}
@@ -69,7 +104,7 @@ const siteWithStats = {
     {timeline && timeline.length > 0 && <Timeline events={timeline} />}
 
     <!-- Social networks -->
-    {socialNetworks.length > 0 && <SocialNetworks socials={socialNetworks} />}
+    {contactLinks.length > 0 && <SocialNetworks socials={contactLinks} />}
 
     <!-- Education history -->
     {education.length > 0 && <EducationTimeline education={education} />}
@@ -80,49 +115,16 @@ const siteWithStats = {
     <!-- About this site - moved to bottom -->
     <SiteInfo site={siteWithStats} />
   </div>
-</DefaultLayout>
+</EditorialPageLayout>
 
 <style>
   .about-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 0;
+    width: 100%;
   }
 
   @media (max-width: 768px) {
     .about-page {
-      padding: 1.5rem 0;
-    }
-  }
-
-  /* Global animations */
-  .about-page > * {
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInUp 0.6s ease forwards;
-  }
-
-  .about-page > *:nth-child(1) { animation-delay: 0.1s; }
-  .about-page > *:nth-child(2) { animation-delay: 0.2s; }
-  .about-page > *:nth-child(3) { animation-delay: 0.3s; }
-  .about-page > *:nth-child(4) { animation-delay: 0.4s; }
-  .about-page > *:nth-child(5) { animation-delay: 0.5s; }
-  .about-page > *:nth-child(6) { animation-delay: 0.6s; }
-  .about-page > *:nth-child(7) { animation-delay: 0.7s; }
-  .about-page > *:nth-child(8) { animation-delay: 0.8s; }
-
-  @keyframes fadeInUp {
-    to {
-      opacity: 1;
-      transform: translateY(0);
+      padding: 0;
     }
   }
 </style>
-
-<script>
-  import { initI18n } from '../../scripts/i18n-content-updater';
-  import { initUserContentI18n } from '../../scripts/i18n-user-content';
-  
-  initI18n();
-  initUserContentI18n();
-</script>

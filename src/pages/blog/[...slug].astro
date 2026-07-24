@@ -3,17 +3,14 @@
  * Blog post detail page
  * Route: /blog/[...slug]
  */
-import { getCollection, render } from 'astro:content';
-import BlogPostLayout from '../../layouts/blog/BlogPostLayout.astro';
-import { getPostSlug } from '../../utils/blog';
-import type { CollectionEntry } from 'astro:content';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BlogPostLayout from '@app/layouts/blog/BlogPostLayout.astro';
+import { getPostSlug, getPostsBySeries } from '@features/blog/lib/blog';
+import { isPublishableContentVisible } from '@features/blog/lib/visibility';
 
 // Generate static paths for all posts
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => {
-    // Exclude drafts in production
-    return import.meta.env.PROD ? !data.draft : true;
-  });
+  const posts = await getCollection('blog', ({ data }) => isPublishableContentVisible(data));
   
   return posts.map((post) => ({
     params: { slug: getPostSlug(post) },
@@ -26,6 +23,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
+const seriesPosts = post.data.series ? await getPostsBySeries(post.data.series) : [];
 
 // Use render function to render Markdown content (Astro v5)
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
@@ -36,6 +34,7 @@ const { Content, headings, remarkPluginFrontmatter } = await render(post);
   headings={headings}
   readingTime={remarkPluginFrontmatter?.readingTime}
   readingMinutes={remarkPluginFrontmatter?.readingMinutes}
+  seriesPosts={seriesPosts}
 >
   <Content />
 </BlogPostLayout>

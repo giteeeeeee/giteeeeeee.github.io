@@ -1,0 +1,118 @@
+---
+/** Localized, config-driven personal narrative without inventing résumé facts. */
+import { getLocalizedUserContent } from '@app/config/site.config';
+import { useI18n } from '@features/i18n/lib/i18n';
+
+const { currentLang, t } = useI18n();
+const story = getLocalizedUserContent(currentLang).story;
+---
+
+{story && (
+  <section class="about-narrative" data-about-narrative>
+    <header>
+      <p>
+        <i class="i-carbon:quotes" aria-hidden="true"></i>
+        <span data-i18n="about.narrative.eyebrow">{t('about.narrative.eyebrow')}</span>
+      </p>
+      <h2 data-user-content="story.title">{story.title}</h2>
+    </header>
+    <div class="narrative-copy">
+      <p class="narrative-lead" data-user-content="story.lead">{story.lead}</p>
+      <div class="narrative-body">
+        {story.body.map((paragraph, index) => <p data-user-content={`story.body.${index}`}>{paragraph}</p>)}
+      </div>
+      <ol>
+        {story.principles.map((principle, index) => (
+          <li><span>{String(index + 1).padStart(2, '0')}</span><strong data-user-content={`story.principles.${index}`}>{principle}</strong></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+)}
+
+<style>
+  .about-narrative {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: clamp(1.25rem, 4vw, 2.75rem);
+    margin-bottom: clamp(2.8rem, 7vw, 4.5rem);
+  }
+
+  header > p {
+    display: flex;
+    align-items: center;
+    gap: 0.42rem;
+    margin: 0 0 0.4rem;
+    color: var(--md-sys-color-primary);
+    font-size: 0.64rem;
+    font-weight: 850;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  header h2 {
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 1.08rem;
+    font-weight: 860;
+    line-height: 1.35;
+  }
+
+  .narrative-copy {
+    min-width: 0;
+  }
+
+  .narrative-lead {
+    max-width: 50rem;
+    margin: 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: clamp(1.05rem, 2.2vw, 1.38rem);
+    font-weight: 720;
+    line-height: 1.55;
+  }
+
+  .narrative-body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2rem;
+    margin-top: 1.15rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+  }
+
+  .narrative-body p {
+    margin: 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.75rem;
+    line-height: 1.7;
+  }
+
+  ol {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 1.2rem 0 0;
+    padding: 0;
+    border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+    border-bottom: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.44);
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.75rem;
+    border-left: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.34);
+  }
+
+  li:first-child { padding-left: 0; border-left: 0; }
+  li span { color: var(--md-sys-color-primary); font-family: var(--reay-font-metadata); font-size: 0.58rem; }
+  li strong { color: var(--md-sys-color-on-surface); font-size: 0.7rem; line-height: 1.35; }
+
+  @media (max-width: 660px) {
+    .about-narrative { grid-template-columns: 1fr; gap: 0.8rem; }
+    .narrative-body { grid-template-columns: 1fr; }
+    ol { grid-template-columns: 1fr; }
+    li:nth-child(n) { padding-left: 0; border-left: 0; border-top: 1px solid rgba(var(--md-sys-color-outline-variant-rgb), 0.3); }
+    li:first-child { border-top: 0; }
+  }
+</style>

@@ -4,42 +4,55 @@
  * Compose Layout and Components to form the page
  * 
  * Architecture:
- * - Layout: DefaultLayout (provides page skeleton: Header + Footer + Container)
- * - Components: BlogListHeader, BlogTimeline, EmptyBlogList
+ * - Layout: EditorialPageLayout (shared compact page flow)
+ * - Components: EditorialPageHeader, BlogTimeline, EmptyBlogList
  * - Page: responsible for data fetching and component composition
  */
-import DefaultLayout from '../../layouts/base/DefaultLayout.astro';
-import BlogListHeader from '../../components/blog/BlogListHeader.astro';
-import BlogTimeline from '../../components/blog/BlogTimeline.astro';
-import EmptyBlogList from '../../components/blog/EmptyBlogList.astro';
-import { getSortedPosts } from '../../utils/blog';
+import EditorialPageLayout from '@app/layouts/base/EditorialPageLayout.astro';
+import BlogTimeline from '@features/blog/components/BlogTimeline.astro';
+import EmptyBlogList from '@features/blog/components/EmptyBlogList.astro';
+import { getSortedPosts } from '@features/blog/lib/blog';
+import EditorialPageHeader from '@shared/components/EditorialPageHeader.astro';
+import { useI18n } from '@features/i18n/lib/i18n';
 
 const sortedPosts = await getSortedPosts();
 const totalTags = new Set(sortedPosts.flatMap(post => post.data.tags)).size;
 const totalSeries = new Set(sortedPosts.map(post => post.data.series).filter(Boolean)).size;
 const latestDate = sortedPosts[0]?.data.updatedDate ?? sortedPosts[0]?.data.publishDate;
+const { t } = useI18n();
+const stats = [
+  { icon: 'i-carbon:document', labelKey: 'blog.stats.posts', label: t('blog.stats.posts'), value: sortedPosts.length },
+  { icon: 'i-carbon:tag', labelKey: 'blog.stats.tags', label: t('blog.stats.tags'), value: totalTags },
+  { icon: 'i-carbon:list-boxes', labelKey: 'blog.stats.series', label: t('blog.stats.series'), value: totalSeries },
+  {
+    icon: 'i-carbon:recently-viewed',
+    labelKey: 'blog.stats.updated',
+    label: t('blog.stats.updated'),
+    value: latestDate ? latestDate.toLocaleDateString('zh-CN') : '-',
+    date: latestDate,
+  },
+];
 ---
 
-<DefaultLayout 
-  title="Blog List" 
-  description="Explore all my blog posts, arranged in timeline order"
+<EditorialPageLayout
+  title={t('blog.title')}
+  description={t('blog.subtitle')}
+  pageClass="blog-index-page"
 >
-  <div class="min-h-screen py-12 px-4">
-    <div class="max-w-4xl mx-auto">
-      <!-- Component: Page header -->
-      <BlogListHeader
-        totalPosts={sortedPosts.length}
-        totalTags={totalTags}
-        totalSeries={totalSeries}
-        latestDate={latestDate}
-      />
+  <EditorialPageHeader
+    title={t('blog.title')}
+    description={t('blog.subtitle')}
+    titleKey="blog.title"
+    descriptionKey="blog.subtitle"
+    eyebrow={t('blog.statistics')}
+    eyebrowKey="blog.statistics"
+    icon="i-carbon:blog"
+    {stats}
+  />
 
-      <!-- Component: Timeline list or empty state -->
-      {sortedPosts.length > 0 ? (
-        <BlogTimeline posts={sortedPosts} />
-      ) : (
-        <EmptyBlogList />
-      )}
-    </div>
-  </div>
-</DefaultLayout>
+  {sortedPosts.length > 0 ? (
+    <BlogTimeline posts={sortedPosts} />
+  ) : (
+    <EmptyBlogList />
+  )}
+</EditorialPageLayout>
