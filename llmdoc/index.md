@@ -49,7 +49,7 @@
 ## Reference
 
 - `llmdoc/reference/configuration.md`：用户、站点、主题预设与覆盖、功能、导航、媒体、评论和项目配置面。
-- `llmdoc/reference/routes.md`：公共静态路由、404、动态路由、Feed 和 robots。
+- `llmdoc/reference/routes.md`：公共静态路由、canonical 尾斜杠、404、动态路由、Feed 和 robots。
 - `llmdoc/reference/content-schema.md`：Blog/Plog frontmatter、默认值和 slug 规则。
 - `llmdoc/reference/client-lifecycle-contract.md`：文档级单例、页面级 disposer 和 Astro 事件合同。
 - `llmdoc/reference/design-system-contract.md`：MD3 token、CSS 变量、模式与主题生成合同。

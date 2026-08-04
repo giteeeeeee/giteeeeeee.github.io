@@ -21,11 +21,12 @@
 
 1. 页面级 listener、observer、timer、animation frame 必须返回 cleanup，并由 `client-runtime.ts` 管理。
 2. 大型 feature runtime 只在对应 DOM 存在时动态导入。
-3. 站内预取只使用 Astro `data-astro-prefetch`，不再维护第二套 fetch/prefetch runtime。
+3. 站内预取只使用 Astro `data-astro-prefetch`：Blog/Archives 高频入口在页面加载后预取，其余入口在 hover/focus 时预取，不维护第二套 fetch/prefetch runtime。
 4. flow 首页通过 IntersectionObserver 暂停离屏 section 动画，并使用 `content-visibility`。
 5. 默认不启用季节粒子、MusicDock 和首页波浪；重新开启时必须完成移动端与 reduced-motion 验证。
 6. 页面切换只动画 opacity/transform，不对整页应用 blur/filter。
 7. 重复卡片不使用 backdrop-filter 或常驻 `translateZ(0)`；模糊只留给少量焦点组件。
+8. 目录型站内链接必须直接使用带尾斜杠的 canonical URL；构建产物检查会拒绝导致静态托管 301 的无尾斜杠 href。
 
 ## Cacheable Shared Assets
 

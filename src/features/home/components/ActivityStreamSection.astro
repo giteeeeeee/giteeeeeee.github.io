@@ -143,7 +143,7 @@ const emailContact = contactLinks.find((link) => link.kind === 'email');
             <span>{social.label}</span>
           </a>
         ))}
-        <a href="/about" data-astro-prefetch="hover">
+        <a href="/about/" data-astro-prefetch="hover">
           <span data-i18n="home.about.more">{t('home.about.more')}</span>
           <i class="i-carbon:arrow-right" aria-hidden="true"></i>
         </a>
@@ -213,7 +213,7 @@ const emailContact = contactLinks.find((link) => link.kind === 'email');
             <i class="i-carbon:document" aria-hidden="true"></i>
             <span data-i18n="home.showcase.blog">{t('home.showcase.blog')}</span>
           </span>
-          <a href="/blog" data-astro-prefetch="hover">
+          <a href="/blog/" data-astro-prefetch="hover">
             <span data-i18n="home.showcase.allBlog">{t('home.showcase.allBlog')}</span>
             <i class="i-carbon:arrow-up-right" aria-hidden="true"></i>
           </a>
@@ -276,7 +276,7 @@ const emailContact = contactLinks.find((link) => link.kind === 'email');
                 <i class="i-carbon:terminal" aria-hidden="true"></i>
                 <span data-i18n="home.showcase.projects">{t('home.showcase.projects')}</span>
               </span>
-              <a href="/projects" data-astro-prefetch="hover">
+              <a href="/projects/" data-astro-prefetch="hover">
                 <span data-i18n="home.showcase.allProjects">{t('home.showcase.allProjects')}</span>
                 <i class="i-carbon:arrow-up-right" aria-hidden="true"></i>
               </a>
@@ -285,7 +285,7 @@ const emailContact = contactLinks.find((link) => link.kind === 'email');
             <div class="home-project-list">
               {showcaseProjects.map((project) => (
                 <article data-home-showcase-project>
-                  <a href={`/projects/${project.owner}/${project.name}`} data-astro-prefetch="hover">
+                  <a href={`/projects/${project.owner}/${project.name}/`} data-astro-prefetch="hover">
                     <div class="home-project-title-row">
                       <h3>{project.name}</h3>
                       <i class="i-carbon:arrow-up-right" aria-hidden="true"></i>
@@ -318,7 +318,7 @@ const emailContact = contactLinks.find((link) => link.kind === 'email');
                 <i class="i-carbon:camera" aria-hidden="true"></i>
                 <span data-i18n="home.showcase.plog">{t('home.showcase.plog')}</span>
               </span>
-              <a href="/gallery" data-astro-prefetch="hover">
+              <a href="/gallery/" data-astro-prefetch="hover">
                 <span data-i18n="home.showcase.allPlog">{t('home.showcase.allPlog')}</span>
                 <i class="i-carbon:arrow-up-right" aria-hidden="true"></i>
               </a>

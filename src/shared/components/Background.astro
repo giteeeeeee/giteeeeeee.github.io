@@ -91,7 +91,7 @@ if (type === 'gradient') {
 ---
 
 {type !== 'none' && (
-  <div 
+  <div
     class={`app-background ${useImage ? 'image-bg' : 'gradient-bg'} decoration-${decoration}`}
     style={`${backgroundStyle} --image-opacity: ${imageOpacity};`}
     aria-hidden="true"
@@ -104,8 +104,8 @@ if (type === 'gradient') {
     <div class="scene-layer scene-mid"></div>
     <div class="scene-layer scene-front"></div>
     {blur && (
-      <div 
-        class="background-overlay" 
+      <div
+        class="background-overlay"
         style={`backdrop-filter: blur(${blurValue}); -webkit-backdrop-filter: blur(${blurValue});`}
       ></div>
     )}

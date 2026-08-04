@@ -4,9 +4,12 @@
  */
 
 import { getCollection, type CollectionEntry } from 'astro:content'
+import { decodeRouteParam, encodeRouteParam } from './route-param'
 import { isPublishableContentVisible } from './visibility'
 
 const BLOG_FILE_EXTENSION_PATTERN = /\.(md|mdx)$/i
+
+export { decodeRouteParam, encodeRouteParam }
 
 /**
  * Extract slug from post ID for URL generation
@@ -36,38 +39,18 @@ export function encodePathSegments(path: string): string {
 }
 
 /**
- * Decode Astro route params, including catch-all params.
- */
-export function decodeRouteParam(param?: string): string {
-  if (!param) {
-    return ''
-  }
-
-  return param
-    .split('/')
-    .map(segment => {
-      try {
-        return decodeURIComponent(segment)
-      } catch {
-        return segment
-      }
-    })
-    .join('/')
-}
-
-/**
  * Generate blog post URL
  */
 export function getPostUrl(post: CollectionEntry<'blog'>): string {
-  return `/blog/${encodePathSegments(getPostSlug(post))}`
+  return `/blog/${encodePathSegments(getPostSlug(post))}/`
 }
 
 export function getTagUrl(tag: string): string {
-  return `/archives/tags/${encodeURIComponent(tag)}`
+  return `/archives/tags/${encodeURIComponent(encodeRouteParam(tag))}/`
 }
 
 export function getSeriesUrl(series: string): string {
-  return `/archives/series/${encodeURIComponent(series)}`
+  return `/archives/series/${encodeURIComponent(encodeRouteParam(series))}/`
 }
 
 /**

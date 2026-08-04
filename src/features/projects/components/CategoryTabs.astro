@@ -20,10 +20,10 @@ const getCategoryKey = (id: string) => `projects.category.${id}` as keyof typeof
 <nav class="projects-categories">
   {categories.map((category) => {
     const count = projectCounts[category.id] || 0;
-    
+
     return (
       <a
-        href={`/projects?category=${category.id}`}
+        href={`/projects/?category=${category.id}`}
         class={`category-tab ${currentCategory === category.id ? 'active' : ''}`}
         data-category={category.id}
       >

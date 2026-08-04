@@ -15,7 +15,7 @@
 - theme sync
 - i18n runtime
 
-站内预取由 Astro ClientRouter 的 `data-astro-prefetch` 负责，不再安装第二套全局预取 runtime。
+站内预取由 Astro ClientRouter 的 `data-astro-prefetch` 负责，不再安装第二套全局预取 runtime。Blog 与 Archives 使用 load 级预取，其余主导航保持 hover 级预取；所有目录型 href 直接指向带尾斜杠的 canonical URL。
 
 页面级实例：
 
@@ -75,7 +75,7 @@ Incoming document 在 swap 前翻译一次；after-swap 只同步 document lang/
 
 ## Route Transitions
 
-当前自定义 transition runtime 保存原生 `document.startViewTransition`，再安装 resolved shim；实际动画只使用短时 opacity/transform，不对整页使用 filter，也不启用跨文档 `@view-transition navigation: auto`。Chrome 的站内导航复测无 transition console error；恢复原生 View Transitions 仍需要独立浏览器测试。
+当前自定义 transition runtime 保存原生 `document.startViewTransition`，再安装 resolved shim；实际进入动画以 140ms 的轻量 opacity/3px transform 为上限，不对整页使用 filter，也不启用跨文档 `@view-transition navigation: auto`。Chrome 的站内导航复测无 transition console error；恢复原生 View Transitions 仍需要独立浏览器测试。
 
 ## Feature-local Runtimes
 

@@ -26,6 +26,8 @@ Loader: `src/content/blog/**/*.{md,mdx}`。
 
 Slug: entry ID 去扩展名和结尾 `/index`。
 
+标签与系列归档 URL 默认使用原始名称的 URL 编码；名称包含 `/` 时，路由段使用可逆的 `~2F~` 标记，因此 `C/C++` 可稳定生成单段静态路径而无需改写 frontmatter。
+
 ## Plog
 
 Loader: `src/content/plog/**/*.{md,mdx}`。

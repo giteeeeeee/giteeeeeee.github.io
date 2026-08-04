@@ -21,6 +21,7 @@
 - Blog/Plog slug 从 Astro entry ID 派生，不恢复已删除的 `entry.slug`。
 - 内容文件属于仓库源代码；不要让 `src/content` 再次被 `.gitignore` 排除。
 - 生成动态路径时把未编码值交给 `getStaticPaths()`，生成链接时使用领域 URL helper。
+- 目录型公开 URL 统一以 `/` 结尾；文件端点和根路径除外，避免静态托管产生额外重定向。
 - 不把当前文章数量、构建页数或外部 API 结果写成稳定架构事实。
 
 ## 安全和外部数据

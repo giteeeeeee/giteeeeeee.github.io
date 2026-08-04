@@ -31,13 +31,13 @@ const yearText = Number.isFinite(startYear) && startYear < year ? `${startYear} 
 
 const quickLinks = navigation.primary.filter((item) => item.showInFooter);
 const resourceLinks = navigation.resources.filter((link) => {
-  if (link.href === '/search') return features.search.showInNavigation;
+  if (link.href === '/search/') return features.search.showInNavigation;
   if (link.href === '/rss.xml') return features.discovery.showRssLink;
   if (link.href === '/sitemap-index.xml') return features.discovery.showSitemapLink;
   return true;
 });
 const getResourceLabelKey = (href: string) => {
-  if (href === '/search') return 'footer.search' as const;
+  if (href === '/search/') return 'footer.search' as const;
   if (href === '/rss.xml') return 'footer.rss' as const;
   if (href === '/sitemap-index.xml') return 'footer.sitemap' as const;
   return undefined;

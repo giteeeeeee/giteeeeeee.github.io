@@ -18,6 +18,10 @@ export default defineConfig({
     // Reay deliberately supports root-path deployments only. This keeps every
     // authored URL, feed, search asset, and canonical on one explicit contract.
     base: '/',
+    // GitHub Pages serves directory routes from `<route>/index.html`. Emitting
+    // canonical trailing slashes keeps client navigation on the final URL and
+    // avoids an extra 301 request for every directory-style route.
+    trailingSlash: 'always',
     
     // 使用集中管理的 Markdown 配置
     markdown: markdownConfig,

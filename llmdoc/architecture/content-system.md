@@ -30,6 +30,7 @@ Markdown/MDX
 - `getPostUrl()` 负责链接编码；动态 `getStaticPaths()` 参数保持未编码。
 - `getAllPosts()` 在生产排除 `draft` 和 `published:false`，开发环境显示全部以便预览。
 - 标签和系列都从已发布集合聚合；系列内部按 `seriesOrder` 排序，缺失顺序放在后面。
+- 标签或系列名中的 `/` 会在单段归档路由中转义为可逆的 `~2F~` 标记；页面标题与内容查询仍使用原始值，避免改变文章 frontmatter 语义。
 - Blog detail 对有 `series` 的文章调用 `getPostsBySeries()`，用当前 entry 在有序集合中的真实索引显示 `3 / 5` 一类结构位置，并通过 `getPostUrl()` / `getSeriesUrl()` 生成相邻章节和系列目录入口。
 - `remarkReadingTime` 在 Markdown processor 中写入渲染 frontmatter。
 - 文章详情静态路径与列表入口共用 `isPublishableContentVisible()`，生产环境同时排除 `draft` 与 `published:false`。
@@ -48,6 +49,7 @@ Plog index.md + sibling images/
 
 - 嵌套目录路径成为相册 slug。
 - 同级 `images/` 文件按自然文件名排序。
+- 构建工具返回的图片模块路径可能带多层 `../`；路径归一化会移除任意层级的 `../content/plog/` 前缀，再以不区分大小写的 entry slug 匹配相册，确保迁移后的嵌套个人相册不会退化为单图 fallback。
 - 每个 Markdown/MDX entry 是一个可独立访问的 photographic moment；共享 `album.id` 的 entries 在 `/gallery` 聚合成一个 collection，`album.title/description` 提供合集身份。
 - `photos[].file` 只覆盖匹配图片的元数据，不是图片发现清单。
 - 图片缺失时退化到条目封面或视觉占位，不应让构建崩溃。

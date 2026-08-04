@@ -25,7 +25,7 @@ export const translations = {
     'nav.search': 'Search',
     'nav.openMenu': 'Open menu',
     'nav.closeMenu': 'Close menu',
-    
+
     // Home page
     'home.hero.subtitle': 'Notes gathered from building, reading, and everyday life',
     'home.hero.intro': 'A small place where unfinished ideas, working projects, and lasting questions can keep growing.',
@@ -75,7 +75,7 @@ export const translations = {
     'home.heatmap.source.repos': 'Repository updates',
     'home.heatmap.source.cache': 'Cached activity',
     'home.heatmap.source.empty': 'No public activity',
-    
+
     // Posts section
     'posts.title': 'Latest Notes',
     'posts.subtitle': 'Engineering notes · project reviews · durable references',
@@ -86,7 +86,7 @@ export const translations = {
     'posts.stats.total': 'Total Notes',
     'posts.stats.updating': 'Still Writing',
     'posts.empty': 'No notes yet',
-    
+
     // Projects section
     'projects.title': 'Featured Projects',
     'projects.subtitle': 'Project experiments · open-source practice · continuous iteration',
@@ -99,7 +99,7 @@ export const translations = {
     'projects.stats.forks': 'Forks',
     'projects.noDescription': 'No description',
     'projects.empty': 'No projects available',
-    
+
     // About section
     'about.title': 'About Me',
     'about.subtitle': 'The tools I keep close, the roads I have taken, and the things that still draw my attention',
@@ -139,7 +139,7 @@ export const translations = {
     'about.timeline.2025.title': 'Started Astro Theme Reay',
     'about.timeline.2025.desc': 'Built a configuration-driven personal site theme with Astro',
     'home.about.more': 'Full About',
-    
+
     // Site info section
     'site.title': 'About This Site',
     'site.subtitle': 'A personal blog about code, projects, photography, and everyday learning',
@@ -156,22 +156,22 @@ export const translations = {
     'site.pillar.projects.desc': 'Open-source practice and product experiments',
     'site.pillar.archive.title': 'Archives',
     'site.pillar.archive.desc': 'Browse content by time, tags, and series',
-    
+
     // Footer
     'footer.navigation': 'Quick Navigation',
     'footer.subscribe': 'Resources',
     'footer.search': 'Site Search',
     'footer.rss': 'RSS',
     'footer.sitemap': 'Sitemap',
-    
+
     // Theme
     'theme.toggle.light': 'Switch theme (current: light)',
     'theme.toggle.dark': 'Switch theme (current: dark)',
     'theme.toggle.system': 'Switch theme (current: system)',
-    
+
     // Language
     'lang.switch': 'Switch Language',
-    
+
     // Page titles
     'page.title.home': 'Home',
     'page.title.blog': 'Blog',
@@ -219,7 +219,7 @@ export const translations = {
     'search.kind.plog': 'Plog',
     'search.kind.project': 'Project',
     'search.kind.page': 'Page',
-    
+
     // Blog page
     'blog.title': 'Blog',
     'blog.subtitle': 'Code, reading, and passing thoughts, kept in a timeline that continues to grow',
@@ -286,7 +286,7 @@ export const translations = {
     'guestbook.unavailableTitle': 'The guestbook is being prepared',
     'guestbook.unavailableDesc': 'The page is here, but messages are not open yet. Come by again another day.',
     'guestbook.otherWays': 'Elsewhere',
-    
+
     // Projects page
     'projectsPage.title': 'Projects',
     'projectsPage.subtitle': 'Ideas made runnable, reusable, and open to another round of refinement',
@@ -366,7 +366,7 @@ export const translations = {
     'music.dock.expand': 'Open music player',
     'music.dock.collapse': 'Collapse music player',
     'music.dock.nowPlaying': 'Now Playing',
-    
+
     // Archives page
     'archives.title': 'Archives',
     'archives.subtitle': 'A shared index of writing and photographed moments, gathered by time and recurring themes',
@@ -417,7 +417,7 @@ export const translations = {
     'archives.nav.timeline': 'Timeline',
     'archives.allTags': 'All Tags',
     'archives.allSeries': 'All Series',
-    
+
     // About page
     'aboutPage.title': 'About',
     'aboutPage.subtitle': 'More about me, my work, my interests, and how this site is maintained',
@@ -447,7 +447,7 @@ export const translations = {
     'aboutPage.overview.stackDesc': 'Core technologies behind this site',
     'aboutPage.overview.networks': 'Networks',
     'aboutPage.overview.networksDesc': 'Places to find my latest updates',
-    
+
     // Archives timeline
     'archives.timeline.quickJump': 'Quick Jump:',
     'archives.timeline.title': 'Timeline',
@@ -477,8 +477,8 @@ export const translations = {
     'archives.series.view': 'View Series',
     'archives.empty.series.title': 'No Series Yet',
     'archives.empty.series.description': 'Series will appear here when connected posts are organized together.',
-    
-    // Links page  
+
+    // Links page
     'links.title': 'Links',
     'links.subtitle': 'A collection of friends, useful resources, and other places to stay connected',
     'links.eyebrow': 'Site Links',
@@ -534,7 +534,7 @@ export const translations = {
     'links.featured': 'Featured',
     'links.friends': 'Friends',
     'links.sites': 'Sites',
-    
+
     // Archives page detailed
     'archives.totalWords': 'Total Words',
     'archives.avgWords': 'Avg Words',
@@ -577,7 +577,7 @@ export const translations = {
     'nav.search': '搜索',
     'nav.openMenu': '打开菜单',
     'nav.closeMenu': '关闭菜单',
-    
+
     // Home page
     'home.hero.subtitle': '把技术、阅读与日常，收进持续生长的时间线',
     'home.hero.intro': '让未完成的想法、正在打磨的作品，以及值得反复追问的问题，都在这里慢慢生长。',
@@ -627,7 +627,7 @@ export const translations = {
     'home.heatmap.source.repos': '仓库更新',
     'home.heatmap.source.cache': '缓存活动',
     'home.heatmap.source.empty': '暂无公开活动',
-    
+
     // Posts section
     'posts.title': '最新笔记',
     'posts.subtitle': '工程记录 · 项目复盘 · 长期参考',
@@ -638,7 +638,7 @@ export const translations = {
     'posts.stats.total': '笔记总数',
     'posts.stats.updating': '持续写作中',
     'posts.empty': '暂无笔记',
-    
+
     // Projects section
     'projects.title': '精选项目',
     'projects.subtitle': '项目实验 · 开源实践 · 持续迭代',
@@ -651,7 +651,7 @@ export const translations = {
     'projects.stats.forks': '分叉',
     'projects.noDescription': '暂无描述',
     'projects.empty': '暂无可展示项目',
-    
+
     // About section
     'about.title': '关于我',
     'about.subtitle': '常用的工具、走过的路，以及仍让我驻足的事物',
@@ -691,7 +691,7 @@ export const translations = {
     'about.timeline.2025.title': '开始构建 Astro Theme Reay',
     'about.timeline.2025.desc': '使用 Astro 构建配置驱动的个人站点主题',
     'home.about.more': '完整关于页',
-    
+
     // Site info section
     'site.title': '关于本站',
     'site.subtitle': '记录代码、项目、影像与日常学习的个人博客',
@@ -708,22 +708,22 @@ export const translations = {
     'site.pillar.projects.desc': '开源实践与产品实验',
     'site.pillar.archive.title': '内容归档',
     'site.pillar.archive.desc': '按时间、标签和系列浏览内容',
-    
+
     // Footer
     'footer.navigation': '快捷导航',
     'footer.subscribe': '资源入口',
     'footer.search': '站内搜索',
     'footer.rss': 'RSS 订阅',
     'footer.sitemap': '站点地图',
-    
+
     // Theme
     'theme.toggle.light': '切换主题（当前：亮色）',
     'theme.toggle.dark': '切换主题（当前：暗色）',
     'theme.toggle.system': '切换主题（当前：跟随系统）',
-    
+
     // Language
     'lang.switch': '切换语言',
-    
+
     // Page titles
     'page.title.home': '首页',
     'page.title.blog': '博客',
@@ -771,7 +771,7 @@ export const translations = {
     'search.kind.plog': 'Plog',
     'search.kind.project': '项目',
     'search.kind.page': '页面',
-    
+
     // Blog page
     'blog.title': '博客',
     'blog.subtitle': '把代码、阅读与偶然想到的事，写进一条持续生长的时间线',
@@ -838,7 +838,7 @@ export const translations = {
     'guestbook.unavailableTitle': '留言簿正在准备中',
     'guestbook.unavailableDesc': '页面已经在这里了，只是留言还没有开放。欢迎改日再来。',
     'guestbook.otherWays': '也可以在这里找到我',
-    
+
     // Projects page
     'projectsPage.title': '项目',
     'projectsPage.subtitle': '把想法做成可运行、可复用，也值得继续打磨的作品',
@@ -918,7 +918,7 @@ export const translations = {
     'music.dock.expand': '打开音乐播放器',
     'music.dock.collapse': '收起音乐播放器',
     'music.dock.nowPlaying': '正在播放',
-    
+
     // Archives page
     'archives.title': '归档',
     'archives.subtitle': '把写下的文字与拍下的片刻，沿时间和主题收进同一册索引',
@@ -969,7 +969,7 @@ export const translations = {
     'archives.nav.timeline': '时间轴',
     'archives.allTags': '全部标签',
     'archives.allSeries': '全部系列',
-    
+
     // About page
     'aboutPage.title': '关于',
     'aboutPage.subtitle': '进一步了解我、我的工作方式、兴趣，以及这座小站的维护方式',
@@ -999,7 +999,7 @@ export const translations = {
     'aboutPage.overview.stackDesc': '支撑本站的核心技术',
     'aboutPage.overview.networks': '社交入口',
     'aboutPage.overview.networksDesc': '找到我最新动态的地方',
-    
+
     // Archives timeline
     'archives.timeline.quickJump': '快速跳转:',
     'archives.timeline.title': '时间轴',
@@ -1029,7 +1029,7 @@ export const translations = {
     'archives.series.view': '查看系列',
     'archives.empty.series.title': '暂无系列',
     'archives.empty.series.description': '整理相互关联的文章后，系列会出现在这里。',
-    
+
     // Links page
     'links.title': '链接',
     'links.subtitle': '收录友链、实用资源，以及可以继续保持联系的地方',
@@ -1086,7 +1086,7 @@ export const translations = {
     'links.featured': '精选推荐',
     'links.friends': '好友',
     'links.sites': '网站',
-    
+
     // Archives page detailed
     'archives.totalWords': '总字数',
     'archives.avgWords': '平均字数',

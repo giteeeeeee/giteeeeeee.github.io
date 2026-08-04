@@ -39,7 +39,7 @@ npm ci
 
 ## Artifact Verification
 
-`scripts/check-routes.mjs` 要求首页、404、主要栏目、Search、RSS、robots、Sitemap index、Pagefind JS、theme.css 和 markdown.css 等 16 个产物存在，并检查少量标记。
+`scripts/check-routes.mjs` 要求首页、404、主要栏目、Search、RSS、robots、Sitemap index、Pagefind JS、theme.css 和 markdown.css 等 16 个产物存在，并检查少量标记；它还递归扫描生成 HTML，拒绝缺少尾斜杠的目录型 root-absolute href，避免静态托管为站内导航增加 301 往返。
 
 `scripts/check-performance-budget.mjs` 约束首页/Blog 列表 HTML、首页 inline 资源、`data-astro-rerun` 和共享 CSS 合同。它是静态回归门禁，不测 FPS、INP、LCP、内存或 layer。
 

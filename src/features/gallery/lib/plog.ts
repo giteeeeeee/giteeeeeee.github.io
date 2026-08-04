@@ -5,6 +5,7 @@
 
 import { getCollection, type CollectionEntry } from 'astro:content';
 import type { ImageMetadata } from 'astro';
+import { getPlogAssetRelativePath } from './plog-path';
 
 const PLOG_FILE_EXTENSION_PATTERN = /\.(md|mdx)$/i;
 const PLOG_IMAGE_EXTENSION_PATTERN = /\.(avif|gif|jpe?g|png|webp)$/i;
@@ -112,13 +113,6 @@ function getImageSrc(image?: { src?: string } | string) {
 function getImageAsset(image?: { src?: string; width?: number; height?: number; format?: string } | string) {
   if (!image || typeof image === 'string' || !image.src) return undefined;
   return image as ImageMetadata;
-}
-
-function getPlogAssetRelativePath(path: string) {
-  return path
-    .replace(/\\/g, '/')
-    .replace(/^.*?\/src\/content\/plog\//, '')
-    .replace(/^\.\.\/content\/plog\//, '');
 }
 
 function getPlogLookupSlug(slug: string) {

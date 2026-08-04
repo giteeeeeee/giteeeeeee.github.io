@@ -1,19 +1,19 @@
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import { constants } from 'node:fs';
-import { resolve } from 'node:path';
+import { extname, relative, resolve } from 'node:path';
 
 const root = resolve(process.cwd(), 'dist');
 const requiredArtifacts = [
   ['/', 'index.html'],
-  ['/404', '404.html'],
-  ['/about', 'about/index.html'],
-  ['/archives', 'archives/index.html'],
-  ['/blog', 'blog/index.html'],
-  ['/gallery', 'gallery/index.html'],
-  ['/guestbook', 'guestbook/index.html'],
-  ['/links', 'links/index.html'],
-  ['/projects', 'projects/index.html'],
-  ['/search', 'search/index.html'],
+  ['/404.html', '404.html'],
+  ['/about/', 'about/index.html'],
+  ['/archives/', 'archives/index.html'],
+  ['/blog/', 'blog/index.html'],
+  ['/gallery/', 'gallery/index.html'],
+  ['/guestbook/', 'guestbook/index.html'],
+  ['/links/', 'links/index.html'],
+  ['/projects/', 'projects/index.html'],
+  ['/search/', 'search/index.html'],
   ['/rss.xml', 'rss.xml'],
   ['/robots.txt', 'robots.txt'],
   ['/sitemap-index.xml', 'sitemap-index.xml'],
@@ -23,6 +23,33 @@ const requiredArtifacts = [
 ];
 
 const failures = [];
+
+const fileRouteExtensions = new Set([
+  '.avif', '.css', '.gif', '.html', '.ico', '.jpeg', '.jpg', '.js', '.json',
+  '.mjs', '.mp3', '.mp4', '.pdf', '.png', '.svg', '.txt', '.webmanifest',
+  '.webp', '.woff', '.woff2', '.xml',
+]);
+
+async function collectHtmlFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const path = resolve(directory, entry.name);
+    if (entry.isDirectory()) files.push(...await collectHtmlFiles(path));
+    else if (entry.isFile() && entry.name.endsWith('.html')) files.push(path);
+  }
+
+  return files;
+}
+
+function needsCanonicalTrailingSlash(href) {
+  if (!href.startsWith('/') || href.startsWith('//')) return false;
+
+  const { pathname } = new URL(href, 'https://reay.invalid');
+  if (pathname === '/' || pathname.endsWith('/')) return false;
+  return !fileRouteExtensions.has(extname(pathname).toLowerCase());
+}
 
 for (const [route, file] of requiredArtifacts) {
   try {
@@ -52,10 +79,25 @@ if (!robots.includes('Sitemap:')) failures.push('/robots.txt does not advertise 
 if (!themeCss.includes('--md-sys-color-primary')) failures.push('/theme.css has no MD3 system variables');
 if (!markdownCss.includes('.prose')) failures.push('/markdown.css has no prose rules');
 
+const nonCanonicalLinks = new Set();
+for (const htmlFile of await collectHtmlFiles(root)) {
+  const html = await readFile(htmlFile, 'utf8');
+  for (const match of html.matchAll(/\bhref=(['"])(.*?)\1/g)) {
+    const href = match[2];
+    if (needsCanonicalTrailingSlash(href)) {
+      nonCanonicalLinks.add(`${relative(root, htmlFile)} -> ${href}`);
+    }
+  }
+}
+
+for (const link of nonCanonicalLinks) {
+  failures.push(`non-canonical directory href: ${link}`);
+}
+
 if (failures.length > 0) {
   console.error('Production route validation failed:');
   failures.forEach((failure) => console.error(`- ${failure}`));
   process.exit(1);
 }
 
-console.log(`Validated ${requiredArtifacts.length} production route artifacts.`);
+console.log(`Validated ${requiredArtifacts.length} production route artifacts and canonical internal links.`);

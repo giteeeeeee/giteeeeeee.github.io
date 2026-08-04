@@ -26,8 +26,14 @@ const links: Array<NavigationItem & { label: string }> = navigation.primary.map(
   label: t(item.key),
 }));
 
-const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
-const isActive = (href: string) => href === '/' ? currentPath === '/' : currentPath.startsWith(href);
+const normalizePath = (path: string) => path === '/' ? '/' : path.replace(/\/+$/, '');
+const currentPath = normalizePath(Astro.url.pathname);
+const isActive = (href: string) => {
+  const normalizedHref = normalizePath(href);
+  return normalizedHref === '/'
+    ? currentPath === '/'
+    : currentPath === normalizedHref || currentPath.startsWith(`${normalizedHref}/`);
+};
 ---
 <header class="site-header sticky top-0 z-20" data-floating-header>
   <div class="site-header-inner mx-auto max-w-1100px px-4 sm:px-6 h-16 flex items-center justify-between gap-4">

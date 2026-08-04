@@ -1,6 +1,6 @@
 /**
  * Markdown Rendering Configuration
- * 
+ *
  * Centralized configuration for all Markdown-related plugins and options.
  * This file manages syntax highlighting, math rendering, and content processing.
  */
@@ -12,7 +12,7 @@ import rehypeSlug from 'rehype-slug'
 import { unified } from '@astrojs/markdown-remark'
 import { remarkReadingTime } from '../../features/blog/lib/remark-reading-time'
 import type { AstroUserConfig } from 'astro'
-import { 
+import {
   transformerNotationDiff,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
@@ -51,7 +51,7 @@ export const markdownConfig: AstroUserConfig['markdown'] = {
     },
     wrap: true,
     defaultColor: false,
-    
+
     // Advanced code block transformers
     transformers: [
       transformerNotationDiff(),

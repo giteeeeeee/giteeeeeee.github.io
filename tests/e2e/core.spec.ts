@@ -131,8 +131,36 @@ test('language, theme, and client navigation stay synchronized', async ({ page }
   await expect(page.getByText('Latest', { exact: true })).toBeVisible();
 });
 
+test('primary navigation uses canonical directory URLs and restrained transitions', async ({ page }) => {
+  await page.goto('/');
+
+  const navigation = page.locator('.site-header nav:visible');
+  const hrefs = await navigation.locator('a').evaluateAll(links =>
+    links.map(link => link.getAttribute('href')),
+  );
+
+  expect(hrefs).toEqual([
+    '/',
+    '/blog/',
+    '/archives/',
+    '/projects/',
+    '/gallery/',
+    '/links/',
+    '/guestbook/',
+    '/about/',
+  ]);
+  await expect(navigation.locator('a[href="/blog/"]')).toHaveAttribute('data-astro-prefetch', 'load');
+  await expect(navigation.locator('a[href="/archives/"]')).toHaveAttribute('data-astro-prefetch', 'load');
+  await expect(navigation.locator('a[href="/projects/"]')).toHaveAttribute('data-astro-prefetch', 'hover');
+
+  const routeDuration = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--reay-route-enter-duration').trim(),
+  );
+  expect(routeDuration).toMatch(/^(140ms|0?\.14s)$/);
+});
+
 test('Pagefind returns local results', async ({ page }) => {
-  await page.goto('/search');
+  await page.goto('/search/');
   await expect(page.locator('[data-search-root]')).toHaveAttribute('data-search-state', 'idle');
   await page.getByRole('searchbox').fill('Astro');
   await expect(page).toHaveURL(/\?q=Astro/);
@@ -144,34 +172,34 @@ test('Pagefind returns local results', async ({ page }) => {
 
 test('search falls back to Blog and Plog documents when Pagefind is unavailable', async ({ page }) => {
   await page.route('**/pagefind/pagefind.js', route => route.abort());
-  await page.goto('/search');
+  await page.goto('/search/');
   await page.getByRole('searchbox').fill('Python');
 
   await expect(page.locator('[data-search-error]')).toBeVisible();
   await expect(page.locator('[data-search-status]')).toContainText('轻量索引');
-  await expect(page.locator('[data-search-result] > a[href="/blog/python-tutorial-01"]')).toBeVisible();
+  await expect(page.locator('[data-search-result] > a[href="/blog/python-tutorial-01/"]')).toBeVisible();
 });
 
 test('Blog and Plog detail back links restore the previous archive state', async ({ page }) => {
-  await page.goto('/archives?type=blog');
-  const blogEntry = page.locator('[data-archive-row][data-archive-kind="blog"] > a[href="/blog/test-markdown"]');
+  await page.goto('/archives/?type=blog');
+  const blogEntry = page.locator('[data-archive-row][data-archive-kind="blog"] > a[href="/blog/test-markdown/"]');
   await expect(blogEntry).toHaveCount(1);
   await blogEntry.click();
   await expect(page).toHaveURL(/\/blog\/test-markdown\/?$/);
   await page.locator('[data-history-back]').click();
-  await expect(page).toHaveURL(/\/archives\?type=blog$/);
+  await expect(page).toHaveURL(/\/archives\/\?type=blog$/);
 
-  await page.goto('/archives?type=plog');
+  await page.goto('/archives/?type=plog');
   const plogEntry = page.locator('[data-archive-row][data-archive-kind="plog"] > a[href="/gallery/daily/morning-window/"]');
   await expect(plogEntry).toHaveCount(1);
   await plogEntry.click();
   await expect(page).toHaveURL(/\/gallery\/daily\/morning-window\/?$/);
   await page.locator('[data-history-back]').click();
-  await expect(page).toHaveURL(/\/archives\?type=plog$/);
+  await expect(page).toHaveURL(/\/archives\/\?type=plog$/);
 });
 
 test('custom 404 title follows the selected language', async ({ page }) => {
-  const response = await page.goto('/definitely-missing-page');
+  const response = await page.goto('/definitely-missing-page/');
   expect(response?.status()).toBe(404);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('这一页暂时走丢了');
 
@@ -267,7 +295,7 @@ test('default technology preset reaches the rendered background and component sh
 
 test('blog table of contents keeps its reading percentage centered in a complete progress ring', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/blog/test-markdown');
+  await page.goto('/blog/test-markdown/');
 
   const progress = page.locator('[data-toc-progress-circle]');
   await expect(progress).toHaveCount(1);
@@ -316,11 +344,11 @@ test('configured contact and site identity propagate across public surfaces', as
   await expect(page.locator('[data-home-now] [data-contact-kind="website"]')).toHaveAttribute('href', website);
   await expect(page.locator('footer [data-contact-kind="website"]')).toHaveAttribute('href', website);
 
-  await page.goto('/about');
+  await page.goto('/about/');
   await expect(page.locator('.socials-section [data-contact-kind="website"]')).toHaveAttribute('href', website);
   await expect(page.locator('[data-about-intro] h2')).toHaveText('YOUR_NAME');
 
-  await page.goto('/links');
+  await page.goto('/links/');
   await expect(page.locator('.contact-buttons [data-contact-kind="website"]')).toHaveAttribute('href', website);
   await expect(page.locator('.site-info-card [data-copy="YOUR_NAME"]')).toHaveCount(1);
   await expect(page.locator(`.site-info-card [data-copy="${website}"]`)).toHaveCount(1);
@@ -360,7 +388,7 @@ test('homepage applies the compact config-driven typography scale', async ({ pag
 });
 
 test('role-based typography falls back globally and propagates to the intended surfaces', async ({ page }) => {
-  await page.goto('/blog/test-markdown');
+  await page.goto('/blog/test-markdown/');
 
   const typography = await page.evaluate(() => ({
     roles: [
@@ -410,7 +438,7 @@ test('role-based typography falls back globally and propagates to the intended s
     code: expect.stringContaining('SFMono-Regular'),
   });
 
-  await page.goto('/gallery/daily/morning-window');
+  await page.goto('/gallery/daily/morning-window/');
   const plogTypography = await page.evaluate(() => {
     document.documentElement.style.setProperty('--reay-font-prose', 'serif');
     return {
@@ -453,17 +481,17 @@ test('desktop homepage keeps only the Hero viewport-sized', async ({ page }) => 
 test('public index pages share the compact editorial page contract', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const paths = [
-    '/blog',
-    '/archives',
-    '/archives/tags',
-    '/archives/series',
-    '/archives/timeline',
-    '/projects',
-    '/gallery',
-    '/about',
-    '/links',
-    '/guestbook',
-    '/search',
+    '/blog/',
+    '/archives/',
+    '/archives/tags/',
+    '/archives/series/',
+    '/archives/timeline/',
+    '/projects/',
+    '/gallery/',
+    '/about/',
+    '/links/',
+    '/guestbook/',
+    '/search/',
   ];
 
   for (const path of paths) {
@@ -492,7 +520,7 @@ test('public index pages share the compact editorial page contract', async ({ pa
 
 test('guestbook keeps the conversation compact and visitor-facing', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/guestbook');
+  await page.goto('/guestbook/');
 
   const flow = page.locator('[data-guestbook-flow]');
   const commentSection = page.locator('[data-comment-section]');
@@ -543,7 +571,7 @@ test('guestbook keeps the conversation compact and visitor-facing', async ({ pag
 });
 
 test('editorial details and archives do not regress into card walls', async ({ page }) => {
-  await page.goto('/archives');
+  await page.goto('/archives/');
   await expect(page.locator('[data-archive-explorer]')).toHaveCount(1);
   await expect(page.locator('[data-archive-year]')).not.toHaveCount(0);
   await expect(page.locator('[data-archive-topic-panel="all"]')).toBeVisible();
@@ -554,7 +582,7 @@ test('editorial details and archives do not regress into card walls', async ({ p
   await expect(page.locator('[data-archive-series-shelf]')).toBeVisible();
   expect(await page.locator('[data-archive-series-entry]').count()).toBeLessThanOrEqual(4);
   await expect(page.locator('[data-archive-series-compact]')).toHaveCount(0);
-  await expect(page.locator('[data-archive-series-shelf] > header a')).toHaveAttribute('href', '/archives/series');
+  await expect(page.locator('[data-archive-series-shelf] > header a')).toHaveAttribute('href', '/archives/series/');
 
   const archiveSwitcher = await page.evaluate(() => {
     const toolbar = getComputedStyle(document.querySelector('[data-archive-toolbar]')!);
@@ -579,7 +607,7 @@ test('editorial details and archives do not regress into card walls', async ({ p
   await expect(page.locator('[data-archive-series-shelf]')).toBeHidden();
   await expect(page.locator('.archive-main .reay-card, .series-progress')).toHaveCount(0);
 
-  await page.goto('/links');
+  await page.goto('/links/');
   const linkCard = page.locator('[data-link-card]').first();
   const linkPreview = linkCard.locator('[data-link-preview]');
   await expect(linkCard).toHaveAttribute('data-preview-ready', 'true');
@@ -615,14 +643,14 @@ test('editorial details and archives do not regress into card walls', async ({ p
   await linkCard.hover();
   await expect(linkPreview).toHaveAttribute('src', /api\.microlink\.io/);
 
-  await page.goto('/projects');
+  await page.goto('/projects/');
   await expect(page.locator('[data-editorial-page-header]')).toHaveCount(1);
   await expect(page.locator('.stat-card')).toHaveCount(0);
 });
 
 test('tag and series directories keep a centered, compact editorial rhythm', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/archives/tags');
+  await page.goto('/archives/tags/');
 
   const tagLayout = await page.evaluate(() => {
     const flow = document.querySelector<HTMLElement>('.tag-page-flow')!;
@@ -644,7 +672,7 @@ test('tag and series directories keep a centered, compact editorial rhythm', asy
   expect(tagLayout.rankFamily).not.toContain('SFMono-Regular');
   expect(tagLayout.titleWeight).toBeLessThanOrEqual(760);
 
-  await page.goto('/archives/series');
+  await page.goto('/archives/series/');
   await expect(page.locator('[data-series-index]')).toBeVisible();
   expect(await page.locator('[data-series-entry]').count()).toBeGreaterThan(0);
   const seriesCenterDelta = await page.locator('[data-series-index]').evaluate((element) => {
@@ -655,7 +683,7 @@ test('tag and series directories keep a centered, compact editorial rhythm', asy
 });
 
 test('archives keeps popular topics concise and returns topic discovery to filtered results', async ({ page }) => {
-  await page.goto('/archives');
+  await page.goto('/archives/');
 
   const popularTopics = page.locator('[data-archive-topic-panel="all"] .archive-popular-topics [data-archive-topic]');
   expect(await popularTopics.count()).toBeLessThanOrEqual(12);
@@ -668,7 +696,7 @@ test('archives keeps popular topics concise and returns topic discovery to filte
   await expect(page).toHaveURL(/\/archives\/series\//);
   await expect(page.locator('.series-chapters')).toBeVisible();
 
-  await page.goto('/archives');
+  await page.goto('/archives/');
   const topicTrigger = page.locator('[data-archive-toolbar] [data-archive-topic-dialog-open]');
   await expect(topicTrigger).toHaveAttribute('aria-label', '主题');
   await topicTrigger.click();
@@ -706,7 +734,7 @@ test('archives keeps popular topics concise and returns topic discovery to filte
 });
 
 test('blog series context exposes structural position and adjacent chapters', async ({ page }) => {
-  await page.goto('/blog/python-tutorial-03');
+  await page.goto('/blog/python-tutorial-03/');
 
   const context = page.locator('[data-post-series-context]');
   const navigation = page.locator('[data-post-series-navigation]');
@@ -714,20 +742,20 @@ test('blog series context exposes structural position and adjacent chapters', as
   await expect(context.locator('[data-series-position-value]:visible')).toHaveText('3 / 5');
   await expect(context.getByRole('link', { name: /Python 入门教程/ })).toHaveAttribute(
     'href',
-    '/archives/series/Python%20%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B',
+    '/archives/series/Python%20%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/',
   );
 
   await expect(navigation).toBeVisible();
   await expect(navigation.locator('[data-series-position-value]:visible')).toHaveText('3 / 5');
-  await expect(navigation.locator('[data-series-previous]')).toHaveAttribute('href', '/blog/python-tutorial-02');
-  await expect(navigation.locator('[data-series-next]')).toHaveAttribute('href', '/blog/python-tutorial-04');
+  await expect(navigation.locator('[data-series-previous]')).toHaveAttribute('href', '/blog/python-tutorial-02/');
+  await expect(navigation.locator('[data-series-next]')).toHaveAttribute('href', '/blog/python-tutorial-04/');
   await expect(navigation.locator('[data-series-previous]')).toContainText('数据结构与函数');
   await expect(navigation.locator('[data-series-next]')).toContainText('文件操作与异常处理');
 });
 
 test('archive topic dialog remains usable and overflow-free on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/archives');
+  await page.goto('/archives/');
   await page.locator('[data-archive-toolbar] [data-archive-topic-dialog-open]').click();
 
   const dialog = page.locator('[data-archive-topic-dialog]');
@@ -747,12 +775,12 @@ test('archive topic dialog remains usable and overflow-free on mobile', async ({
 });
 
 test('Plog groups moments into collections and About exposes its narrative', async ({ page }) => {
-  await page.goto('/gallery');
+  await page.goto('/gallery/');
   await expect(page.locator('[data-plog-index]')).toHaveCount(1);
   await expect(page.locator('[data-plog-collection]')).toHaveCount(3);
   await expect(page.locator('.moment-entry')).toHaveCount(6);
 
-  await page.goto('/about');
+  await page.goto('/about/');
   await expect(page.locator('[data-about-narrative]')).toHaveCount(1);
   await expect(page.locator('[data-about-intro] [data-user-content="status"]')).toHaveCount(1);
   await expect(page.getByText('访问', { exact: true })).toHaveCount(0);
@@ -761,19 +789,19 @@ test('Plog groups moments into collections and About exposes its narrative', asy
 test('all representative route types remain overflow-free on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const paths = [
-    '/blog',
-    '/archives',
-    '/archives/tags',
-    '/archives/series/Python%20%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B',
-    '/projects',
-    '/gallery',
-    '/about',
-    '/links',
-    '/guestbook',
-    '/search',
-    '/blog/test-markdown',
-    '/gallery/daily/morning-window',
-    '/404',
+    '/blog/',
+    '/archives/',
+    '/archives/tags/',
+    '/archives/series/Python%20%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/',
+    '/projects/',
+    '/gallery/',
+    '/about/',
+    '/links/',
+    '/guestbook/',
+    '/search/',
+    '/blog/test-markdown/',
+    '/gallery/daily/morning-window/',
+    '/404.html',
   ];
 
   for (const path of paths) {
@@ -792,7 +820,7 @@ test('all representative route types remain overflow-free on mobile', async ({ p
   }
 });
 
-for (const path of ['/', '/archives', '/guestbook', '/search', '/404']) {
+for (const path of ['/', '/archives/', '/guestbook/', '/search/', '/404.html']) {
   test(`has no automated WCAG A/AA violations on ${path}`, async ({ page }) => {
     await page.goto(path);
     const results = await new AxeBuilder({ page })

@@ -1,13 +1,13 @@
 ---
 import ArchiveLayout from '@app/layouts/archives/ArchiveLayout.astro';
 import BlogTimeline from '@features/blog/components/BlogTimeline.astro';
-import { decodeRouteParam, getAllTags, getPostsByTag, getTagUrl } from '@features/blog/lib/blog';
+import { decodeRouteParam, encodeRouteParam, getAllTags, getPostsByTag, getTagUrl } from '@features/blog/lib/blog';
 import { useI18n } from '@features/i18n/lib/i18n';
 import EditorialSectionHeader from '@shared/components/EditorialSectionHeader.astro';
 
 export async function getStaticPaths() {
   const tags = await getAllTags();
-  return tags.map(({ tag }) => ({ params: { tag } }));
+  return tags.map(({ tag }) => ({ params: { tag: encodeRouteParam(tag) } }));
 }
 
 const tag = decodeRouteParam(Astro.params.tag);
