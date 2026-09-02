@@ -1,0 +1,87 @@
+# =====================================================================
+#  MEOW 主题自定义配置（覆盖 themes/meow/_config.yml 的默认值）
+#  文档：https://meow.jumaoo.top/categories/Docs文档
+# =====================================================================
+
+# ---------------- 站点信息 ----------------
+info:
+  favicon: assets/images/Hexo-Theme-MEOW.ico
+  logo: assets/images/Hexo-Theme-MEOW.png
+  avatar: ''
+  # 建站时间（格式与根配置的 date_format/time_format 保持一致）
+  start_date: 2026-09-02 22:00:00
+
+# ---------------- 主题色 ----------------
+color:
+  light:
+    theme_color: '#4CAF50'   # 浅色模式主题色（健身绿）
+  dark:
+    theme_color: '#81C784'
+  mode:
+    default: light
+
+# ---------------- 导航菜单 ----------------
+# 格式：菜单名: 路径 || 图标名（图标见 themes/meow/source/assets/images/svg/uc/）
+menu:
+  主页: / || uc-home
+  分类: /categories || uc-category
+  相册: /albums || uc-picture
+  留言: /guestbook || uc-comment
+  关于: /about || uc-about
+
+# ---------------- 顶部横幅 ----------------
+banner:
+  title:
+    enable: true
+    text: 体能训练日志
+  subtitle:
+    enable: true
+    effect: true
+    text:
+      - 记录训练的成长与经验
+      - 坚持就是胜利 💪
+
+# ---------------- 首页侧边栏 ----------------
+sidebar:
+  enable: true
+  info:
+    enable: true
+    type: author
+    status:
+      emoji: 💪
+      desc: 坚持训练中
+    desc: 记录力量训练、跑步与体态康复的点滴。
+    statistic: true
+    social:
+      enable: true
+      list:
+        github: brand-github || https://github.com/giteeeeeee
+
+# ---------------- 评论 / 留言板 ----------------
+comment:
+  enable: true
+  display: true
+  type: waline
+  lazyload: true
+  waline:
+    # TODO：部署 Waline 服务端后，把地址填到这里（例如 https://xxx.vercel.app）
+    server_url: ''
+    lang: zh-CN
+
+# ---------------- 相册 ----------------
+# external 模式：图片列表直接写在 source/_data/albums.yml 里
+album:
+  local: false
+
+# ---------------- 关闭音乐播放器 ----------------
+music:
+  enable: false
+
+# ---------------- 关闭赞赏 ----------------
+post:
+  reward:
+    enable: false
+
+reward:
+  qrcode: false
+  link: false
