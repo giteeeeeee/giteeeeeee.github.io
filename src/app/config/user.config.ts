@@ -15,26 +15,26 @@ import { defaultLang, type Language } from './i18n.config';
 // ---------------------------------------------------------------------------
 
 export const user = {
-  name: 'YOUR_NAME',
+  name: 'giteeeeeee',
   avatar: '/images/profile/avatar.png',
   /** Optional public profile detail. Leave empty to hide it everywhere. */
-  location: 'YOUR_LOCATION',
+  location: '',
 
   /**
    * The only source for public contact details.
    * Home, About, Links, and Footer all consume these values through site.config.
    */
   contact: {
-    email: 'your.email@example.com',
+    email: '',
     /** Full public Twitter/X profile URL. Leave empty to hide it everywhere. */
-    twitter: 'https://x.com/yourusername',
-    website: 'https://yourusername.github.io',
+    twitter: '',
+    website: 'https://giteeeeeee.github.io',
     additionalLinks: [] as AdditionalContactLink[],
   },
 
   /** The GitHub profile URL is derived from this username. */
   github: {
-    username: 'yourusername',
+    username: 'giteeeeeee',
     token: '',
   },
 } satisfies User;
@@ -45,34 +45,40 @@ export const user = {
 
 export const userContent = {
   en: {
-    role: 'YOUR_ROLE',
-    tagline: 'YOUR_TAGLINE',
-    bio: 'YOUR_SHORT_BIO',
-    status: 'YOUR_CURRENT_STATUS',
-    focus: ['YOUR_FOCUS_1', 'YOUR_FOCUS_2', 'YOUR_FOCUS_3', 'YOUR_FOCUS_4'],
+    role: 'Fitness Enthusiast',
+    tagline: 'Documenting my fitness training journey',
+    bio: 'Recording strength training, running, and posture recovery.',
+    status: 'Training consistently',
+    focus: ['Strength Training', 'Running', 'Posture & Recovery', 'Experience'],
     story: {
-      title: 'YOUR_STORY_TITLE',
-      lead: 'YOUR_STORY_LEAD',
-      body: ['YOUR_STORY_PARAGRAPH_1', 'YOUR_STORY_PARAGRAPH_2'],
-      principles: ['YOUR_PRINCIPLE_1', 'YOUR_PRINCIPLE_2', 'YOUR_PRINCIPLE_3'],
+      title: 'My Training Story',
+      lead: 'Starting from zero, witnessing every step of progress.',
+      body: [
+        'This site records my physical training growth, including strength training, running and posture recovery.',
+        'Every photo album and article is a milestone of my progress.',
+      ],
+      principles: ['Consistency', 'Science', 'Record'],
     },
-    greeting: 'YOUR_GREETING',
-    description: 'YOUR_SITE_DESCRIPTION',
+    greeting: 'Welcome to my training log',
+    description: 'Recording my fitness training growth and experience',
   },
   zh: {
-    role: '你的身份或职业',
-    tagline: '你的个人标语',
-    bio: '你的个人简介',
-    status: '你的当前状态',
-    focus: ['你的关注方向 1', '你的关注方向 2', '你的关注方向 3', '你的关注方向 4'],
+    role: '体能训练爱好者',
+    tagline: '记录体能训练的成长与经验',
+    bio: '一个坚持训练的普通人，记录力量训练、跑步与体态康复的点滴。',
+    status: '坚持训练中',
+    focus: ['力量训练', '跑步', '体态康复', '经验总结'],
     story: {
-      title: '你的故事标题',
-      lead: '你的故事引言',
-      body: ['你的故事正文 1', '你的故事正文 2'],
-      principles: ['你的原则 1', '你的原则 2', '你的原则 3'],
+      title: '我的训练故事',
+      lead: '从零开始，用记录见证每一次进步。',
+      body: [
+        '这里记录我的体能训练成长，涵盖力量训练、跑步与体态康复。',
+        '每一个相册合集、每一篇文章，都是我进步的里程碑。',
+      ],
+      principles: ['坚持', '科学', '记录'],
     },
-    greeting: '你的问候语',
-    description: '你的站点简介',
+    greeting: '欢迎来到我的训练日志',
+    description: '记录体能训练成长与经验总结',
   },
 } satisfies UserContent;
 
@@ -82,9 +88,9 @@ export const userContent = {
 
 export const site = {
   /** Keep true while this repository still contains template placeholders. */
-  templateMode: true,
+  templateMode: false,
   builtWith: 'site.tech.description',
-  since: 'YYYY',
+  since: '2026',
   techStack: [
     { name: 'Astro', description: 'about.tool.astro', url: 'https://astro.build/', icon: 'i-carbon:rocket' },
     { name: 'UnoCSS', description: 'about.tool.unocss', url: 'https://unocss.dev/', icon: 'i-carbon:color-palette' },
