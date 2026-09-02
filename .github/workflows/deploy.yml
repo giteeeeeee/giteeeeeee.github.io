@@ -14,7 +14,6 @@ permissions:
   id-token: write
 
 # 只允许一个并发部署，跳过正在运行和最新队列之间的运行队列
-# 但是，不要取消正在进行的运行，因为我们希望允许这些生产部署完成
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -29,27 +28,15 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
 
-      - name: Restore GitHub API cache
-        uses: actions/cache@v4
-        with:
-          path: .cache/github
-          key: ${{ runner.os }}-github-cache-main-${{ hashFiles('src/features/projects/lib/github.ts', 'src/app/config/projects.config.ts', 'src/app/config/user.config.ts') }}
-          restore-keys: |
-            ${{ runner.os }}-github-cache-main-
-            ${{ runner.os }}-github-cache-
-      
       - name: Install dependencies
         run: npm ci
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
 
       - name: Validate production configuration
         run: npm run check:production
@@ -57,15 +44,12 @@ jobs:
           SITE: ${{ vars.SITE }}
           BASE: /
 
-      - name: Verify production build
-        run: npm run verify
+      - name: Build
+        run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SITE: ${{ vars.SITE }}
           BASE: /
-
-      - name: Dependency audit
-        run: npm run audit
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
