@@ -1,0 +1,9 @@
+name = "blog-admin"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+# Secret 不写在配置里，用命令设置（每个都是敏感信息，绝不提交到仓库）：
+#   npx wrangler secret put ADMIN_PASSWORD_SALT
+#   npx wrangler secret put ADMIN_PASSWORD_HASH
+#   npx wrangler secret put SESSION_SECRET
+#   npx wrangler secret put GITHUB_TOKEN

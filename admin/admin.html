@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>博客后台</title>
+<style>
+  :root {
+    --green: #4CAF50;
+    --green-dark: #388E3C;
+    --bg: #f5f7f6;
+    --card: #ffffff;
+    --border: #e3e8e5;
+    --text: #263238;
+    --muted: #78909c;
+    --danger: #e53935;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); }
+  header {
+    display: flex; align-items: center; gap: 20px; padding: 0 20px; height: 56px;
+    background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10;
+  }
+  .logo { font-weight: 700; font-size: 17px; color: var(--green-dark); }
+  nav { display: flex; gap: 4px; }
+  nav button {
+    border: none; background: none; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 14px; color: var(--muted);
+  }
+  nav button.active { background: #e8f5e9; color: var(--green-dark); font-weight: 600; }
+  .spacer { flex: 1; }
+  #flash { font-size: 13px; color: var(--green-dark); margin-right: 8px; }
+  .btn {
+    border: 1px solid var(--border); background: #fff; color: var(--text); padding: 8px 14px;
+    border-radius: 8px; cursor: pointer; font-size: 14px;
+  }
+  .btn:hover { border-color: var(--green); }
+  .btn.primary { background: var(--green); border-color: var(--green); color: #fff; }
+  .btn.primary:hover { background: var(--green-dark); }
+  .btn.danger { color: var(--danger); }
+  .btn.danger:hover { border-color: var(--danger); }
+  .btn.small { padding: 4px 10px; font-size: 12px; }
+
+  main { display: flex; height: calc(100vh - 56px); }
+  aside { width: 260px; min-width: 260px; border-right: 1px solid var(--border); background: #fff; overflow-y: auto; padding: 12px; }
+  aside h3 { font-size: 13px; color: var(--muted); margin: 4px 0 10px; }
+  .list-item {
+    padding: 10px 12px; border-radius: 8px; cursor: pointer; margin-bottom: 4px;
+    border: 1px solid transparent;
+  }
+  .list-item:hover { background: #f0f4f1; }
+  .list-item.active { background: #e8f5e9; border-color: var(--green); }
+  .list-item .t { font-weight: 600; font-size: 14px; }
+  .list-item .s { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .list-item .thumb { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; margin-bottom: 6px; }
+
+  .editor { flex: 1; overflow-y: auto; padding: 24px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card h2 { margin: 0 0 16px; font-size: 16px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+  .field input[type=text], .field input[type=number], .field textarea {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; background: #fafbfb;
+  }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--green); background: #fff; }
+  .field input[readonly] { background: #f1f3f2; color: var(--muted); }
+  .row { display: flex; gap: 12px; }
+  .row .field { flex: 1; }
+  textarea#p_content { min-height: 420px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 14px; line-height: 1.6; resize: vertical; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .toolbar button { border: 1px solid var(--border); background: #fff; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  .toolbar button:hover { border-color: var(--green); }
+  .dropzone {
+    border: 2px dashed var(--border); border-radius: 10px; padding: 20px; text-align: center;
+    color: var(--muted); cursor: pointer; font-size: 14px; transition: .15s;
+  }
+  .dropzone:hover, .dropzone.drag { border-color: var(--green); color: var(--green-dark); background: #f6fbf6; }
+  .actions { display: flex; gap: 10px; margin-top: 16px; }
+
+  .photo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .photo-thumb { width: 64px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); flex: none; }
+  .photo-row input { flex: 1; padding: 7px 9px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+  .photo-row input.photo-title { flex: 0 0 180px; }
+  .check { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+  .empty { color: var(--muted); font-size: 14px; text-align: center; padding: 40px 0; }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">💪 博客后台</span>
+  <nav>
+    <button id="tabPosts" class="active" onclick="showTab('posts')">文章</button>
+    <button id="tabAlbums" onclick="showTab('albums')">相册</button>
+  </nav>
+  <div class="spacer"></div>
+  <span id="flash"></span>
+  <button class="btn primary" onclick="publish()">🚀 一键发布</button>
+</header>
+
+<main>
+  <!-- ============ 文章 ============ -->
+  <section id="postsView" style="display:flex; flex:1; min-width:0;">
+    <aside>
+      <button class="btn primary" style="width:100%; margin-bottom:12px;" onclick="newPost()">＋ 新建文章</button>
+      <h3>全部文章</h3>
+      <div id="postList"></div>
+    </aside>
+    <div class="editor">
+      <div class="card">
+        <h2 id="postTitleLabel">新建文章</h2>
+        <div class="field">
+          <label>标题（必填）</label>
+          <input type="text" id="p_title" placeholder="例如：深蹲入门：正确姿势与常见错误">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>文件名 / 网址（英文或数字，留空自动生成，创建后不可改）</label>
+            <input type="text" id="p_slug" placeholder="例如 squat-basics">
+          </div>
+          <div class="field">
+            <label>日期（留空用当前时间）</label>
+            <input type="text" id="p_date" placeholder="2026-09-03 15:30:00">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>分类（用逗号分隔）</label>
+            <input type="text" id="p_category" placeholder="力量训练">
+          </div>
+          <div class="field">
+            <label>标签（用逗号分隔）</label>
+            <input type="text" id="p_tags" placeholder="深蹲, 基础动作">
+          </div>
+        </div>
+        <div class="field">
+          <label>摘要（可选，列表页显示）</label>
+          <input type="text" id="p_excerpt" placeholder="一句话介绍这篇文章">
+        </div>
+        <div class="field">
+          <label>正文（Markdown）</label>
+          <div class="toolbar" id="mdToolbar"></div>
+          <textarea id="p_content" placeholder="在这里写正文，支持 Markdown 语法。&#10;&#10;## 小标题&#10;- 列表项&#10;&#10;直接把图片拖到下方虚线框或 Ctrl+V 粘贴即可插入。"></textarea>
+        </div>
+        <div class="field">
+          <label>插入图片</label>
+          <div class="dropzone" id="dropzone">点这里选择图片，或把图片拖到这里，或 Ctrl+V 粘贴截图</div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" onclick="savePost()">💾 保存文章</button>
+          <button class="btn danger" id="deletePostBtn" style="display:none;" onclick="deletePost()">删除文章</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 相册 ============ -->
+  <section id="albumsView" style="display:none; flex:1; min-width:0;">
+    <aside>
+      <button class="btn primary" style="width:100%; margin-bottom:12px;" onclick="newAlbum()">＋ 新建相册</button>
+      <h3>全部相册</h3>
+      <div id="albumList"></div>
+    </aside>
+    <div class="editor">
+      <div class="card">
+        <h2 id="albumTitleLabel">新建相册</h2>
+        <div class="row">
+          <div class="field">
+            <label>相册名</label>
+            <input type="text" id="a_name" placeholder="例如：力量训练">
+          </div>
+          <div class="field">
+            <label>封面图地址</label>
+            <input type="text" id="a_cover" placeholder="/images/xxx.jpg 或外链 URL">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>封面占列宽 span（可选，默认自动）</label>
+            <input type="number" id="a_span" placeholder="4" min="1" max="12">
+          </div>
+          <div class="field">
+            <label>图片列数 column（可选，默认自动）</label>
+            <input type="number" id="a_column" placeholder="3" min="1" max="6">
+          </div>
+        </div>
+        <div class="field">
+          <label class="check"><input type="checkbox" id="a_encrypt"> 加密相册（需密码才能看）</label>
+        </div>
+        <div class="field">
+          <label>相册照片（可上传或直接贴图片地址）</label>
+          <div id="photos" style="margin-bottom:10px;"></div>
+          <button class="btn" onclick="uploadPhoto()">📷 上传照片到此相册</button>
+          <button class="btn" onclick="uploadCover()" style="margin-left:8px;">🖼 上传并设为封面</button>
+        </div>
+        <div class="actions">
+          <button class="btn primary" onclick="saveAlbum()">💾 保存相册</button>
+          <button class="btn danger" id="deleteAlbumBtn" style="display:none;" onclick="deleteAlbum()">删除相册</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const baseName = (n) => String(n || '').replace(/\.[^.]+$/, '') || '照片';
+const splitList = (s) => String(s || '').split(/[,，]/).map(x => x.trim()).filter(Boolean);
+const nowStr = () => {
+  const d = new Date(), p = (n) => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+};
+
+let posts = [], albums = [];
+let currentPostSlug = null;   // null 表示新建
+let currentAlbum = null;      // 相册对象
+let currentAlbumIsNew = false;
+let uploadTarget = 'post';    // post | album | cover
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  return j;
+}
+function flash(msg) {
+  const el = $('flash'); el.textContent = msg;
+  clearTimeout(el._t); el._t = setTimeout(() => { el.textContent = ''; }, 4000);
+}
+
+// ---------- Tab 切换 ----------
+function showTab(t) {
+  $('postsView').style.display = t === 'posts' ? 'flex' : 'none';
+  $('albumsView').style.display = t === 'albums' ? 'flex' : 'none';
+  $('tabPosts').classList.toggle('active', t === 'posts');
+  $('tabAlbums').classList.toggle('active', t === 'albums');
+  uploadTarget = t === 'posts' ? 'post' : 'album';
+}
+
+// ---------- 文章 ----------
+async function loadPosts() {
+  posts = await api('/api/posts');
+  const box = $('postList');
+  box.innerHTML = posts.length ? '' : '<div class="empty">还没有文章</div>';
+  posts.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'list-item' + (currentPostSlug === p.slug ? ' active' : '');
+    d.innerHTML = '<div class="t">' + esc(p.title) + '</div><div class="s">' + esc(p.date) + (p.category ? ' · ' + esc(p.category) : '') + '</div>';
+    d.onclick = () => selectPost(p.slug);
+    box.appendChild(d);
+  });
+}
+async function selectPost(slug) {
+  const p = await api('/api/posts/' + encodeURIComponent(slug));
+  currentPostSlug = slug;
+  fillPostForm(p);
+  $('postTitleLabel').textContent = '编辑文章：' + (p.title || slug);
+  $('deletePostBtn').style.display = '';
+  await loadPosts();
+  $('postsView').querySelector('.editor').scrollTop = 0;
+}
+function fillPostForm(p) {
+  $('p_title').value = p.title || '';
+  $('p_slug').value = p.slug || '';
+  $('p_slug').readOnly = !!p.slug;
+  $('p_date').value = p.date || '';
+  $('p_category').value = (p.categories || []).join(', ');
+  $('p_tags').value = (p.tags || []).join(', ');
+  $('p_excerpt').value = p.excerpt || '';
+  $('p_content').value = p.content || '';
+}
+function newPost() {
+  currentPostSlug = null;
+  fillPostForm({ title: '', slug: '', date: nowStr(), categories: [], tags: [], excerpt: '', content: '' });
+  $('postTitleLabel').textContent = '新建文章';
+  $('deletePostBtn').style.display = 'none';
+  $('p_slug').readOnly = false;
+  loadPosts();
+}
+async function savePost() {
+  const title = $('p_title').value.trim();
+  if (!title) { alert('标题不能为空'); return; }
+  await api('/api/posts', { method: 'POST', body: JSON.stringify({
+    slug: $('p_slug').value.trim(),
+    title, date: $('p_date').value.trim(),
+    categories: splitList($('p_category').value), tags: splitList($('p_tags').value),
+    excerpt: $('p_excerpt').value.trim(), content: $('p_content').value,
+  })});
+  flash('已保存 ✓（记得点右上角「一键发布」才会更新到线上）');
+  currentPostSlug = null;
+  await loadPosts();
+}
+async function deletePost() {
+  if (!currentPostSlug) return;
+  if (!confirm('确定删除这篇文章？删除后需点「一键发布」才会生效。')) return;
+  await api('/api/posts/' + encodeURIComponent(currentPostSlug), { method: 'DELETE' });
+  flash('已删除（记得发布）');
+  currentPostSlug = null;
+  await loadPosts();
+  fillPostForm({ title: '', slug: '', date: '', categories: [], tags: [], excerpt: '', content: '' });
+  $('postTitleLabel').textContent = '新建文章';
+  $('deletePostBtn').style.display = 'none';
+}
+
+// ---------- 相册 ----------
+async function loadAlbums() {
+  albums = await api('/api/albums');
+  const box = $('albumList');
+  box.innerHTML = albums.length ? '' : '<div class="empty">还没有相册</div>';
+  albums.forEach(a => {
+    const d = document.createElement('div');
+    d.className = 'list-item' + (currentAlbum && currentAlbum.name === a.name && !currentAlbumIsNew ? ' active' : '');
+    const cover = a.cover ? '<img class="thumb" src="' + esc(a.cover) + '" onerror="this.style.visibility=\'hidden\'">' : '';
+    d.innerHTML = cover + '<div class="t">' + esc(a.name) + '</div><div class="s">' + (a.images || []).length + ' 张照片</div>';
+    d.onclick = () => selectAlbum(a.name);
+    box.appendChild(d);
+  });
+}
+function selectAlbum(name) {
+  currentAlbum = albums.find(a => a.name === name) || null;
+  currentAlbumIsNew = false;
+  fillAlbumForm();
+  loadAlbums();
+}
+function newAlbum() {
+  currentAlbum = { name: '', cover: '', span: '', column: '', encrypt: false, images: [] };
+  currentAlbumIsNew = true;
+  fillAlbumForm();
+  loadAlbums();
+}
+function fillAlbumForm() {
+  const a = currentAlbum || { name: '', cover: '', span: '', column: '', encrypt: false, images: [] };
+  $('a_name').value = a.name || '';
+  $('a_cover').value = a.cover || '';
+  $('a_span').value = a.span === '' || a.span == null ? '' : a.span;
+  $('a_column').value = a.column === '' || a.column == null ? '' : a.column;
+  $('a_encrypt').checked = !!a.encrypt;
+  $('albumTitleLabel').textContent = currentAlbumIsNew ? '新建相册' : '编辑相册：' + (a.name || '');
+  $('deleteAlbumBtn').style.display = currentAlbumIsNew ? 'none' : '';
+  renderPhotos();
+}
+function renderPhotos() {
+  const box = $('photos');
+  box.innerHTML = '';
+  (currentAlbum.images || []).forEach((img, i) => {
+    const row = document.createElement('div');
+    row.className = 'photo-row';
+    row.innerHTML =
+      '<img class="photo-thumb" src="' + esc(img.url) + '" onerror="this.style.visibility=\'hidden\'">' +
+      '<input class="photo-title" placeholder="照片标题" value="' + esc(img.title) + '" data-i="' + i + '">' +
+      '<input class="photo-url" placeholder="图片地址" value="' + esc(img.url) + '" data-i="' + i + '">' +
+      '<button class="btn small" data-act="cover" data-i="' + i + '">设为封面</button>' +
+      '<button class="btn small danger" data-act="del" data-i="' + i + '">删除</button>';
+    box.appendChild(row);
+  });
+}
+$('photos').addEventListener('input', (e) => {
+  const i = Number(e.target.getAttribute('data-i'));
+  if (Number.isNaN(i)) return;
+  if (e.target.classList.contains('photo-title')) currentAlbum.images[i].title = e.target.value;
+  if (e.target.classList.contains('photo-url')) currentAlbum.images[i].url = e.target.value;
+});
+$('photos').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if (!btn) return;
+  const i = Number(btn.getAttribute('data-i'));
+  if (btn.getAttribute('data-act') === 'cover') { currentAlbum.cover = currentAlbum.images[i].url; $('a_cover').value = currentAlbum.cover; flash('已设为封面'); }
+  else { currentAlbum.images.splice(i, 1); renderPhotos(); }
+});
+async function saveAlbum() {
+  const name = $('a_name').value.trim();
+  if (!name) { alert('相册名不能为空'); return; }
+  currentAlbum.name = name;
+  currentAlbum.cover = $('a_cover').value.trim();
+  currentAlbum.span = $('a_span').value;
+  currentAlbum.column = $('a_column').value;
+  currentAlbum.encrypt = $('a_encrypt').checked;
+  if (currentAlbumIsNew) { albums.push(currentAlbum); currentAlbumIsNew = false; }
+  await api('/api/albums', { method: 'PUT', body: JSON.stringify(albums) });
+  flash('相册已保存 ✓（记得点「一键发布」）');
+  await loadAlbums();
+}
+async function deleteAlbum() {
+  if (!currentAlbum || currentAlbumIsNew) return;
+  if (!confirm('确定删除相册「' + currentAlbum.name + '」？')) return;
+  albums = albums.filter(a => a.name !== currentAlbum.name);
+  await api('/api/albums', { method: 'PUT', body: JSON.stringify(albums) });
+  flash('已删除（记得发布）');
+  currentAlbum = null; currentAlbumIsNew = false;
+  fillAlbumForm(); await loadAlbums();
+}
+
+// ---------- 图片上传 ----------
+function shrinkImage(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 1600;
+      if (Math.max(img.width, img.height) <= MAX) { URL.revokeObjectURL(url); resolve(file); return; }
+      const scale = MAX / Math.max(img.width, img.height);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => { URL.revokeObjectURL(url); resolve(blob || file); }, 'image/jpeg', 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+async function uploadFile(file) {
+  const shrunk = await shrinkImage(file);
+  const dataUrl = await fileToBase64(shrunk);
+  const res = await api('/api/upload', { method: 'POST', body: JSON.stringify({ filename: file.name, data: dataUrl }) });
+  return res.url;
+}
+async function handleFiles(files) {
+  for (const f of files) {
+    try {
+      const url = await uploadFile(f);
+      if (uploadTarget === 'post') insertAtCursor($('p_content'), '![](' + url + ')');
+      else if (uploadTarget === 'cover') { currentAlbum.cover = url; $('a_cover').value = url; flash('封面已上传，记得保存相册'); }
+      else { currentAlbum.images.push({ title: baseName(f.name), url }); renderPhotos(); flash('照片已加入，记得保存相册'); }
+    } catch (e) { alert('上传失败：' + e.message); }
+  }
+}
+function insertAtCursor(textarea, text) {
+  const s = textarea.selectionStart, e = textarea.selectionEnd;
+  textarea.value = textarea.value.slice(0, s) + text + textarea.value.slice(e);
+  textarea.focus();
+  textarea.setSelectionRange(s + text.length, s + text.length);
+}
+
+function uploadPhoto() { uploadTarget = 'album'; $('fileInput').click(); }
+function uploadCover() { uploadTarget = 'cover'; $('fileInput').click(); }
+
+// 拖拽 / 粘贴 / 选择
+const dz = $('dropzone');
+dz.addEventListener('click', () => { uploadTarget = 'post'; $('fileInput').click(); });
+dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('drag'); uploadTarget = 'post'; handleFiles(e.dataTransfer.files); });
+$('fileInput').addEventListener('change', (e) => { handleFiles(e.target.files); e.target.value = ''; });
+$('p_content').addEventListener('paste', (e) => {
+  const items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  const imgs = [];
+  for (const it of items) if (it.type && it.type.startsWith('image/')) imgs.push(it.getAsFile());
+  if (imgs.length) { e.preventDefault(); uploadTarget = 'post'; handleFiles(imgs); }
+});
+
+// ---------- Markdown 工具栏 ----------
+function wrap(ta, before, after, ph) {
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s, e) || ph;
+  ta.value = ta.value.slice(0, s) + before + sel + after + ta.value.slice(e);
+  ta.focus();
+  ta.setSelectionRange(s + before.length, s + before.length + sel.length);
+}
+const TB = [
+  ['加粗', '**', '**', '粗体'], ['斜体', '*', '*', '斜体'], ['标题', '## ', '', '标题'],
+  ['引用', '> ', '', '引用'], ['列表', '- ', '', '列表项'], ['代码', '`', '`', '代码'],
+  ['链接', '[', '](https://)', '链接文字'], ['图片', '![](', ')', '图片地址'],
+];
+(function () {
+  const bar = $('mdToolbar');
+  TB.forEach(([label, before, after, ph]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = label;
+    b.onclick = () => wrap($('p_content'), before, after, ph);
+    bar.appendChild(b);
+  });
+})();
+
+// ---------- 发布 ----------
+async function publish() {
+  const msg = prompt('填写本次发布的说明（可选）：', '更新博客');
+  if (msg === null) return; // 用户取消
+  try {
+    const r = await api('/api/publish', { method: 'POST', body: JSON.stringify({ message: msg }) });
+    alert(r.message);
+  } catch (e) {
+    alert('发布失败：' + e.message);
+  }
+}
+
+// ---------- 启动 ----------
+(async function init() {
+  try { await loadPosts(); } catch (e) { $('postList').innerHTML = '<div class="empty">加载失败：' + esc(e.message) + '</div>'; }
+  try { await loadAlbums(); } catch (e) { $('albumList').innerHTML = '<div class="empty">加载失败：' + esc(e.message) + '</div>'; }
+  newPost();
+})();
+</script>
+</body>
+</html>
