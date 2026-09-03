@@ -1,38 +1,10 @@
 # =====================================================================
-#  相册数据（Meow 主题 external 相册模式）
-#  - name   相册名（显示在相册封面）
-#  - cover  相册封面图（可以是外链 URL 或本地路径 /images/xxx.jpg）
-#  - span   相册封面在合集页占的列宽（可选，默认自动）
-#  - column 相册内图片的列数
-#  - images 相册内图片列表：标题: 图片地址
-#  想换图：把图片放到 source/images/ 下用本地路径，或直接换成图床外链
+#  相册数据（Meow 主题 external 相册模式，由本地后台自动维护）
+#  - name   相册名
+#  - cover  封面图（本地路径 /images/xxx 或外链 URL）
+#  - span   封面在合集页占的列宽（可选）
+#  - column 相册内图片列数
+#  - images 相册内图片：标题: 图片地址
 # =====================================================================
 
-albums_list:
-  - name: 力量训练
-    cover: https://picsum.photos/seed/strength-cover/800/500
-    span: 4
-    column: 3
-    encrypt: false
-    images:
-      深蹲训练: https://picsum.photos/seed/squat/600/400
-      硬拉训练: https://picsum.photos/seed/deadlift/600/400
-      卧推训练: https://picsum.photos/seed/benchpress/600/400
-
-  - name: 跑步
-    cover: https://picsum.photos/seed/running-cover/800/500
-    span: 4
-    column: 3
-    encrypt: false
-    images:
-      第一个五公里: https://picsum.photos/seed/run5k/600/400
-      晨跑打卡: https://picsum.photos/seed/morningrun/600/400
-
-  - name: 体态康复
-    cover: https://picsum.photos/seed/posture-cover/800/500
-    span: 4
-    column: 3
-    encrypt: false
-    images:
-      训练前: https://picsum.photos/seed/posture-before/600/400
-      训练后: https://picsum.photos/seed/posture-after/600/400
+albums_list: []
