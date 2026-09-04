@@ -1,6 +1,6 @@
 ---
 title: My Training Logs
-date: '2026-09-02 22:00:00'
+date: '2026-08-21 22:00:00'
 categories:
   - 创建目的
 tags:
